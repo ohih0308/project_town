@@ -1,0 +1,83 @@
+home (page redirection: popular post, popular board)
+    event img section
+    popular post list
+
+board selection (page redirection: board)
+    board list by today's post count order by desc
+    category list
+    board list
+
+board (page redirection: post, write post)
+    announcement list
+    post list
+    paging
+    if (isAdmin) {
+        - write board announcement
+        - delete board announcement
+        }
+
+post (page redirection: write post, revise post)
+    details
+    comment list
+    write comment
+    delete comment
+    comment paging
+
+write post (page redirection: board)
+    post form
+    smart editor
+
+revise post (page redirection: board)
+    post form
+    details
+    smart editor
+
+confirmation of decision (page redirection: depends on previous page)
+    confirmation input
+        - password
+        - y/n
+
+chat
+    websocket
+
+login (page redirection: home)
+    login form
+
+register (page redirection: home)
+    register form
+    email duplication check
+    email verification
+    name duplication check
+
+my page ordinary member (page redirection: post record, comment record, account configuration)
+
+post record (page redirection: board, post, my page)
+    total post count
+    board list
+    post count by board
+    post list by board
+    delete selected posts
+
+comment record (page redirection: post, my page)
+    total comment count
+    board list
+    comment count by board
+    comment list by board
+    delete selected comments
+
+account configuration (page redirection: my page)
+    update user information
+        - user name
+        - password
+        - profile image
+    deactivate account
+
+admin
+    set event img on home page
+    set ad img
+    add category
+    delete category
+    update category name
+    add board
+    delete board
+    update board name

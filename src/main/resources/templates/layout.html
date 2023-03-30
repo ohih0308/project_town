@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, pageResources, body)">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Town</title>
+
+        <script type="text/javascript" src="/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+        <script type="text/javascript" src="/bootstrap-5.3.0-alpha2-dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="/bootstrap-5.3.0-alpha2-dist/css/bootstrap.min.css"/>
+
+        <link th:replace="${pageResources}"/>
+    </head>
+
+
+    <body>
+        <div>
+            <div>
+                <div th:replace="~{../fragments/header :: header}"/>
+            </div>
+
+            <div>
+                <div th:replace="${body}"/>
+            </div>
+
+            <div>
+                <div th:replace="~{../fragments/footer :: footer}"/>
+            </div>
+        </div>
+    </body>
+
+</html>

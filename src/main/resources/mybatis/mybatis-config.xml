@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+        <typeAlias type="ohih.town.domain.forum.dto.Forum" alias="Forum"/>
+        <typeAlias type="ohih.town.domain.user.dto.Register" alias="Register"/>
+        <typeAlias type="ohih.town.domain.user.dto.LoginResult" alias="LoginResult"/>
+        <typeAlias type="ohih.town.domain.user.dto.ProfileImage" alias="ProfileImage"/>
+
+        <typeAlias type="ohih.town.domain.forum.dto.BoardPost" alias="BoardPost"/>
+    </typeAliases>
+
+    <mappers>
+        <mapper resource="mybatis.mappers.ForumMapper.xml"/>
+        <mapper resource="mybatis.mappers.UserMapper.xml"/>
+    </mappers>
+</configuration>

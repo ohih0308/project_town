@@ -1,0 +1,130 @@
+categories
+PK 	- id bigint unsigned auto_increment
+	- name varchar(200) not null
+
+
+boards
+PK 	- id bigint unsigned auto_increment
+FK 	- category_id bigint unsigned not null
+	- name varchar(200) not null
+
+
+users
+PK 	- id bigint unsigned auto_increment
+	- user_type tinyint unsigned not null
+	- email varchar(100) not null unique
+	- username varchar(100) not null unique
+	- password varchar(255) not null
+	- created_at datetime not null
+
+
+profile_images
+PK 	- uuid varchar (100)
+FK 	- user_id bigint unsigned not null
+	- file_name varchar (100) not null
+	- extension varchar (100) not null
+	- directory varchar (300) not null
+
+
+posts
+PK 	- id bigint unsigned auto_increment
+FK 	- board_id bigint unsigned not null
+FK	- user_id bigint unsigned null
+	- user_type tinyint unsigned not null
+	- ip varchar(45) not null
+	- author varchar(100) not null default ""
+	- password varchar(255) not null default ""
+	- subject varchar(2000) not null
+	- body mediumtext not null
+	- views bigint unsigned not null
+	- created_at datetime not null
+	- updated_at datetime not null
+
+
+attachments
+PK 	- uuid varchar(50)
+FK 	- post_id bigint unsigned not null
+	- file_name varchar(255) not null
+	- extension varchar(10) not null
+	- directory varchar(300) not null
+
+
+thumbnails
+PK 	- uuid varchar(50)
+FK	- post_id bigint unsigned not null
+	- file_name varchar(255)
+	- extension varchar(10) not null
+	- directory varchar(300) not null
+	- created_at datetime not null
+
+
+post_appraisals
+PK  - id bigint unsigned auto_increment
+FK  - user_id bigint unsigned null
+FK 	- post_id bigint unsigned not null
+	- is_like bit not null
+	- ip varchar (45) not null
+
+
+comments
+PK 	- id bigint unsigned auto_increment
+FK 	- post_id bigint unsigned not null
+	- user_type tinyint unsigned not null
+	- user_id varchar(100) null
+	- ip varchar(45) not null
+	- author varchar(100) not null
+	- password varchar(255) not null default ""
+	- content mediumtext not null
+	- created_at datetime not null
+
+
+comment_appraisals
+PK  - id bigint unsigned auto_increment
+FK  - user_id bigint unsigned null
+FK 	- comment_id bigint unsigned not null
+	- is_like bit not null
+	- ip varchar (45) not null
+
+
+letter_configs
+FK 	- user_id bigint unsigned not null unique
+	- letter_activation bit not null
+	- private_read bit not null
+	- member_write bit not null
+	- guest_write bit not null
+
+
+letters
+PK 	- id bigint unsigned auto_increment
+FK 	- to_user_id bigint unsigned not null
+FK 	- from_user_id bigint unsigned null
+	- user_type tinyint unsigned not null
+	- ip varchar (45) not null
+	- author varchar (100) not null default ""
+	- password varchar (100) not null default ""
+	- seal bit not null
+	- subject varchar (2000) not null
+	- body mediumtext not null
+	- created_at datetime not null
+
+
+letter_comments
+PK 	- id bigint unsigned auto_increment
+FK 	- letter_id bigint unsigned not null
+	- user_type tinyint unsigned not null
+	- user_id varchar (100) null
+	- ip varchar (45) not null
+	- author varchar (100) not null
+	- password varchar (100) null
+	- content mediumtext not null
+	- created_at datetime not null
+
+
+notifications
+PK  - id bigint unsigned auto_increment
+FK  - use_id bigint unsigned, index
+    - type tinyint (50) not null
+    - target_id bigint unsigned not null
+    - message varchar (255) not null
+    - created_at datetime not null
+    - updated_at datetime not null

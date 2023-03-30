@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ohih.town.domain.user.mapper.UserMapper">
+
+    <!--  boolean isFiledDuplicated(Map<String, String> map);  -->
+    <select id="isFiledDuplicated" parameterType="Map" resultType="boolean">
+        select count(#{field})
+        from users
+        where #{field} = #{value};
+    </select>
+    <!--  void registerUser(Register register);  -->
+    <insert id="registerUser" parameterType="Register" useGeneratedKeys="true" keyProperty="id">
+        insert into users (user_type, email, username, password, created_at)
+        values (1, #{email}, #{username}, #{password}, now());
+    </insert>
+    <!--  void setLetterConfig(Long id);  -->
+    <insert id="setLetterConfig" parameterType="Long">
+        insert into letter_configs (user_id, letter_activation, private_read, member_write, guest_write)
+        values (#{userId}, 1, 0, 1, 1);
+    </insert>
+
+
+    <!--  UserLoginResult getUserByEmailAndPassword(Map<String, String> map);  -->
+    <select id="getUserByEmailAndPassword" parameterType="Map" resultType="LoginResult">
+        select u.id,
+               u.user_type,
+               u.email,
+               u.username,
+               pi.uuid,
+               pi.extension,
+               pi.directory
+        from users as u
+                 left join profile_images as pi on u.id = pi.user_id
+        where u.email = #{email}
+          and u.password = #{password};
+    </select>
+
+
+    <!--  ProfileImage findProfileImageByUserId(Long userId);  -->
+    <select id="findProfileImageByUserId" parameterType="Long" resultType="ProfileImage">
+        select *
+        from profile_image
+        where user_id = #{userId};
+    </select>
+    <!--  void createProfileImage(ProfileImage profileImage);  -->
+    <insert id="createProfileImage" parameterType="ProfileImage">
+        INSERT INTO profile_images(uuid, user_id, file_name, extension, directory)
+        VALUES (#{uuid}, #{userId}, #{fileName}, #{extension}, #{directory})
+    </insert>
+    <!--  String findProfileImageDirectoryByUserId(Long userId);  -->
+    <select id="findProfileImageDirectoryByUserId" parameterType="Long" resultType="String">
+        select directory
+        from profile_images
+        where user_id = #{userId};
+    </select>
+    <!--  void updateProfileImage(ProfileImage profileImage);  -->
+    <update id="updateProfileImage" parameterType="ProfileImage">
+        UPDATE profile_images
+        SET uuid      = #{uuid},
+            file_name = #{fileName},
+            extension = #{extension},
+            directory = #{directory}
+        WHERE user_id = #{userId}
+    </update>
+    <!--  void deleteProfileImage(Long userId);  -->
+    <delete id="deleteProfileImage" parameterType="Long">
+        delete
+        from profile_image
+        where user_id = #{userId};
+    </delete>
+</mapper>

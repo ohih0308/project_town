@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ohih.town.domain.forum.mapper.ForumMapper">
+    <!--  List<Forum> getAllForums();  -->
+    <select id="getAllForums" resultType="Forum">
+        select c.id as categoryId, c.name as categoryName, b.id as boardId, b.name as boardName
+        from boards as b
+                 left join categories as c on b.category_id = c.id;
+    </select>
+
+    <!--  Integer getBoardPostTotalCount(String name);  -->
+    <select id="getBoardPostTotalCount" parameterType="Map" resultType="Long">
+        select count(*)
+        from posts as p
+        left join boards as b on p.board_id = b.id
+        where b.name = #{board_name}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>;
+    </select>
+
+    <!--  List<BoardPost> getBoardPostList(Map map);  -->
+    <select id="getBoardPostList" parameterType="Map" resultType="BoardPost">
+        
+    </select>
+</mapper>

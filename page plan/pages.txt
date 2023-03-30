@@ -1,0 +1,17 @@
+1) home
+2) board selection
+3) board
+4) post
+    - detail
+    - write
+    - revise
+5) confirmation of decision
+6) chat
+7) user
+    - login
+    - register
+    - my page
+    - post record
+    - comment record
+    - account configuration
+    - admin

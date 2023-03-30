@@ -1,0 +1,86 @@
+package ohih.town.domain.mail.controller;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import ohih.town.constants.SessionConst;
+import ohih.town.constants.URLConst;
+import ohih.town.constants.UserConst;
+import ohih.town.domain.mail.EmailVerificationRequest;
+import ohih.town.domain.mail.EmailVerificationResult;
+import ohih.town.domain.mail.MailProperties;
+import ohih.town.domain.mail.MailResult;
+import ohih.town.domain.mail.service.MailService;
+import ohih.town.domain.user.service.UserService;
+import ohih.town.session.SessionManager;
+import org.springframework.mail.MailException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import static ohih.town.constants.ErrorMessagesResourceBundle.MAIL_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessagesResourceBundle.USER_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorsConst.MAIL_SEND_ERROR;
+import static ohih.town.constants.ErrorsConst.USER_EMAIL_DUPLICATED;
+import static ohih.town.constants.SessionConst.EMAIL_VERIFICATION_REQUEST;
+import static ohih.town.constants.SessionConst.VALIDATED_EMAIL;
+import static ohih.town.session.SessionManager.getAttributes;
+
+@RestController
+@RequiredArgsConstructor
+public class MailRestController {
+
+    private final UserService userService;
+    private final MailService mailService;
+    private MailProperties mailProperties = new MailProperties();
+
+
+    @PostMapping(URLConst.SEND_VERIFICATION_CODE)
+    public MailResult sendVerificationCode(HttpServletRequest request) {
+        MailResult mailResult = new MailResult();
+
+        String email = (String) getAttributes(request, VALIDATED_EMAIL);
+
+        if (!userService.isFieldDuplicated(UserConst.EMAIL, email)) {
+            try {
+                EmailVerificationRequest emailVerificationRequest = mailService.sendVerificationCode(email);
+
+                SessionManager.setAttributes(request, EMAIL_VERIFICATION_REQUEST, emailVerificationRequest);
+
+                mailResult.setFrom(mailProperties.getFrom());
+                mailResult.setTo(email);
+                mailResult.setIsSent(true);
+            } catch (MailException e) {
+                mailResult.setFrom(mailProperties.getFrom());
+                mailResult.setTo(email);
+                mailResult.setIsSent(false);
+
+                String errorMessage = MAIL_ERROR_MESSAGES.getString(MAIL_SEND_ERROR);
+                mailResult.setErrorMessage(errorMessage);
+            }
+        } else {
+            mailResult.setFrom(mailProperties.getFrom());
+            mailResult.setTo(email);
+            mailResult.setIsSent(false);
+
+            String errorMessage = USER_ERROR_MESSAGES.getString(USER_EMAIL_DUPLICATED);
+            mailResult.setErrorMessage(errorMessage);
+        }
+
+        return mailResult;
+    }
+
+    @PostMapping(URLConst.EMAIL_VERIFY_CODE)
+    public EmailVerificationResult verifyEmailCode(HttpServletRequest request,
+                                                   String emailVerificationCode) {
+        EmailVerificationRequest EMAIL_VERIFICATION_REQUEST = (EmailVerificationRequest) SessionManager.getAttributes(request, SessionConst.EMAIL_VERIFICATION_REQUEST);
+        EmailVerificationResult emailVerificationResult = mailService.verifyEmailCode(EMAIL_VERIFICATION_REQUEST, emailVerificationCode);
+
+        if (emailVerificationResult.getSuccess()) {
+            SessionManager.setAttributes(request, SessionConst.AUTHENTICATED_EMAIL, EMAIL_VERIFICATION_REQUEST.getEmail());
+            SessionManager.removeAttribute(request, SessionConst.EMAIL_VERIFICATION_REQUEST);
+        } else {
+            SessionManager.removeAttribute(request, VALIDATED_EMAIL);
+        }
+
+        return emailVerificationResult;
+    }
+}
