@@ -88,7 +88,7 @@ FK 	- comment_id bigint unsigned not null
 
 guestbook_configs
 FK 	- user_id bigint unsigned not null unique
-	- guestbook_activation bit not null
+	- activation bit not null
 	- private_read bit not null
 	- member_write bit not null
 	- guest_write bit not null

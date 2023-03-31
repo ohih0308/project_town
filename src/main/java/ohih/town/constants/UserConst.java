@@ -13,4 +13,6 @@ public interface UserConst {
     String CONFIRM_PASSWORD = "confirmPassword";
     String AGREEMENT = "agreement";
     String USER_ID = "user_id";
+
+    String ACTIVATION = "activation";
 }

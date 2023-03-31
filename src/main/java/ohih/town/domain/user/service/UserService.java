@@ -455,4 +455,23 @@ public class UserService {
             throw new SQLException();
         }
     }
+
+
+    public void updateGuestbookPermission(Long userId, GuestbookPermission guestbookPermission) throws SQLException {
+        guestbookPermission.setUserId(userId);
+
+        if (!userMapper.updateGuestbookPermission(guestbookPermission)) {
+            throw new SQLException();
+        }
+    }
+
+    public void updateGuestbookActivation(Long userId, boolean activation) throws SQLException {
+        Map<String, Object> map = new HashMap<>();
+        map.put(UserConst.USER_ID, userId);
+        map.put(UserConst.ACTIVATION, activation);
+
+        if (!userMapper.updateGuestbookActivation(map)) {
+            throw new SQLException();
+        }
+    }
 }

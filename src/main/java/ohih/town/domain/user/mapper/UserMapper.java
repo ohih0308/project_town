@@ -1,5 +1,6 @@
 package ohih.town.domain.user.mapper;
 
+import ohih.town.domain.user.dto.GuestbookPermission;
 import ohih.town.domain.user.dto.ProfileImage;
 import ohih.town.domain.user.dto.Register;
 import ohih.town.domain.user.dto.UserInfo;
@@ -36,7 +37,9 @@ public interface UserMapper {
 
     boolean updatePassword(Map map);
 
-
-    // deactivate
     boolean deactivate(Long userId);
+
+    boolean updateGuestbookPermission(GuestbookPermission guestbookPermission);
+
+    boolean updateGuestbookActivation(Map map);
 }

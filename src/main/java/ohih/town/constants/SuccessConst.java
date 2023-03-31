@@ -17,4 +17,7 @@ public interface SuccessConst {
     String USERNAME_UPDATE_SUCCESS = "username.update.success";
     String PASSWORD_UPDATE_SUCCESS = "password.update.success";
     String DEACTIVATE_SUCCESS = "deactivate.success";
+
+    String GUESTBOOK_PERMISSION_UPDATE_SUCCESS = "guestbook.permission.update.success";
+    String GUESTBOOK_ACTIVATION_UPDATE_SUCCESS = "guestbook.activation.update.success";
 }

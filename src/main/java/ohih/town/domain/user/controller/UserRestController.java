@@ -21,6 +21,7 @@ import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.VALIDATED_USERNAME;
 import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
+import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_PERMISSION;
 
 @RestController
 @RequiredArgsConstructor
@@ -97,6 +98,7 @@ public class UserRestController {
         return loginResult;
     }
 
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.LOGOUT)
     public String logout(HttpServletRequest request) {
         SessionManager.removeAttribute(request, SessionConst.USER_INFO);
@@ -104,6 +106,7 @@ public class UserRestController {
     }
 
 
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.UPLOAD_PROFILE_IMAGE)
     public SimpleResponse uploadProfileImage(HttpServletRequest request,
                                              @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
@@ -137,6 +140,7 @@ public class UserRestController {
         return simpleResponse;
     }
 
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.DELETE_PROFILE_IMAGE)
     public SimpleResponse deleteProfileImage(HttpServletRequest request,
                                              @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
@@ -163,7 +167,7 @@ public class UserRestController {
         return simpleResponse;
     }
 
-    // isLoginInterceptor 조건
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.UPDATE_USERNAME)
     public CheckResult updateUsername(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                       String username) {
@@ -184,7 +188,7 @@ public class UserRestController {
         return checkResult;
     }
 
-    // isLoginInterceptor 조건
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.UPDATE_PASSWORD)
     public CheckResult updatePassword(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                       String password) {
@@ -204,7 +208,7 @@ public class UserRestController {
         return checkResult;
     }
 
-    // isLoginInterceptor 조건
+    // condition: isLoginInterceptor
     @PostMapping(URLConst.DEACTIVATE)
     public SimpleResponse deactivate(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
         SimpleResponse simpleResponse = new SimpleResponse();
@@ -215,6 +219,43 @@ public class UserRestController {
         } catch (SQLException e) {
             simpleResponse.setSuccess(false);
             simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_DELETE_ERROR));
+        }
+
+        return simpleResponse;
+    }
+
+
+    // condition: isLoginInterceptor
+    @PostMapping(UPDATE_GUESTBOOK_PERMISSION)
+    public SimpleResponse updateGuestbookPermissions(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                     GuestbookPermission guestbookPermission) {
+        SimpleResponse simpleResponse = new SimpleResponse();
+
+        try {
+            userService.updateGuestbookPermission(userInfo.getId(), guestbookPermission);
+            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
+            simpleResponse.setSuccess(true);
+        } catch (SQLException e) {
+            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+            simpleResponse.setSuccess(false);
+        }
+
+        return simpleResponse;
+    }
+
+    // condition: isLoginInterceptor
+    @PostMapping(URLConst.UPDATE_GUESTBOOK_ACTIVATION)
+    public SimpleResponse updateGuestbookActivation(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                    boolean activation) {
+        SimpleResponse simpleResponse = new SimpleResponse();
+
+        try {
+            userService.updateGuestbookActivation(userInfo.getId(), activation);
+            simpleResponse.setSuccess(true);
+            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
+        } catch (SQLException e) {
+            simpleResponse.setSuccess(false);
+            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
         }
 
         return simpleResponse;

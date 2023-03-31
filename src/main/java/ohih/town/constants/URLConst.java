@@ -22,4 +22,7 @@ public interface URLConst {
     String UPDATE_USERNAME = "/update/username";
     String UPDATE_PASSWORD = "/update/password";
     String DEACTIVATE = "/deactivate";
+
+    String UPDATE_GUESTBOOK_PERMISSION = "/update/guestbook-permission";
+    String UPDATE_GUESTBOOK_ACTIVATION = "/update/guestbook-activation";
 }

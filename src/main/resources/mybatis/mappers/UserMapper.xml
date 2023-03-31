@@ -18,7 +18,7 @@
     </insert>
     <!--  void initGuestbookConfig(Long userId);  -->
     <insert id="initGuestbookConfig" parameterType="Long">
-        insert into guestbook_configs (user_id, guestbook_activation, private_read, member_write, guest_write)
+        insert into guestbook_configs (user_id, activation, private_read, member_write, guest_write)
         values (#{userId}, 1, 0, 1, 1);
     </insert>
 
@@ -93,4 +93,21 @@
         from user
         where user_id = #{userId};
     </delete>
+
+
+    <!--  boolean updateGuestbookPermission(GuestbookPermission guestbookPermission);  -->
+    <update id="updateGuestbookPermission" parameterType="GuestbookPermission">
+        UPDATE guestbook_configs
+        SET private_read = #{privateRead},
+            member_write = #{memberWrite},
+            guest_write  = #{guestWrite}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!--  boolean updateGuestbookActivation(Map map);  -->
+    <update id="updateGuestbookActivation" parameterType="Map">
+        update guestbook_configs
+        set activation = #{activation}
+        where user_id = #{user_id};
+    </update>
 </mapper>
