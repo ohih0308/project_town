@@ -5,11 +5,13 @@ import lombok.RequiredArgsConstructor;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UserConst;
+import ohih.town.constants.ValidationPatterns;
 import ohih.town.domain.mail.EmailVerificationRequest;
 import ohih.town.domain.mail.EmailVerificationResult;
 import ohih.town.domain.mail.MailProperties;
 import ohih.town.domain.mail.MailResult;
 import ohih.town.domain.mail.service.MailService;
+import ohih.town.domain.user.dto.CheckResult;
 import ohih.town.domain.user.service.UserService;
 import ohih.town.session.SessionManager;
 import org.springframework.mail.MailException;
@@ -18,10 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static ohih.town.constants.ErrorMessagesResourceBundle.MAIL_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorMessagesResourceBundle.USER_ERROR_MESSAGES;
-import static ohih.town.constants.ErrorsConst.MAIL_SEND_ERROR;
-import static ohih.town.constants.ErrorsConst.USER_EMAIL_DUPLICATED;
+import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.EMAIL_VERIFICATION_REQUEST;
 import static ohih.town.constants.SessionConst.VALIDATED_EMAIL;
+import static ohih.town.constants.SuccessConst.USER_EMAIL_VALID;
+import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
 import static ohih.town.session.SessionManager.getAttributes;
 
 @RestController
@@ -34,12 +37,16 @@ public class MailRestController {
 
 
     @PostMapping(URLConst.SEND_VERIFICATION_CODE)
-    public MailResult sendVerificationCode(HttpServletRequest request) {
+    public MailResult sendVerificationCode(HttpServletRequest request, String email) {
         MailResult mailResult = new MailResult();
 
-        String email = (String) getAttributes(request, VALIDATED_EMAIL);
+        CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.EMAIL,
+                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
+                USER_EMAIL_INVALID, USER_EMAIL_DUPLICATED,
+                USER_EMAIL_VALID,
+                UserConst.EMAIL, email);
 
-        if (!userService.isFieldDuplicated(UserConst.EMAIL, email)) {
+        if (checkResult.getIsValid() && !checkResult.getIsDuplicated()) {
             try {
                 EmailVerificationRequest emailVerificationRequest = mailService.sendVerificationCode(email);
 
@@ -56,13 +63,14 @@ public class MailRestController {
                 String errorMessage = MAIL_ERROR_MESSAGES.getString(MAIL_SEND_ERROR);
                 mailResult.setErrorMessage(errorMessage);
             }
+
+            SessionManager.setAttributes(request, SessionConst.VALIDATED_EMAIL, email);
         } else {
             mailResult.setFrom(mailProperties.getFrom());
             mailResult.setTo(email);
             mailResult.setIsSent(false);
 
-            String errorMessage = USER_ERROR_MESSAGES.getString(USER_EMAIL_DUPLICATED);
-            mailResult.setErrorMessage(errorMessage);
+            mailResult.setErrorMessage(checkResult.getMessage());
         }
 
         return mailResult;
