@@ -19,9 +19,9 @@ PK 	- id bigint unsigned auto_increment
 
 
 profile_images
-PK 	- uuid varchar (100)
+PK 	- saved_file_name varchar (100)
 FK 	- user_id bigint unsigned not null
-	- file_name varchar (100) not null
+	- original_file_name varchar (100) not null
 	- extension varchar (100) not null
 	- directory varchar (300) not null
 

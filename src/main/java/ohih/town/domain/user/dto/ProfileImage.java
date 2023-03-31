@@ -6,9 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProfileImage {
-    private String uuid;
+    private String savedFileName;
     private Long userId;
-    private String fileName;
+    private String originalFileName;
     private String extension;
     private String directory;
 }

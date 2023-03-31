@@ -11,7 +11,7 @@ public class UserInfo {
     private Integer userType;
     private String email;
     private String username;
-    private String uuid;
+    private String savedFileName;
     private String extension;
     private String directory;
 }

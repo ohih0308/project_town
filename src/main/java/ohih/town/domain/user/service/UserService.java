@@ -371,15 +371,15 @@ public class UserService {
     private ProfileImage setProfileImage(MultipartFile multipartFile, Long userId) {
         String filePath = ConfigurationResourceBundle.FILE_PATHS.getString(ConfigurationConst.FILE_PATHS);
 
-        String uuid = Utilities.createCode(36);
-        String fileName = multipartFile.getOriginalFilename();
-        String extension = filePath.substring(fileName.lastIndexOf(".") + 1);
-        String directory = filePath + "/" + uuid + "." + extension;
+        String savedFileName = Utilities.createCode(36);
+        String originalFilename = multipartFile.getOriginalFilename();
+        String extension = filePath.substring(originalFilename.lastIndexOf(".") + 1);
+        String directory = filePath + "/" + savedFileName + "." + extension;
 
         ProfileImage profileImage = new ProfileImage();
-        profileImage.setUuid(uuid);
+        profileImage.setSavedFileName(savedFileName);
         profileImage.setUserId(userId);
-        profileImage.setFileName(fileName);
+        profileImage.setOriginalFileName(originalFilename);
         profileImage.setExtension(extension);
         profileImage.setDirectory(directory);
 

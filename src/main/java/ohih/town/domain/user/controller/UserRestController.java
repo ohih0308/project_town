@@ -21,6 +21,7 @@ import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.VALIDATED_USERNAME;
 import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
+import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_ACTIVATION;
 import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_PERMISSION;
 
 @RestController
@@ -123,7 +124,7 @@ public class UserRestController {
                 SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
             }
 
-            userInfo.setUuid(profileImage.getUuid());
+            userInfo.setSavedFileName(profileImage.getSavedFileName());
             userInfo.setExtension(profileImage.getExtension());
             userInfo.setDirectory(profileImage.getDirectory());
 
@@ -154,7 +155,7 @@ public class UserRestController {
             try {
                 userService.deleteProfileImage(profileImage.getDirectory(), userInfo.getId());
 
-                userInfo.setUuid(null);
+                userInfo.setSavedFileName(null);
                 userInfo.setExtension(null);
                 userInfo.setDirectory(null);
 
@@ -244,7 +245,7 @@ public class UserRestController {
     }
 
     // condition: isLoginInterceptor
-    @PostMapping(URLConst.UPDATE_GUESTBOOK_ACTIVATION)
+    @PostMapping(UPDATE_GUESTBOOK_ACTIVATION)
     public SimpleResponse updateGuestbookActivation(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                                     boolean activation) {
         SimpleResponse simpleResponse = new SimpleResponse();
@@ -260,6 +261,4 @@ public class UserRestController {
 
         return simpleResponse;
     }
-
-
 }

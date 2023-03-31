@@ -11,7 +11,7 @@
                  left join categories as c on b.category_id = c.id;
     </select>
 
-    <!--  Integer getBoardPostTotalCount(String name);  -->
+    <!--  Long getBoardPostTotalCount(Map map);  -->
     <select id="getBoardPostTotalCount" parameterType="Map" resultType="Long">
         select count(*)
         from posts as p
@@ -28,8 +28,19 @@
         </if>;
     </select>
 
-    <!--  List<BoardPost> getBoardPostList(Map map);  -->
-    <select id="getBoardPostList" parameterType="Map" resultType="BoardPost">
-        
+    <!--  List<BoardPost> getBoardPosts(Map map);  -->
+    <select id="getBoardPosts" parameterType="Map" resultType="BoardPost">
+        select p.id,
+               p.user_id,
+               p.user_type,
+               p.author,
+               p.subject,
+               p.views,
+               p.created_at,
+               pi.saved_file_name,
+               pi.extension
+        from posts as p
+                 left join users on p.user_id = pi.user_id
+        where p.board = (select name from boards where id = #{board_id});
     </select>
 </mapper>

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.ViewConst;
+import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
 import ohih.town.domain.forum.service.ForumService;
 import ohih.town.domain.user.dto.RegisterRequest;
@@ -26,9 +27,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
-import static ohih.town.constants.ForumConst.BOARD_NAME;
-import static ohih.town.constants.ForumConst.FORUM;
+import static ohih.town.constants.ForumConst.*;
 import static ohih.town.constants.PagingConst.postsPerPage;
+import static ohih.town.constants.URLConst.FORUM_SELECTION;
+import static ohih.town.constants.URLConst.GET_BOARD_PAGE;
 import static ohih.town.constants.UtilityConst.PAGING;
 import static ohih.town.constants.UtilityConst.SEARCH;
 
@@ -38,7 +40,6 @@ import static ohih.town.constants.UtilityConst.SEARCH;
 public class TownController {
 
     private final ForumService forumService;
-    private final UserService userService;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -66,26 +67,31 @@ public class TownController {
     }
 
 
-    @GetMapping("/forum-selection")
+    @GetMapping(URLConst.FORUM_SELECTION)
     public String getAllForums(Model model) {
         List<Forum> forums = forumService.getAllForums();
 
         model.addAttribute(FORUM, forums);
-        return "forum_selection";
+        return ViewConst.FORUM_SELECTION;
     }
 
     // not finished
-    @GetMapping("/board/{name}")
+    @GetMapping(URLConst.GET_BOARD_PAGE)
     public String getBoardPage(Model model,
-                               @PathVariable String name,
+                               @PathVariable String boardName,
                                Integer presentPage, Search search) {
-        Long boardPostTotalCount = forumService.getBoardPostTotalCount(name, search);
-        Paging paging = Utilities.getPaging(boardPostTotalCount, presentPage, postsPerPage);
+        Long boardPostTotalCount = forumService.getBoardPostTotalCount(boardName, search);
 
-        model.addAttribute(BOARD_NAME, name);
+        Paging paging = Utilities.getPaging(boardPostTotalCount, presentPage, postsPerPage);
+        List<BoardPost> boardPosts = forumService.getBoardPosts(paging, search, boardName);
+
+        model.addAttribute(BOARD_NAME, boardName);
         model.addAttribute(PAGING, paging);
         model.addAttribute(SEARCH, search);
+        model.addAttribute(BOARD_POSTS, boardPosts);
 
-        return "board";
+        return ViewConst.BOARD;
     }
+
+
 }

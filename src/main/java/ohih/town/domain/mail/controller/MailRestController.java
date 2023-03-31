@@ -76,7 +76,7 @@ public class MailRestController {
         return mailResult;
     }
 
-    @PostMapping(URLConst.EMAIL_VERIFY_CODE)
+    @PostMapping(URLConst.VERIFY_EMAIL_CODE)
     public EmailVerificationResult verifyEmailCode(HttpServletRequest request,
                                                    String emailVerificationCode) {
         EmailVerificationRequest EMAIL_VERIFICATION_REQUEST = (EmailVerificationRequest) SessionManager.getAttributes(request, SessionConst.EMAIL_VERIFICATION_REQUEST);

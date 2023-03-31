@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_ACTIVATION;
+import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_PERMISSION;
+
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
@@ -18,7 +21,9 @@ public class WebConfig implements WebMvcConfigurer {
                         URLConst.DELETE_PROFILE_IMAGE,
                         URLConst.UPDATE_USERNAME,
                         URLConst.UPDATE_PASSWORD,
-                        URLConst.DEACTIVATE);
+                        URLConst.DEACTIVATE,
+                        UPDATE_GUESTBOOK_PERMISSION,
+                        UPDATE_GUESTBOOK_ACTIVATION);
     }
 
 
