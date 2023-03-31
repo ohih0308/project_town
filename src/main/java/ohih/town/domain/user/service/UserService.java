@@ -317,13 +317,12 @@ public class UserService {
         return registerResult;
     }
 
-
     @Transactional
     public void registerUser(String email, String username, String password) {
         Register register = new Register(email, username, password);
         userMapper.registerUser(register);
 
-        userMapper.setLetterConfig(register.getId());
+        userMapper.initGuestbookConfig(register.getId());
     }
 
     public LoginResult login(String email, String password) {
@@ -388,13 +387,13 @@ public class UserService {
     }
 
     @Transactional
-    public ProfileImage createProfileImage(MultipartFile multipartFile, Long userId) throws IOException {
+    public ProfileImage uploadProfileImage(MultipartFile multipartFile, Long userId) throws IOException {
         ProfileImage profileImage = setProfileImage(multipartFile, userId);
 
         File file = new File(profileImage.getDirectory());
         multipartFile.transferTo(file);
 
-        userMapper.createProfileImage(profileImage);
+        userMapper.uploadProfileImage(profileImage);
 
         return profileImage;
     }
@@ -418,6 +417,7 @@ public class UserService {
         return newProfileImage;
     }
 
+
     @Transactional
     public void deleteProfileImage(String directory, Long userId) throws SQLException {
         File file = new File(directory);
@@ -425,6 +425,33 @@ public class UserService {
         file.delete();
 
         if (userMapper.deleteProfileImage(userId) != 1) {
+            throw new SQLException();
+        }
+    }
+
+
+    public void updateUsername(Long userId, String username) throws SQLException {
+        Map<String, Object> map = new HashMap<>();
+        map.put(UserConst.USER_ID, userId);
+        map.put(UserConst.USERNAME, username);
+
+        if (!userMapper.updateUsername(map)) {
+            throw new SQLException();
+        }
+    }
+
+    public void updatePassword(Long userId, String password) throws SQLException {
+        Map<String, Object> map = new HashMap<>();
+        map.put(UserConst.USER_ID, userId);
+        map.put(UserConst.PASSWORD, password);
+
+        if (!userMapper.updatePassword(map)) {
+            throw new SQLException();
+        }
+    }
+
+    public void deactivate(Long userId) throws SQLException {
+        if (!userMapper.deactivate(userId)) {
             throw new SQLException();
         }
     }

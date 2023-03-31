@@ -12,4 +12,5 @@ public interface UserConst {
     String PASSWORD = "password";
     String CONFIRM_PASSWORD = "confirmPassword";
     String AGREEMENT = "agreement";
+    String USER_ID = "user_id";
 }

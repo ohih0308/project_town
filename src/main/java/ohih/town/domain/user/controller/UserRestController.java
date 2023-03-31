@@ -8,7 +8,6 @@ import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.user.dto.*;
 import ohih.town.domain.user.service.UserService;
 import ohih.town.session.SessionManager;
-import org.apache.ibatis.jdbc.SQL;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -17,8 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.MAIL_ERROR_MESSAGES;
-import static ohih.town.constants.ErrorMessagesResourceBundle.USER_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessagesResourceBundle.*;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.VALIDATED_USERNAME;
 import static ohih.town.constants.SuccessConst.*;
@@ -89,6 +87,7 @@ public class UserRestController {
         return registerResult;
     }
 
+
     @PostMapping(URLConst.LOGIN)
     public LoginResult login(HttpServletRequest request,
                              String email, String password) {
@@ -104,6 +103,7 @@ public class UserRestController {
         return SUCCESS_MESSAGES.getString(USER_LOGOUT_SUCCESS);
     }
 
+
     @PostMapping(URLConst.UPLOAD_PROFILE_IMAGE)
     public SimpleResponse uploadProfileImage(HttpServletRequest request,
                                              @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
@@ -114,7 +114,7 @@ public class UserRestController {
             ProfileImage profileImage;
 
             if (userService.findProfileImageByUserId(userInfo.getId()) == null) {
-                profileImage = userService.createProfileImage(multipartFile, userInfo.getId());
+                profileImage = userService.uploadProfileImage(multipartFile, userInfo.getId());
             } else {
                 profileImage = userService.updateProfileImage(multipartFile, userInfo.getId());
                 SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
@@ -160,6 +160,63 @@ public class UserRestController {
                 simpleResponse.setMessage(MAIL_ERROR_MESSAGES.getString(ErrorsConst.DELETE_PROFILE_IMAGE_FAILURE));
             }
         }
+        return simpleResponse;
+    }
+
+    // isLoginInterceptor 조건
+    @PostMapping(URLConst.UPDATE_USERNAME)
+    public CheckResult updateUsername(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                      String username) {
+        CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.USERNAME,
+                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
+                USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED,
+                USER_USERNAME_VALID,
+                UserConst.USERNAME, username);
+
+        if (checkResult.getIsValid() && checkResult.getIsDuplicated()) {
+            try {
+                userService.updateUsername(userInfo.getId(), username);
+                checkResult.setMessage(SUCCESS_MESSAGES.getString(USERNAME_UPDATE_SUCCESS));
+            } catch (SQLException e) {
+                checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+            }
+        }
+        return checkResult;
+    }
+
+    // isLoginInterceptor 조건
+    @PostMapping(URLConst.UPDATE_PASSWORD)
+    public CheckResult updatePassword(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                      String password) {
+        CheckResult checkResult = userService.checkValidation(ValidationPatterns.PASSWORD,
+                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
+                USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
+                password);
+
+        if (checkResult.getIsValid()) {
+            try {
+                userService.updatePassword(userInfo.getId(), password);
+                checkResult.setMessage(SUCCESS_MESSAGES.getString(PASSWORD_UPDATE_SUCCESS));
+            } catch (SQLException e) {
+                checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+            }
+        }
+        return checkResult;
+    }
+
+    // isLoginInterceptor 조건
+    @PostMapping(URLConst.DEACTIVATE)
+    public SimpleResponse deactivate(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
+        SimpleResponse simpleResponse = new SimpleResponse();
+
+        try {
+            userService.deactivate(userInfo.getId());
+            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(DEACTIVATE_SUCCESS));
+        } catch (SQLException e) {
+            simpleResponse.setSuccess(false);
+            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_DELETE_ERROR));
+        }
+
         return simpleResponse;
     }
 }

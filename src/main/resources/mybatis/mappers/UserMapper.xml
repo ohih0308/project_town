@@ -16,9 +16,9 @@
         insert into users (user_type, email, username, password, created_at)
         values (1, #{email}, #{username}, #{password}, now());
     </insert>
-    <!--  void setLetterConfig(Long id);  -->
-    <insert id="setLetterConfig" parameterType="Long">
-        insert into letter_configs (user_id, letter_activation, private_read, member_write, guest_write)
+    <!--  void initGuestbookConfig(Long userId);  -->
+    <insert id="initGuestbookConfig" parameterType="Long">
+        insert into guestbook_configs (user_id, guestbook_activation, private_read, member_write, guest_write)
         values (#{userId}, 1, 0, 1, 1);
     </insert>
 
@@ -45,8 +45,8 @@
         from profile_image
         where user_id = #{userId};
     </select>
-    <!--  void createProfileImage(ProfileImage profileImage);  -->
-    <insert id="createProfileImage" parameterType="ProfileImage">
+    <!--  void uploadProfileImage(ProfileImage profileImage);  -->
+    <insert id="uploadProfileImage" parameterType="ProfileImage">
         INSERT INTO profile_images(uuid, user_id, file_name, extension, directory)
         VALUES (#{uuid}, #{userId}, #{fileName}, #{extension}, #{directory})
     </insert>
@@ -69,6 +69,28 @@
     <delete id="deleteProfileImage" parameterType="Long">
         delete
         from profile_image
+        where user_id = #{userId};
+    </delete>
+
+
+    <!--  void updateUsername (Map map);  -->
+    <update id="updateUsername" parameterType="Map">
+        update users
+        set username = #{username}
+        where id = #{user_id};
+    </update>
+    <!--  void updatePassword (Map map);  -->
+    <update id="updatePassword" parameterType="Map">
+        update users
+        set password = #{password}
+        where id = #{user_id};
+    </update>
+
+
+    <!--  boolean deactivate(Long userId);  -->
+    <delete id="deactivate" parameterType="Long">
+        delete
+        from user
         where user_id = #{userId};
     </delete>
 </mapper>

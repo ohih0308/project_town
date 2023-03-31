@@ -14,4 +14,7 @@ public interface SuccessConst {
     String USER_LOGOUT_SUCCESS = "user.logout.success";
 
     String UPLOAD_PROFILE_IMAGE_SUCCESS = "upload.profile.image.success";
+    String USERNAME_UPDATE_SUCCESS = "username.update.success";
+    String PASSWORD_UPDATE_SUCCESS = "password.update.success";
+    String DEACTIVATE_SUCCESS = "deactivate.success";
 }

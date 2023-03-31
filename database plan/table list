@@ -86,18 +86,18 @@ FK 	- comment_id bigint unsigned not null
 	- ip varchar (45) not null
 
 
-letter_configs
+guestbook_configs
 FK 	- user_id bigint unsigned not null unique
-	- letter_activation bit not null
+	- guestbook_activation bit not null
 	- private_read bit not null
 	- member_write bit not null
 	- guest_write bit not null
 
 
-letters
+guestbook_posts
 PK 	- id bigint unsigned auto_increment
 FK 	- to_user_id bigint unsigned not null
-FK 	- from_user_id bigint unsigned null
+ 	- from_user_id bigint unsigned null
 	- user_type tinyint unsigned not null
 	- ip varchar (45) not null
 	- author varchar (100) not null default ""
@@ -108,15 +108,15 @@ FK 	- from_user_id bigint unsigned null
 	- created_at datetime not null
 
 
-letter_comments
+guestbook_comments
 PK 	- id bigint unsigned auto_increment
-FK 	- letter_id bigint unsigned not null
+FK 	- guestbook_post_id bigint unsigned not null
 	- user_type tinyint unsigned not null
 	- user_id varchar (100) null
 	- ip varchar (45) not null
 	- author varchar (100) not null
 	- password varchar (100) null
-	- content mediumtext not null
+	- comment mediumtext not null
 	- created_at datetime not null
 
 

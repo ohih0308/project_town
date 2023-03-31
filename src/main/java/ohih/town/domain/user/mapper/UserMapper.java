@@ -4,26 +4,27 @@ import ohih.town.domain.user.dto.ProfileImage;
 import ohih.town.domain.user.dto.Register;
 import ohih.town.domain.user.dto.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 @Mapper
 public interface UserMapper {
-
+    // register
     boolean isFiledDuplicated(Map<String, String> map);
 
     void registerUser(Register register);
 
-    void setLetterConfig(Long userId);
+    void initGuestbookConfig(Long userId);
 
 
+    // login
     UserInfo getUserByEmailAndPassword(Map<String, String> map);
 
 
+    // update user info
     ProfileImage findProfileImageByUserId(Long userId);
 
-    void createProfileImage(ProfileImage profileImage);
+    void uploadProfileImage(ProfileImage profileImage);
 
     String findProfileImageDirectoryByUserId(Long userId);
 
@@ -31,4 +32,11 @@ public interface UserMapper {
 
     Integer deleteProfileImage(Long userId);
 
+    boolean updateUsername(Map map);
+
+    boolean updatePassword(Map map);
+
+
+    // deactivate
+    boolean deactivate(Long userId);
 }

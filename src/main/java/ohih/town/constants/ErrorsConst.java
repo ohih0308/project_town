@@ -1,6 +1,10 @@
 package ohih.town.constants;
 
 public interface ErrorsConst {
+    String DATABASE_UPDATE_ERROR = "database.update.error";
+    String DATABASE_DELETE_ERROR = "database.delete.error";
+
+
     String MAIL_SEND_ERROR = "mail.send.error";
     String USER_EMAIL_DUPLICATED = "user.email.duplicated";
     String EMAIL_VERIFICATION_FAILURE = "email.verification.failure";
@@ -23,6 +27,7 @@ public interface ErrorsConst {
 
 
     String USER_LOGIN_FAILURE_INVALID_CREDENTIALS = "user.login.failure.invalid.credentials";
+
 
     String UPLOAD_PROFILE_IMAGE_FAILURE = "upload.profile.image.failure";
     String DELETE_PROFILE_IMAGE_FAILURE_NOT_UPLOADED = "delete.profile.image.failure.not.uploaded";
