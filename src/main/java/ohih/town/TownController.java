@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.swing.text.View;
 import java.util.List;
 
 import static ohih.town.constants.ForumConst.*;
@@ -93,5 +94,10 @@ public class TownController {
         return ViewConst.BOARD;
     }
 
+//    @GetMapping(URLConst.POST_DETAILS)
+//    public String getPostDetails(@PathVariable Long postId) {
+//
+//        return ViewConst.POST;
+//    }
 
 }
