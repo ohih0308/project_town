@@ -12,9 +12,11 @@
 
         <typeAlias type="ohih.town.domain.post.dto.Attachment" alias="Attachment"/>
         <typeAlias type="ohih.town.domain.post.dto.Thumbnail" alias="Thumbnail"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostUploadRequest" alias="PostUploadRequest"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostAccessInfo" alias="PostAccessInfo"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostUpdateInfo" alias="PostUpdateInfo"/>
 
         <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
-
         <typeAlias type="ohih.town.domain.forum.dto.BoardPost" alias="BoardPost"/>
     </typeAliases>
 

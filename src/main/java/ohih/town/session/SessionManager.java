@@ -34,7 +34,6 @@ public class SessionManager {
 
     public static boolean updateAttribute(HttpServletRequest request,
                                           String attributeName, Object input) {
-        HttpSession session = request.getSession();
         Object attribute = getAttributes(request, attributeName);
         if (attribute != null) {
             setAttributes(request, attributeName, input);

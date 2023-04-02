@@ -40,4 +40,5 @@ public interface ErrorsConst {
 
     String POST_UPLOAD_IO_EXCEPTION = "post.upload.io.exception";
     String POST_UPLOAD_SQL_EXCEPTION = "post.upload.sql.exception";
+    String UPLOAD_ATTACHMENT_EXTENSION_ERROR = "upload.attachment.extension.error";
 }

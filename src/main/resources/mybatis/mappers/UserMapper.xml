@@ -25,7 +25,7 @@
 
     <!--  UserInfo getUserByEmailAndPassword(Map<String, String> map);  -->
     <select id="getUserByEmailAndPassword" parameterType="Map" resultType="UserInfo">
-        select u.id,
+        select u.user_id,
                u.user_type,
                u.email,
                u.username,
@@ -77,13 +77,13 @@
     <update id="updateUsername" parameterType="Map">
         update users
         set username = #{username}
-        where id = #{user_id};
+        where user_id = #{user_id};
     </update>
     <!--  void updatePassword (Map map);  -->
     <update id="updatePassword" parameterType="Map">
         update users
         set password = #{password}
-        where id = #{user_id};
+        where user_id = #{user_id};
     </update>
 
 

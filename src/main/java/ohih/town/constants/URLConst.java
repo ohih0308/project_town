@@ -29,6 +29,7 @@ public interface URLConst {
     String FORUM_SELECTION = "/forum-selection";
     String GET_BOARD_PAGE = "/board/{boardName}";
 
-    String UPLOAD_POST = "upload/post";
+    String UPLOAD_POST = "/upload/post";
     String POST_DETAILS = "/posts/{postId}";
+    String UPDATE_POST = "/update/post";
 }

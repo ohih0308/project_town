@@ -113,10 +113,10 @@ public class UserRestController {
         try {
             ProfileImage profileImage;
 
-            if (userService.findProfileImageByUserId(userInfo.getId()) == null) {
-                profileImage = userService.uploadProfileImage(multipartFile, userInfo.getId());
+            if (userService.findProfileImageByUserId(userInfo.getUserId()) == null) {
+                profileImage = userService.uploadProfileImage(multipartFile, userInfo.getUserId());
             } else {
-                profileImage = userService.updateProfileImage(multipartFile, userInfo.getId());
+                profileImage = userService.updateProfileImage(multipartFile, userInfo.getUserId());
                 SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
             }
 
@@ -142,14 +142,14 @@ public class UserRestController {
     public SimpleResponse deleteProfileImage(HttpServletRequest request,
                                              @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
         SimpleResponse simpleResponse = new SimpleResponse();
-        ProfileImage profileImage = userService.findProfileImageByUserId(userInfo.getId());
+        ProfileImage profileImage = userService.findProfileImageByUserId(userInfo.getUserId());
 
         if (profileImage == null) {
             simpleResponse.setSuccess(false);
             simpleResponse.setMessage(MAIL_ERROR_MESSAGES.getString(ErrorsConst.DELETE_PROFILE_IMAGE_FAILURE_NOT_UPLOADED));
         } else {
             try {
-                userService.deleteProfileImage(profileImage.getDirectory(), userInfo.getId());
+                userService.deleteProfileImage(profileImage.getDirectory(), userInfo.getUserId());
 
                 userInfo.setSavedFileName(null);
                 userInfo.setExtension(null);
@@ -176,7 +176,7 @@ public class UserRestController {
 
         if (checkResult.getIsValid() && checkResult.getIsDuplicated()) {
             try {
-                userService.updateUsername(userInfo.getId(), username);
+                userService.updateUsername(userInfo.getUserId(), username);
                 checkResult.setMessage(SUCCESS_MESSAGES.getString(USERNAME_UPDATE_SUCCESS));
             } catch (SQLException e) {
                 checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
@@ -196,7 +196,7 @@ public class UserRestController {
 
         if (checkResult.getIsValid()) {
             try {
-                userService.updatePassword(userInfo.getId(), password);
+                userService.updatePassword(userInfo.getUserId(), password);
                 checkResult.setMessage(SUCCESS_MESSAGES.getString(PASSWORD_UPDATE_SUCCESS));
             } catch (SQLException e) {
                 checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
@@ -211,7 +211,7 @@ public class UserRestController {
         SimpleResponse simpleResponse = new SimpleResponse();
 
         try {
-            userService.deactivate(userInfo.getId());
+            userService.deactivate(userInfo.getUserId());
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(DEACTIVATE_SUCCESS));
         } catch (SQLException e) {
             simpleResponse.setSuccess(false);
@@ -229,7 +229,7 @@ public class UserRestController {
         SimpleResponse simpleResponse = new SimpleResponse();
 
         try {
-            userService.updateGuestbookPermission(userInfo.getId(), guestbookPermission);
+            userService.updateGuestbookPermission(userInfo.getUserId(), guestbookPermission);
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
             simpleResponse.setSuccess(true);
         } catch (SQLException e) {
@@ -247,7 +247,7 @@ public class UserRestController {
         SimpleResponse simpleResponse = new SimpleResponse();
 
         try {
-            userService.updateGuestbookActivation(userInfo.getId(), activation);
+            userService.updateGuestbookActivation(userInfo.getUserId(), activation);
             simpleResponse.setSuccess(true);
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
         } catch (SQLException e) {

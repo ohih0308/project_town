@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.ValidationResult;
 import ohih.town.constants.*;
-import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.exception.NotAllowedExtensionException;
 import ohih.town.utilities.Utilities;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,6 @@ import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
 import static ohih.town.constants.UtilityConst.UUID_FULL_INDEX;
-import static ohih.town.utilities.Utilities.extractAttachmentsFromBody;
 import static ohih.town.utilities.Utilities.replaceAttachmentsInBody;
 
 @Service
@@ -92,26 +91,26 @@ public class PostService {
     }
 
 
-    public List<ValidationResult> checkValidations(PostUploadUser postUploadUser, PostUploadContent postUploadContent) {
+    public List<ValidationResult> checkValidations(PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
         List<ValidationResult> errorMessages = new ArrayList<>();
 
         ValidationResult[] validationResults = {
                 checkValidation(ValidationPatterns.USERNAME,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         USER_USERNAME_INVALID, USER_USERNAME_VALID,
-                        PostConst.AUTHOR, postUploadUser.getAuthor()),
+                        PostConst.AUTHOR, postAuthorInfo.getAuthor()),
                 checkValidation(ValidationPatterns.PASSWORD,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
-                        PostConst.PASSWORD, postUploadUser.getPassword()),
+                        PostConst.PASSWORD, postAuthorInfo.getPassword()),
                 checkValidation(ValidationPatterns.SUBJECT,
                         POST_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         POST_SUBJECT_INVALID, POST_SUBJECT_VALID,
-                        PostConst.SUBJECT, postUploadContent.getSubject()),
+                        PostConst.SUBJECT, postContentInfo.getSubject()),
                 checkValidation(ValidationPatterns.BODY,
                         POST_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         POST_BODY_INVALID, POST_BODY_VALID,
-                        PostConst.BODY, postUploadContent.getBody())
+                        PostConst.BODY, postContentInfo.getBody())
         };
 
         errorMessages.addAll(Arrays.asList(validationResults));
@@ -120,29 +119,32 @@ public class PostService {
     }
 
 
-    public void setAuthor(PostUploadUser postUploadUser, UserInfo userInfo, String ip) {
-        postUploadUser.setIp(ip);
+    public void setAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo, String ip) {
+        postAuthorInfo.setIp(ip);
 
         if (userInfo == null) {
-            postUploadUser.setUserType(UserConst.USER_TYPE_GUEST);
+            postAuthorInfo.setUserType(UserConst.USER_TYPE_GUEST);
         } else {
-            postUploadUser.setUserId(userInfo.getId());
-            postUploadUser.setUserType(userInfo.getUserType());
-            postUploadUser.setAuthor(userInfo.getUsername());
+            postAuthorInfo.setUserId(userInfo.getId());
+            postAuthorInfo.setUserType(userInfo.getUserType());
+            postAuthorInfo.setAuthor(userInfo.getUsername());
         }
     }
 
-    public void setContent(PostUploadContent postUploadContent, List<Attachment> attachments, String boardName) {
+    public void setContent(PostContentInfo postContentInfo, List<Attachment> attachments, String boardName) {
 //        List<Attachment> attachments =
 //                getAttachmentsFromPost(extractAttachmentsFromBody(postUploadContent.getBody()), boardName);
         for (Attachment attachment : attachments) {
-            postUploadContent.setBody(replaceAttachmentsInBody(
-                    postUploadContent.getBody(), attachment, BASE_64));
+            postContentInfo.setBody(replaceAttachmentsInBody(
+                    postContentInfo.getBody(), attachment, BASE_64));
         }
     }
 
-    public void uploadAttachments(List<Attachment> attachments, Long postId) throws IOException, SQLException {
+    public void uploadAttachments(List<Attachment> attachments, Long postId)
+            throws IOException, SQLException, NotAllowedExtensionException {
         for (Attachment attachment : attachments) {
+            Utilities.isAllowedExtension(attachment.getExtension());
+
             attachment.setPostId(postId);
 
             Path path = Paths.get(attachment.getDirectory());
@@ -183,14 +185,15 @@ public class PostService {
     }
 
     @Transactional
-    public void uploadPost(List<Attachment> attachments, PostUploadUser postUploadUser, PostUploadContent postUploadContent) throws SQLException, IOException {
-        PostUpload postUpload = new PostUpload(postUploadUser, postUploadContent);
+    public void uploadPost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
+            throws SQLException, IOException, NotAllowedExtensionException {
+        PostUploadRequest postUploadRequest = new PostUploadRequest(postAuthorInfo, postContentInfo);
 
-        if (!postMapper.uploadPost(postUpload)) {
+        if (!postMapper.uploadPost(postUploadRequest)) {
             throw new SQLException();
         }
 
-        uploadAttachments(attachments, postUpload.getPostId());
+        uploadAttachments(attachments, postUploadRequest.getPostId());
 
         if (attachments.size() > 0) {
             setThumbnail(attachments.get(0).getFileName(), attachments.get(0).getPostId(), attachments.get(0).getDirectory());
@@ -202,4 +205,27 @@ public class PostService {
             throw new SQLException();
         }
     }
+
+
+    public boolean isPostAccessGranted(UserInfo userInfo, Long postId, String password) {
+        PostAccessInfo postAccessInfo = postMapper.getPostAccessInfoByPostId(postId);
+        if (postAccessInfo == null) {
+            return false;
+        }
+
+        if (userInfo == null) {
+            if (postAccessInfo.getUserType() == UserConst.USER_TYPE_GUEST && postAccessInfo.getPassword().equals(password)) {
+                return true;
+            }
+            return false;
+        }
+
+        return postAccessInfo.getUserType() == UserConst.USER_TYPE_MEMBER && postAccessInfo.getUserId() == userInfo.getId()
+                || userInfo.getUserType() == UserConst.USER_TYPE_ADMIN;
+    }
+
+    public PostUpdateInfo getPostUpdateInfoByPostId(Long postId) {
+        return postMapper.getPostUpdateInfoByPostId(postId);
+    }
+
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostUploadUser {
+public class PostAuthorInfo {
     private Long userId;
     private String ip;
     private Integer userType;

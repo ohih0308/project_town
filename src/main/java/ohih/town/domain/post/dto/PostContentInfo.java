@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostUploadContent {
+public class PostContentInfo {
 
     private Long boardId;
     private String subject;

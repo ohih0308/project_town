@@ -2,8 +2,10 @@ package ohih.town.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import ohih.town.constants.AllowedExtensionList;
 import ohih.town.constants.PagingConst;
 import ohih.town.domain.post.dto.Attachment;
+import ohih.town.exception.NotAllowedExtensionException;
 import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -114,5 +116,11 @@ public class Utilities {
                 attachment.getDirectory().indexOf(CLASS_PATH) + CLASS_PATH.length());
 
         return body.replace(originalText, newText);
+    }
+
+    public static void isAllowedExtension(String extension) throws NotAllowedExtensionException{
+        if (AllowedExtensionList.isAllowedExtension(extension)) {
+            throw new NotAllowedExtensionException();
+        }
     }
 }
