@@ -50,19 +50,15 @@ public class UserRestController {
 
     @PostMapping(URLConst.CHECK_PASSWORD)
     public CheckResult checkPassword(String password) {
-        CheckResult checkResult = userService.checkValidation(ValidationPatterns.PASSWORD,
+        return userService.checkValidation(ValidationPatterns.PASSWORD,
                 USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                 USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
                 password);
-
-        return checkResult;
     }
 
     @PostMapping(URLConst.CHECK_CONFIRM_PASSWORD)
     public CheckResult checkConfirmPassword(String password, String confirmPassword) {
-        CheckResult checkResult = userService.checkConfirmPassword(password, confirmPassword);
-
-        return checkResult;
+        return userService.checkConfirmPassword(password, confirmPassword);
     }
 
     @PostMapping(URLConst.REGISTER_URL)

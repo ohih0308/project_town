@@ -14,4 +14,6 @@ public interface ForumMapper {
     Long getBoardPostTotalCount(Map map);
 
     List<BoardPost> getBoardPosts(Map map);
+
+    String getBoardNameById(Long boardId);
 }

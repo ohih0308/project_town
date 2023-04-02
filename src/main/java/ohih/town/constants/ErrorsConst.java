@@ -32,4 +32,12 @@ public interface ErrorsConst {
     String UPLOAD_PROFILE_IMAGE_FAILURE = "upload.profile.image.failure";
     String DELETE_PROFILE_IMAGE_FAILURE_NOT_UPLOADED = "delete.profile.image.failure.not.uploaded";
     String DELETE_PROFILE_IMAGE_FAILURE = "delete.profile.image.failure";
+
+
+    String POST_SUBJECT_INVALID = "post.subject.invalid";
+    String POST_BODY_INVALID = "post.body.invalid";
+
+
+    String POST_UPLOAD_IO_EXCEPTION = "post.upload.io.exception";
+    String POST_UPLOAD_SQL_EXCEPTION = "post.upload.sql.exception";
 }

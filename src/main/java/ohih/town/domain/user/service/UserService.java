@@ -322,8 +322,9 @@ public class UserService {
         Register register = new Register(email, username, password);
         userMapper.registerUser(register);
 
-        userMapper.initGuestbookConfig(register.getId());
+        userMapper.initGuestbookConfig(register.getUserId());
     }
+
 
     public LoginResult login(String email, String password) {
         LoginResult loginResult = new LoginResult();
@@ -354,6 +355,7 @@ public class UserService {
 
         return loginResult;
     }
+
 
     private UserInfo getUserByEmailAndPassword(String email, String password) {
         Map<String, String> map = new HashMap<>();

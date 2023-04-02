@@ -43,4 +43,8 @@ public class ForumService {
 
         return forumMapper.getBoardPosts(map);
     }
+
+    public String getBoardNameById(Long boardId) {
+        return forumMapper.getBoardNameById(boardId);
+    }
 }

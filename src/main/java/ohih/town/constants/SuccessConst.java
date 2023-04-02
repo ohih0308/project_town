@@ -20,4 +20,9 @@ public interface SuccessConst {
 
     String GUESTBOOK_PERMISSION_UPDATE_SUCCESS = "guestbook.permission.update.success";
     String GUESTBOOK_ACTIVATION_UPDATE_SUCCESS = "guestbook.activation.update.success";
+
+    String POST_SUBJECT_VALID = "post.subject.valid";
+    String POST_BODY_VALID = "post.body.valid";
+
+    String POST_UPLOAD_SUCCESS = "post.upload.success";
 }

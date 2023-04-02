@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ohih.town.domain.post.mapper.PostMapper">
+    <!--  boolean uploadPost(Map map);  -->
+    <insert id="uploadPost" parameterType="Map" useGeneratedKeys="true" keyProperty="postId">
+        insert into posts (board_id, user_type, ip, author, password, subject, body, views, created_at, updated_at)
+        values (#{boardId}, #{userType}, #{ip}, #{author}, #{password}, #{subject}, #{body}, 0, now(), now());
+    </insert>
+
+    <!--  boolean uploadAttachment(Attachment attachment);  -->
+    <insert id="uploadAttachment" parameterType="Attachment">
+        insert into attachments (file_name, extension, post_id, directory)
+        values (#{fileName}, #{extension}, #{postId}, #{directory});
+    </insert>
+
+    <!--  boolean setThumbnail(Thumbnail thumbnail);  -->
+    <insert id="setThumbnail" parameterType="Thumbnail">
+        insert into thumbnails (post_id, file_name, directory)
+        values (#{postId}, #{fileName}, #{directory});
+    </insert>
+
+</mapper>

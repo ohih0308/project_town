@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Register {
-    private Long id;
+    private Long userId;
     private String email;
     private String username;
     private String password;

@@ -43,4 +43,11 @@
                  left join users on p.user_id = pi.user_id
         where p.board = (select name from boards where id = #{board_id});
     </select>
+
+    <!--  String getBoardNameById(Long boardId);  -->
+    <select id="getBoardNameById" parameterType="Long" resultType="String">
+        select name
+        from boards
+        where id = #{boardId};
+    </select>
 </mapper>

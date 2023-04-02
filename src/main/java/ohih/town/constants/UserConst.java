@@ -10,7 +10,7 @@ public interface UserConst {
     String EMAIL = "email";
     String USERNAME = "username";
     String PASSWORD = "password";
-    String CONFIRM_PASSWORD = "confirmPassword";
+    String CONFIRM_PASSWORD = "confirm_password";
     String AGREEMENT = "agreement";
     String USER_ID = "user_id";
 

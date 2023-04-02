@@ -1,18 +1,23 @@
 package ohih.town.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.PagingConst;
+import ohih.town.domain.post.dto.Attachment;
 import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utilities {
+    private static final String CLASS_PATH = "src/main/resources/";
+    private static final String BASE_64_PATTERN_OPEN = "data:image/";
+
+
     public static String getIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
 
@@ -34,6 +39,14 @@ public class Utilities {
 
         return ip;
     }
+
+    public static String getDate(String dateFormat) {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+
+        return today.format(formatter);
+    }
+
 
     // paging revised
     public static Paging getPaging(Long totalCount, Integer presentPage, Integer itemsPerPage) {
@@ -70,5 +83,36 @@ public class Utilities {
         UUID uuid = UUID.randomUUID();
 
         return uuid.toString().substring(0, length);
+    }
+
+    public static List<String> extractAttachmentsFromBody(String body) {
+        List<String> attachments = new ArrayList<>();
+        Pattern pattern = Pattern.compile("<img[^>]*src=[\"']?([^>\"']+)[\"']?[^>]*>");
+        Matcher matcher = pattern.matcher(body);
+        while (matcher.find()) {
+            String imgSrc = matcher.group(1);
+            if (imgSrc.startsWith("data:image")) { // base64 인코딩된 이미지인 경우
+                attachments.add(imgSrc);
+            } else if (imgSrc.startsWith("/uploads/")) { // 업로드된 이미지인 경우
+                attachments.add(imgSrc);
+            }
+        }
+        return attachments;
+    }
+
+    public static String extractExtension(String file) {
+        return file.substring(file.indexOf('/') + 1, file.indexOf(';'));
+    }
+
+    public static String replaceAttachmentsInBody(String body, Attachment attachment, String ENCODE_TYPE) {
+        String originalText = BASE_64_PATTERN_OPEN +
+                attachment.getExtension() + ";" +
+                ENCODE_TYPE + "," +
+                attachment.getImageDate();
+
+        String newText = attachment.getDirectory().substring(
+                attachment.getDirectory().indexOf(CLASS_PATH) + CLASS_PATH.length());
+
+        return body.replace(originalText, newText);
     }
 }
