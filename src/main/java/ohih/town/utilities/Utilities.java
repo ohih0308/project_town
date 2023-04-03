@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utilities {
-    private static final String CLASS_PATH = "src/main/resources/";
+    private static final String CLASS_PATH = "src/main/resources/static/";
     private static final String BASE_64_PATTERN_OPEN = "data:image/";
 
 
@@ -98,6 +98,7 @@ public class Utilities {
                 attachments.add(imgSrc);
             }
         }
+
         return attachments;
     }
 

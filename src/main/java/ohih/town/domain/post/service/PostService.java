@@ -3,7 +3,10 @@ package ohih.town.domain.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.ValidationResult;
-import ohih.town.constants.*;
+import ohih.town.constants.ConfigurationResourceBundle;
+import ohih.town.constants.PostConst;
+import ohih.town.constants.UserConst;
+import ohih.town.constants.ValidationPatterns;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
@@ -95,9 +98,10 @@ public class PostService {
 
 
     public boolean checkValidations(UploadResult uploadResult,
-                                    List<Map<String, String>> errorMessages,
                                     PostAuthorInfo postAuthorInfo,
                                     PostContentInfo postContentInfo) {
+        boolean isValid = true;
+
         ValidationResult[] validationResults = {
                 checkValidation(ValidationPatterns.USERNAME,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
@@ -118,6 +122,7 @@ public class PostService {
         };
 
         List<Map<String, Boolean>> fieldValidations = new ArrayList<>();
+        List<Map<String, String>> errorMessages = new ArrayList<>();
 
         for (ValidationResult validationResult : validationResults) {
             fieldValidations.add(validationResult.getFieldValidation());
@@ -125,11 +130,11 @@ public class PostService {
 
             if (!validationResult.getIsValid()) {
                 uploadResult.setFieldValidations(fieldValidations);
-                uploadResult.setMessages(errorMessages);
-                return false;
+                uploadResult.setErrorMessages(errorMessages);
+                isValid = false;
             }
         }
-        return true;
+        return isValid;
     }
 
 
@@ -212,7 +217,7 @@ public class PostService {
         }
     }
 
-    public void uploadPostExceptionHandler(UploadResult uploadResult, List<Map<String, String>> errorMessages,
+    public void uploadPostExceptionHandler(UploadResult uploadResult,
                                            List<Attachment> attachments,
                                            PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
         Map<String, String> errorMessage = new HashMap<>();
@@ -232,8 +237,7 @@ public class PostService {
         }
 
         if (!errorMessage.isEmpty()) {
-            errorMessages.add(errorMessage);
-            uploadResult.setMessages(errorMessages);
+            uploadResult.setErrorMessages(Collections.singletonList(errorMessage));
         }
     }
 

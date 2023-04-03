@@ -25,6 +25,4 @@ public class WebConfig implements WebMvcConfigurer {
                         UPDATE_GUESTBOOK_PERMISSION,
                         UPDATE_GUESTBOOK_ACTIVATION);
     }
-
-
 }

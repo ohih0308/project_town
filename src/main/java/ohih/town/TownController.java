@@ -112,9 +112,9 @@ public class TownController {
 //            return ViewConst.UPLOAD_POST_FORM;
 //        }
 
-        log.info("postUpdateInfo = {}", postService.getPostUpdateInfoByPostId(10L).toString());
+        log.info("postUpdateInfo = {}", postService.getPostUpdateInfoByPostId(1L));
 
-        model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(10L));
+        model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(1L));
         return ViewConst.UPLOAD_POST_FORM;
 //        return "redirect:/";
     }
