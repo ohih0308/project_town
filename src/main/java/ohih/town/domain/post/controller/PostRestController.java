@@ -2,6 +2,7 @@ package ohih.town.domain.post.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ohih.town.ValidationResult;
 import ohih.town.constants.*;
 import ohih.town.domain.forum.service.ForumService;
@@ -11,6 +12,7 @@ import ohih.town.domain.post.dto.PostContentInfo;
 import ohih.town.domain.post.dto.PostAuthorInfo;
 import ohih.town.domain.post.service.PostService;
 import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
 import ohih.town.utilities.Utilities;
 import org.springframework.lang.Nullable;
@@ -30,9 +32,11 @@ import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.POST_UPLOAD_SUCCESS;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
 import static ohih.town.utilities.Utilities.extractAttachmentsFromBody;
+import static ohih.town.utilities.Utilities.getIp;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class PostRestController {
 
     private final ForumService forumService;
@@ -44,56 +48,24 @@ public class PostRestController {
                                    PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
         UploadResult uploadResult = new UploadResult();
         List<Map<String, String>> errorMessages = new ArrayList<>();
-        List<Map<String, Boolean>> fieldValidations = new ArrayList<>();
-        boolean validPost = true;
 
-        uploadResult.setSuccess(false);
 
-        String boardName = forumService.getBoardNameById(postContentInfo.getBoardId());
         List<Attachment> attachments =
-                postService.getAttachmentsFromPost(extractAttachmentsFromBody(postContentInfo.getBody()), boardName);
-        postService.setAuthor(postAuthorInfo, userInfo, Utilities.getIp(request));
-        postService.setContent(postContentInfo, attachments, boardName);
+                postService.extractAttachmentsFromPost(
+                        postContentInfo.getBoardId(), extractAttachmentsFromBody(postContentInfo.getBody()));
 
+        postService.setPostAuthor(postAuthorInfo, userInfo);
+        postService.setPostContent(postContentInfo, attachments);
 
         // Validate Fields
-        List<ValidationResult> validationResults = postService.checkValidations(postAuthorInfo, postContentInfo);
-
-        for (ValidationResult validationResult : validationResults) {
-            fieldValidations.add(validationResult.getFieldValidation());
-            errorMessages.add(validationResult.getMessage());
-
-            if (!validationResult.getIsValid()) {
-                validPost = false;
-            }
-        }
-
-        uploadResult.setFieldValidations(fieldValidations);
-        uploadResult.setMessages(errorMessages);
-
-        // If not valid any of fields return error messages with field name
-        if (!validPost) {
+        if (!postService.checkValidations(uploadResult, errorMessages, postAuthorInfo, postContentInfo)) {
             return uploadResult;
         }
 
 
         // Upload post
-        Map<String, String> errorMessage = new HashMap<>();
-        try {
-            postService.uploadPost(attachments, postAuthorInfo, postContentInfo);
-            uploadResult.setSuccess(true);
-            uploadResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
-        } catch (IOException e) {
-            errorMessage.put(POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
-        } catch (SQLException e) {
-            errorMessage.put(POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
-        } catch (NotAllowedExtensionException e) {
-            errorMessage.put(UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
-        }
-
-        if (!errorMessage.isEmpty()) {
-            errorMessages.add(errorMessage);
-        }
+        postService.uploadPostExceptionHandler(uploadResult, errorMessages,
+                attachments, postAuthorInfo, postContentInfo);
 
         return uploadResult;
     }

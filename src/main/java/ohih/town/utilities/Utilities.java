@@ -1,13 +1,12 @@
 package ohih.town.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.AllowedExtensionList;
+import ohih.town.constants.ConfigurationConst;
 import ohih.town.constants.PagingConst;
 import ohih.town.domain.post.dto.Attachment;
+import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
-import org.apache.catalina.core.ApplicationContext;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -110,17 +109,32 @@ public class Utilities {
         String originalText = BASE_64_PATTERN_OPEN +
                 attachment.getExtension() + ";" +
                 ENCODE_TYPE + "," +
-                attachment.getImageDate();
+                attachment.getImageData();
 
         String newText = attachment.getDirectory().substring(
                 attachment.getDirectory().indexOf(CLASS_PATH) + CLASS_PATH.length());
 
-        return body.replace(originalText, newText);
+        return body.replace(originalText, "/" + newText);
     }
 
-    public static void isAllowedExtension(String extension) throws NotAllowedExtensionException{
-        if (AllowedExtensionList.isAllowedExtension(extension)) {
+    public static void isAllowedExtension(String extension) throws NotAllowedExtensionException {
+        if (!AllowedExtensionList.isAllowedExtension(extension)) {
             throw new NotAllowedExtensionException();
+        }
+    }
+
+    public static Integer getBytesLength(String str) {
+        if (str == null) {
+            return 0;
+        }
+
+        byte[] byteArr = str.getBytes();
+        return byteArr.length;
+    }
+
+    public static void isFileSizeExceedLimit(Integer fileSize) throws FileSizeExceedLimitException {
+        if (fileSize > ConfigurationConst.FILE_MAX_SIZE) {
+            throw new FileSizeExceedLimitException();
         }
     }
 }

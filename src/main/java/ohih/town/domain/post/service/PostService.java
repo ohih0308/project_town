@@ -7,6 +7,7 @@ import ohih.town.constants.*;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
 import ohih.town.utilities.Utilities;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class PostService {
         return validationResult;
     }
 
-    public List<Attachment> getAttachmentsFromPost(List<String> extractedImages, String boardName) {
+    public List<Attachment> extractAttachmentsFromPost(Long boardId, List<String> extractedImages) {
         List<Attachment> attachments = new ArrayList<>();
         String date = Utilities.getDate(DATE_FORMAT_YYYY_MM_DD);
 
@@ -75,14 +76,16 @@ public class PostService {
             String fileName = Utilities.createCode(UUID_FULL_INDEX);
             String extension = Utilities.extractExtension(extractedImage);
             Path directory = Paths.get(ConfigurationResourceBundle.FILE_PATHS.getString(ATTACHMENT_PATHS),
-                    boardName,
+                    boardId.toString(),
                     date).resolve(fileName + "." + extension);
 
             Attachment attachment = new Attachment();
-            attachment.setImageDate(extractedImage.substring(extractedImage.indexOf(",") + 1));
+            attachment.setImageData(extractedImage.substring(extractedImage.indexOf(",") + 1));
             attachment.setFileName(fileName);
             attachment.setExtension(extension);
             attachment.setDirectory(directory.toString());
+
+            attachment.setSize(Utilities.getBytesLength(attachment.getImageData()));
 
             attachments.add(attachment);
         }
@@ -91,9 +94,10 @@ public class PostService {
     }
 
 
-    public List<ValidationResult> checkValidations(PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
-        List<ValidationResult> errorMessages = new ArrayList<>();
-
+    public boolean checkValidations(UploadResult uploadResult,
+                                    List<Map<String, String>> errorMessages,
+                                    PostAuthorInfo postAuthorInfo,
+                                    PostContentInfo postContentInfo) {
         ValidationResult[] validationResults = {
                 checkValidation(ValidationPatterns.USERNAME,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
@@ -113,15 +117,23 @@ public class PostService {
                         PostConst.BODY, postContentInfo.getBody())
         };
 
-        errorMessages.addAll(Arrays.asList(validationResults));
+        List<Map<String, Boolean>> fieldValidations = new ArrayList<>();
 
-        return errorMessages;
+        for (ValidationResult validationResult : validationResults) {
+            fieldValidations.add(validationResult.getFieldValidation());
+            errorMessages.add(validationResult.getMessage());
+
+            if (!validationResult.getIsValid()) {
+                uploadResult.setFieldValidations(fieldValidations);
+                uploadResult.setMessages(errorMessages);
+                return false;
+            }
+        }
+        return true;
     }
 
 
-    public void setAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo, String ip) {
-        postAuthorInfo.setIp(ip);
-
+    public void setPostAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo) {
         if (userInfo == null) {
             postAuthorInfo.setUserType(UserConst.USER_TYPE_GUEST);
         } else {
@@ -131,19 +143,19 @@ public class PostService {
         }
     }
 
-    public void setContent(PostContentInfo postContentInfo, List<Attachment> attachments, String boardName) {
-//        List<Attachment> attachments =
-//                getAttachmentsFromPost(extractAttachmentsFromBody(postUploadContent.getBody()), boardName);
+    public void setPostContent(PostContentInfo postContentInfo, List<Attachment> attachments) {
         for (Attachment attachment : attachments) {
             postContentInfo.setBody(replaceAttachmentsInBody(
                     postContentInfo.getBody(), attachment, BASE_64));
         }
     }
 
+
     public void uploadAttachments(List<Attachment> attachments, Long postId)
-            throws IOException, SQLException, NotAllowedExtensionException {
+            throws IOException, SQLException, NotAllowedExtensionException, FileSizeExceedLimitException {
         for (Attachment attachment : attachments) {
             Utilities.isAllowedExtension(attachment.getExtension());
+            Utilities.isFileSizeExceedLimit(attachment.getSize());
 
             attachment.setPostId(postId);
 
@@ -162,7 +174,7 @@ public class PostService {
                 file.createNewFile();
             }
 
-            byte[] imageData = Base64.getDecoder().decode(attachment.getImageDate());
+            byte[] imageData = Base64.getDecoder().decode(attachment.getImageData());
 
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -186,7 +198,7 @@ public class PostService {
 
     @Transactional
     public void uploadPost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
-            throws SQLException, IOException, NotAllowedExtensionException {
+            throws SQLException, IOException, NotAllowedExtensionException, FileSizeExceedLimitException {
         PostUploadRequest postUploadRequest = new PostUploadRequest(postAuthorInfo, postContentInfo);
 
         if (!postMapper.uploadPost(postUploadRequest)) {
@@ -197,6 +209,31 @@ public class PostService {
 
         if (attachments.size() > 0) {
             setThumbnail(attachments.get(0).getFileName(), attachments.get(0).getPostId(), attachments.get(0).getDirectory());
+        }
+    }
+
+    public void uploadPostExceptionHandler(UploadResult uploadResult, List<Map<String, String>> errorMessages,
+                                           List<Attachment> attachments,
+                                           PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
+        Map<String, String> errorMessage = new HashMap<>();
+        try {
+            uploadPost(attachments, postAuthorInfo, postContentInfo);
+
+            uploadResult.setSuccess(true);
+            uploadResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+        } catch (IOException e) {
+            errorMessage.put(POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
+        } catch (SQLException e) {
+            errorMessage.put(POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
+        } catch (NotAllowedExtensionException e) {
+            errorMessage.put(UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+        } catch (FileSizeExceedLimitException e) {
+            errorMessage.put(UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
+        }
+
+        if (!errorMessage.isEmpty()) {
+            errorMessages.add(errorMessage);
+            uploadResult.setMessages(errorMessages);
         }
     }
 

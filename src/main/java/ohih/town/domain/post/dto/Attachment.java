@@ -8,10 +8,12 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Attachment {
-    private String imageDate;
+    private String imageData;
 
     private String fileName;
     private String extension;
     private Long postId;
     private String directory;
+
+    private Integer size;
 }

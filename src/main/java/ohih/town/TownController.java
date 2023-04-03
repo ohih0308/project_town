@@ -75,7 +75,7 @@ public class TownController {
 
 
     @GetMapping(URLConst.LOGIN)
-    public String login(){
+    public String login() {
         return ViewConst.LOGIN;
     }
 
@@ -98,23 +98,23 @@ public class TownController {
     }
 
     @GetMapping(URLConst.UPLOAD_POST)
-    public String uploadPost() {
-        return ViewConst.UPLOAD_POST_FORM;
+    public String getUploadPostForm() {
+//        return ViewConst.UPLOAD_POST_FORM;
+        return "temp";
     }
 
     @GetMapping(URLConst.UPDATE_POST)
-    public String updatePost(Model model,
-                             @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                             Long postId, String password) {
+    public String getUpdatePostForm(Model model,
+                                    @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                    Long postId, String password) {
 //        if (postService.isPostAccessGranted(userInfo, postId, password)) {
 //            model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(postId));
 //            return ViewConst.UPLOAD_POST_FORM;
 //        }
 
-        System.out.println("TownController.updatePost");
-        log.info("postUpdateInfo = {}", postService.getPostUpdateInfoByPostId(11L).toString());
+        log.info("postUpdateInfo = {}", postService.getPostUpdateInfoByPostId(10L).toString());
 
-        model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(11L));
+        model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(10L));
         return ViewConst.UPLOAD_POST_FORM;
 //        return "redirect:/";
     }
