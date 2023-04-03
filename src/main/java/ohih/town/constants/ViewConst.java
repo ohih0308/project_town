@@ -7,6 +7,8 @@ public interface ViewConst {
     String HOME = "home";
     String REGISTER = "register";
 
+    String LOGIN = "login";
+
     String FORUM_SELECTION = "forum-selection";
     String BOARD = "board";
 

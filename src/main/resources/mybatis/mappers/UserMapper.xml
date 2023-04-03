@@ -25,15 +25,15 @@
 
     <!--  UserInfo getUserByEmailAndPassword(Map<String, String> map);  -->
     <select id="getUserByEmailAndPassword" parameterType="Map" resultType="UserInfo">
-        select u.user_id,
-               u.user_type,
+        select u.user_id          as userId,
+               u.user_type        as userType,
                u.email,
                u.username,
-               pi.saved_file_name,
+               pi.saved_file_name as savedFileName,
                pi.extension,
                pi.directory
         from users as u
-                 left join profile_images as pi on u.id = pi.user_id
+                 left join profile_images as pi on u.user_id = pi.user_id
         where u.email = #{email}
           and u.password = #{password};
     </select>
@@ -41,14 +41,18 @@
 
     <!--  ProfileImage findProfileImageByUserId(Long userId);  -->
     <select id="findProfileImageByUserId" parameterType="Long" resultType="ProfileImage">
-        select *
-        from profile_image
+        select saved_file_name    as savedFileName,
+               user_id            as userId,
+               original_file_name as originalFileName,
+               extension,
+               directory
+        from profile_images
         where user_id = #{userId};
     </select>
     <!--  void uploadProfileImage(ProfileImage profileImage);  -->
     <insert id="uploadProfileImage" parameterType="ProfileImage">
         INSERT INTO profile_images(saved_file_name, user_id, original_file_name, extension, directory)
-        VALUES (#{saved_file_name}, #{userId}, #{original_file_name}, #{extension}, #{directory})
+        VALUES (#{savedFile_Name}, #{userId}, #{originalFileName}, #{extension}, #{directory})
     </insert>
     <!--  String findProfileImageDirectoryByUserId(Long userId);  -->
     <select id="findProfileImageDirectoryByUserId" parameterType="Long" resultType="String">
@@ -59,10 +63,10 @@
     <!--  void updateProfileImage(ProfileImage profileImage);  -->
     <update id="updateProfileImage" parameterType="ProfileImage">
         UPDATE profile_images
-        SET saved_file_name      = #{saved_file_name},
-            original_file_name = #{original_file_name},
-            extension = #{extension},
-            directory = #{directory}
+        SET saved_file_name    = #{savedFile_Name},
+            original_file_name = #{originalFileName},
+            extension          = #{extension},
+            directory          = #{directory}
         WHERE user_id = #{userId}
     </update>
     <!--  void deleteProfileImage(Long userId);  -->

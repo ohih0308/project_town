@@ -24,7 +24,10 @@
 
     <!--  PostAccessInfo getPostAccessInfoByPostId(Long postId);  -->
     <select id="getPostAccessInfoByPostId" parameterType="Long" resultType="PostAccessInfo">
-        select post_id, user_id, user_type, password
+        select post_id   as postId,
+               user_id   as userId,
+               user_type as userType,
+               password
         from posts
         where post_id = #{postId};
     </select>
@@ -32,9 +35,9 @@
 
     <!--  PostUpdateInfo getPostUpdateInfoByPostId(Long postId);  -->
     <select id="getPostUpdateInfoByPostId" parameterType="Long" resultType="PostUpdateInfo">
-        select id, user_id, author, subject, body
+        select post_id as postId, user_id as userId, author, subject, body
         from posts
-        where id = #{postId};
+        where post_id = #{postId};
     </select>
 
 </mapper>

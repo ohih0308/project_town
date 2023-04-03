@@ -74,6 +74,12 @@ public class TownController {
     }
 
 
+    @GetMapping(URLConst.LOGIN)
+    public String login(){
+        return ViewConst.LOGIN;
+    }
+
+
     @GetMapping(URLConst.GET_BOARD_PAGE)
     public String getBoardPage(Model model,
                                @PathVariable String boardName,

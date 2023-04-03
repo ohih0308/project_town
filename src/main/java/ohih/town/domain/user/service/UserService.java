@@ -353,6 +353,8 @@ public class UserService {
             loginResult.setUserInfo(userInfo);
         }
 
+        System.out.println(userInfo.toString());
+
         return loginResult;
     }
 

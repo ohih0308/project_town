@@ -125,7 +125,7 @@ public class PostService {
         if (userInfo == null) {
             postAuthorInfo.setUserType(UserConst.USER_TYPE_GUEST);
         } else {
-            postAuthorInfo.setUserId(userInfo.getId());
+            postAuthorInfo.setUserId(userInfo.getUserId());
             postAuthorInfo.setUserType(userInfo.getUserType());
             postAuthorInfo.setAuthor(userInfo.getUsername());
         }
@@ -220,7 +220,7 @@ public class PostService {
             return false;
         }
 
-        return postAccessInfo.getUserType() == UserConst.USER_TYPE_MEMBER && postAccessInfo.getUserId() == userInfo.getId()
+        return postAccessInfo.getUserType() == UserConst.USER_TYPE_MEMBER && postAccessInfo.getUserId() == userInfo.getUserId()
                 || userInfo.getUserType() == UserConst.USER_TYPE_ADMIN;
     }
 

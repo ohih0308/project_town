@@ -1,10 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{../layout :: layout(~{:: title}, ~{:: pageResources}, ~{:: body})}">
     <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
+        <title>
+            Town
+        </title>
 
+        <pageResources>
+            <script src="/summernote/summernote-lite.js" type="text/javascript"></script>
+            <script src="/summernote/lang/summernote-ko-KR.js" type="text/javascript"></script>
+
+            <link href="/summernote/summernote-lite.css" rel="stylesheet"/>
+        </pageResources>
+    </head>
+
+
+    <body class="container">
+        <form action="/login" method="post">
+            email <input type="text" name="email"/>
+            password <input type="password" name="password"/>
+            <input type="submit" value="sub"/>
+        </form>
     </body>
+
+
 </html>
