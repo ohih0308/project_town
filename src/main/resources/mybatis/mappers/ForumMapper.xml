@@ -47,10 +47,12 @@
         where p.board = (select name from boards where board_id = #{board_id});
     </select>
 
-    <!--  String getBoardNameById(Long boardId);  -->
-    <select id="getBoardNameById" parameterType="Long" resultType="String">
-        select name
-        from boards
-        where board_id = #{boardId};
+    <!--  String getBoardNameByPostId(Long postId);  -->
+    <select id="getBoardNameByPostId" parameterType="Long" resultType="String">
+        select b.name
+        from posts as p
+                 left join boards as b on p.board_id = b.board_id
+        where p.post_id = #{post_id};
+
     </select>
 </mapper>

@@ -124,4 +124,18 @@ public class TownController {
             return ViewConst.UPDATE_POST_FORM;
         }
     }
+
+    @PostMapping(URLConst.DELETE_POST)
+    public String deletePost(HttpServletRequest request,
+                             @PathVariable Long postId) {
+        String boardName = forumService.getBoardNameByPostId(postId);
+        Long permittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+
+        if (permittedPostId == null || permittedPostId != postId) {
+            return "redirect:/post/" + postId;
+        } else {
+// comment firsts
+            return "redirect:/board/" + boardName;
+        }
+    }
 }

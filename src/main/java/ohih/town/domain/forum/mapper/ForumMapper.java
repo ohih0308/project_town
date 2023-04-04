@@ -15,5 +15,5 @@ public interface ForumMapper {
 
     List<BoardPost> getBoardPosts(Map map);
 
-    String getBoardNameById(Long boardId);
+    String getBoardNameByPostId(Long postId);
 }
