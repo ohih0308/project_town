@@ -7,4 +7,6 @@ public interface SessionConst {
     String VALIDATED_USERNAME = "validated_username";
 
     String USER_INFO = "userInfo";
+
+    String ACCESS_PERMITTED_POST_ID = "access_permitted_post_id";
 }

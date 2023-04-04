@@ -15,11 +15,11 @@
 
 
     <body class="container">
-        <form th:action="@{/upload/post}"
+        <form th:action="@{/update/post}"
               method="post"
               class="column overflow">
 
-            <input type="text" th:value="${post_update_info.subject}"/>
+            <input type="text" name="subject" th:value="${post_update_info.subject}"/>
 
             <textarea id="summernote" name="body" th:text="${post_update_info.body}"></textarea>
 

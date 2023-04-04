@@ -86,7 +86,7 @@ public class Utilities {
         return uuid.toString().substring(0, length);
     }
 
-    public static List<String> extractAttachmentsFromBody(String body) {
+    public static List<String> extractBase64DataFromString(String body) {
         List<String> attachments = new ArrayList<>();
         Pattern pattern = Pattern.compile("<img[^>]*src=[\"']?([^>\"']+)[\"']?[^>]*>");
         Matcher matcher = pattern.matcher(body);

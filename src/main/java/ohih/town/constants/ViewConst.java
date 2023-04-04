@@ -12,6 +12,9 @@ public interface ViewConst {
     String FORUM_SELECTION = "forum-selection";
     String BOARD = "board";
 
+    String POST_DETAILS = "post-details";
+
     String UPLOAD_POST_FORM = "upload-post-form";
+    String UPDATE_POST_FORM = "upload-post-form";
 
 }

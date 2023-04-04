@@ -1,6 +1,7 @@
 package ohih.town.constants;
 
 public interface URLConst {
+    String RETURN_MESSAGE = "return-message";
 
     String HOME = "/";
     String REGISTER_URL = "/register";
@@ -30,6 +31,9 @@ public interface URLConst {
     String GET_BOARD_PAGE = "/board/{boardName}";
 
     String UPLOAD_POST = "/upload/post";
-    String POST_DETAILS = "/posts/{postId}";
+    String POST_DETAILS = "/post/{postId}";
+    String UPDATE_POST_FORM = "/update/post-form";
     String UPDATE_POST = "/update/post";
+
+    String CHECK_POST_PERMISSION = "/check/post/permission";
 }

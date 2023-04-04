@@ -1,17 +1,17 @@
 package ohih.town;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ohih.town.constants.PostConst;
-import ohih.town.constants.SessionConst;
-import ohih.town.constants.URLConst;
-import ohih.town.constants.ViewConst;
+import ohih.town.constants.*;
 import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
 import ohih.town.domain.forum.service.ForumService;
+import ohih.town.domain.post.dto.PostEditResult;
 import ohih.town.domain.post.service.PostService;
 import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.session.SessionManager;
 import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
@@ -20,16 +20,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ohih.town.constants.ForumConst.*;
 import static ohih.town.constants.PagingConst.postsPerPage;
-import static ohih.town.constants.UtilityConst.PAGING;
-import static ohih.town.constants.UtilityConst.SEARCH;
+import static ohih.town.constants.PostConst.POST_DETAILS;
+import static ohih.town.constants.PostConst.POST_UPDATE_INFO;
+import static ohih.town.constants.UtilityConst.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,6 +53,7 @@ public class TownController {
         }
         return ViewConst.HOME;
     }
+
 
     @GetMapping(URLConst.HOME)
     public String home() {
@@ -97,25 +99,29 @@ public class TownController {
         return ViewConst.BOARD;
     }
 
-    @GetMapping(URLConst.UPLOAD_POST)
-    public String getUploadPostForm() {
-//        return ViewConst.UPLOAD_POST_FORM;
-        return "temp";
+
+    @GetMapping(URLConst.POST_DETAILS)
+    public String getPostDetails(Model model,
+                                 @PathVariable Long postId) {
+        model.addAttribute(POST_DETAILS, postService.getPostDetailsByPostId(postId));
+        return ViewConst.POST_DETAILS;
     }
 
-    @GetMapping(URLConst.UPDATE_POST)
-    public String getUpdatePostForm(Model model,
-                                    @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                    Long postId, String password) {
-//        if (postService.isPostAccessGranted(userInfo, postId, password)) {
-//            model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(postId));
-//            return ViewConst.UPLOAD_POST_FORM;
-//        }
-
-        log.info("postUpdateInfo = {}", postService.getPostUpdateInfoByPostId(1L));
-
-        model.addAttribute(PostConst.POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(1L));
+    @GetMapping(URLConst.UPLOAD_POST)
+    public String getUploadPostForm() {
         return ViewConst.UPLOAD_POST_FORM;
-//        return "redirect:/";
+    }
+
+    @PostMapping(URLConst.UPDATE_POST_FORM)
+    public String getUpdatePostForm(HttpServletRequest request, Model model,
+                                    Long postId) {
+        Long permittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+
+        if (permittedPostId == null || permittedPostId != postId) {
+            return "redirect:/post/" + postId;
+        } else {
+            model.addAttribute(POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(postId));
+            return ViewConst.UPDATE_POST_FORM;
+        }
     }
 }

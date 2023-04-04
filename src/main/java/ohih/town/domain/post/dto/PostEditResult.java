@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class UploadResult {
+public class PostEditResult {
 
     private boolean success;
     private Long postId;
@@ -18,7 +18,9 @@ public class UploadResult {
     private List<Map<String, Boolean>> fieldValidations;
     private List<Map<String, String>> errorMessages;
 
-    public UploadResult() {
+    private String redirectUrl;
+
+    public PostEditResult() {
         this.success = false;
     }
 }

@@ -10,5 +10,6 @@ public interface PostConst {
     String SUBJECT = "subject";
     String BODY = "body";
 
+    String POST_DETAILS = "post_details";
     String POST_UPDATE_INFO = "post_update_info";
 }

@@ -31,6 +31,7 @@ public class UserRestController {
 
     private final UserService userService;
 
+
     @PostMapping(URLConst.CHECK_USERNAME)
     public CheckResult checkUsername(HttpServletRequest request,
                                      String username) {
@@ -122,7 +123,7 @@ public class UserRestController {
 
             userInfo.setSavedFileName(profileImage.getSavedFileName());
             userInfo.setExtension(profileImage.getExtension());
-            userInfo.setDirectory(profileImage.getDirectory());
+            userInfo.setDirectory(profileImage.getDirectory().substring(profileImage.getDirectory().lastIndexOf("/static/" + 8)));
 
             SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
             SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
@@ -179,7 +180,7 @@ public class UserRestController {
                 userService.updateUsername(userInfo.getUserId(), username);
                 checkResult.setMessage(SUCCESS_MESSAGES.getString(USERNAME_UPDATE_SUCCESS));
             } catch (SQLException e) {
-                checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+                checkResult.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
             }
         }
         return checkResult;
@@ -199,7 +200,7 @@ public class UserRestController {
                 userService.updatePassword(userInfo.getUserId(), password);
                 checkResult.setMessage(SUCCESS_MESSAGES.getString(PASSWORD_UPDATE_SUCCESS));
             } catch (SQLException e) {
-                checkResult.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+                checkResult.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
             }
         }
         return checkResult;
@@ -215,7 +216,7 @@ public class UserRestController {
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(DEACTIVATE_SUCCESS));
         } catch (SQLException e) {
             simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_DELETE_ERROR));
+            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_DELETE_ERROR));
         }
 
         return simpleResponse;
@@ -233,7 +234,7 @@ public class UserRestController {
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
             simpleResponse.setSuccess(true);
         } catch (SQLException e) {
-            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
             simpleResponse.setSuccess(false);
         }
 
@@ -252,7 +253,7 @@ public class UserRestController {
             simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
         } catch (SQLException e) {
             simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(DATABASE_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
+            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
         }
 
         return simpleResponse;

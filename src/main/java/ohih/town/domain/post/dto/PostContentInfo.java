@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class PostContentInfo {
 
+
+    private Long postId;
     private Long boardId;
     private String subject;
     private String body;

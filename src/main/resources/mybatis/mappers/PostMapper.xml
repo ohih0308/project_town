@@ -4,23 +4,37 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="ohih.town.domain.post.mapper.PostMapper">
-    <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
-    <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
-        insert into posts (board_id, user_type, ip, author, password, subject, body, views, created_at, updated_at)
-        values (#{boardId}, #{userType}, #{ip}, #{author}, #{password}, #{subject}, #{body}, 0, now(), now());
-    </insert>
-
+    <!--  List<Attachment> getAttachmentByPostId(Long postId);  -->
+    <select id="getAttachmentByPostId" parameterType="Long" resultType="Attachment">
+        select *
+        from attachments
+        where post_id = #{postId};
+    </select>
     <!--  boolean uploadAttachment(Attachment attachment);  -->
     <insert id="uploadAttachment" parameterType="Attachment">
         insert into attachments (file_name, extension, post_id, directory)
         values (#{fileName}, #{extension}, #{postId}, #{directory});
     </insert>
+    <!--  Integer deleteAttachmentsByFileName(String fileName);  -->
+    <delete id="deleteAttachmentsByFileName" parameterType="Long">
+        delete
+        from attachments
+        where file_name = #{fileName};
+    </delete>
+
 
     <!--  boolean setThumbnail(Thumbnail thumbnail);  -->
     <insert id="setThumbnail" parameterType="Thumbnail">
         insert into thumbnails (post_id, file_name, directory)
         values (#{postId}, #{fileName}, #{directory});
     </insert>
+    <!--  void deleteThumbnailByPostId(Long postId);  -->
+    <delete id="deleteThumbnailByPostId" parameterType="Long">
+        delete
+        from thumbnails
+        where post_id = #{postId};
+    </delete>
+
 
     <!--  PostAccessInfo getPostAccessInfoByPostId(Long postId);  -->
     <select id="getPostAccessInfoByPostId" parameterType="Long" resultType="PostAccessInfo">
@@ -40,4 +54,43 @@
         where post_id = #{postId};
     </select>
 
+
+    <!--  PostDetails getPostDetailsByPostId(Long postId);  -->
+    <select id="getPostDetailsByPostId" parameterType="Long" resultType="PostDetails">
+        select p.post_id          as postId,
+               p.board_id         as boardId,
+               p.user_type        as userType,
+               p.user_id          as userId,
+               p.ip,
+               p.author,
+               p.subject,
+               p.body,
+               p.views,
+               p.created_at       as createAt,
+               p.updated_at       as updatedAt,
+               pi.saved_file_name as savedFileName,
+               pi.extension
+        from posts as p
+                 left join profile_images as pi on posts.user_id = pi.user_id
+        where p.post_id = #{post_id};
+    </select>
+    <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
+    <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
+        insert into posts (board_id, user_type, ip, author, password, subject, body, views, created_at, updated_at)
+        values (#{boardId}, #{userType}, #{ip}, #{author}, #{password}, #{subject}, #{body}, 0, now(), now());
+    </insert>
+    <!--  boolean updatePost(PostUploadRequest postUploadRequest);  -->
+    <update id="updatePost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
+        update posts
+        set board_id   = #{boardId},
+            user_id    = #{userId},
+            user_type  = #{userType},
+            ip         = #{ip},
+            author     = #{author},
+            password   = #{password},
+            subject    = #{subject},
+            body       = #{body},
+            updated_at = NOW()
+        where post_id = #{postId}
+    </update>
 </mapper>

@@ -3,10 +3,8 @@ package ohih.town.domain.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.ValidationResult;
-import ohih.town.constants.ConfigurationResourceBundle;
-import ohih.town.constants.PostConst;
-import ohih.town.constants.UserConst;
-import ohih.town.constants.ValidationPatterns;
+import ohih.town.constants.*;
+import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
@@ -97,7 +95,7 @@ public class PostService {
     }
 
 
-    public boolean checkValidations(UploadResult uploadResult,
+    public boolean checkValidations(PostEditResult postEditResult,
                                     PostAuthorInfo postAuthorInfo,
                                     PostContentInfo postContentInfo) {
         boolean isValid = true;
@@ -129,8 +127,8 @@ public class PostService {
             errorMessages.add(validationResult.getMessage());
 
             if (!validationResult.getIsValid()) {
-                uploadResult.setFieldValidations(fieldValidations);
-                uploadResult.setErrorMessages(errorMessages);
+                postEditResult.setFieldValidations(fieldValidations);
+                postEditResult.setErrorMessages(errorMessages);
                 isValid = false;
             }
         }
@@ -138,13 +136,15 @@ public class PostService {
     }
 
 
-    public void setPostAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo) {
+    public void setPostAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo, String ip) {
+        postAuthorInfo.setIp(ip);
         if (userInfo == null) {
             postAuthorInfo.setUserType(UserConst.USER_TYPE_GUEST);
         } else {
             postAuthorInfo.setUserId(userInfo.getUserId());
             postAuthorInfo.setUserType(userInfo.getUserType());
             postAuthorInfo.setAuthor(userInfo.getUsername());
+            postAuthorInfo.setPassword("");
         }
     }
 
@@ -201,6 +201,80 @@ public class PostService {
         }
     }
 
+    private List<Attachment> getAttachmentsByPostId(Long postId) {
+        return postMapper.getAttachmentByPostId(postId);
+    }
+
+    public void deleteAttachmentsByPostId(Long postId) {
+        List<Attachment> attachments = getAttachmentsByPostId(postId);
+
+        for (Attachment attachment : attachments) {
+            File file = new File(attachment.getDirectory());
+
+            if (!file.delete()) {
+                log.info("File delete failed. {}", attachment.getDirectory());
+            }
+
+            if (!postMapper.deleteAttachmentsByFileName(attachment.getFileName())) {
+                log.info("File delete failed. {}", attachment.getFileName());
+
+            }
+        }
+    }
+
+
+    private void setThumbnail(String fileName, Long postId, String directory) throws SQLException {
+        if (!postMapper.setThumbnail(new Thumbnail(fileName, postId, directory))) {
+            throw new SQLException();
+        }
+    }
+
+    private void deleteThumbnail(Long postId) {
+        postMapper.deleteThumbnailByPostId(postId);
+    }
+
+
+    public SimpleResponse checkPostAccessPermission(UserInfo userInfo, String password, Long postId) {
+        PostAccessInfo postAccessInfo = postMapper.getPostAccessInfoByPostId(postId);
+        SimpleResponse simpleResponse = new SimpleResponse();
+        simpleResponse.setSuccess(false);
+
+        if (postAccessInfo == null) {
+            return simpleResponse;
+        }
+
+        if (postAccessInfo.getUserType().equals(UserConst.USER_TYPE_GUEST)) {
+            if (Objects.equals(postAccessInfo.getPassword(), (password))) {
+                simpleResponse.setSuccess(true);
+            } else {
+                simpleResponse.setMessage(POST_ERROR_MESSAGES.getString(POST_PERMISSION_ERROR));
+            }
+        } else if (postAccessInfo.getUserType().equals(UserConst.USER_TYPE_MEMBER)) {
+            if (userInfo == null
+                    || postAccessInfo.getUserId().equals(userInfo.getUserId())) {
+                simpleResponse.setMessage(POST_ERROR_MESSAGES.getString(POST_PERMISSION_ERROR));
+            } else {
+                simpleResponse.setSuccess(true);
+            }
+        }
+
+
+        if (simpleResponse.getSuccess()) {
+            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(POST_PERMISSION_SUCCESS));
+        }
+
+        return simpleResponse;
+    }
+
+    public PostUpdateInfo getPostUpdateInfoByPostId(Long postId) {
+        return postMapper.getPostUpdateInfoByPostId(postId);
+    }
+
+
+    public PostDetails getPostDetailsByPostId(Long postId) {
+        return postMapper.getPostDetailsByPostId(postId);
+    }
+
     @Transactional
     public void uploadPost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
             throws SQLException, IOException, NotAllowedExtensionException, FileSizeExceedLimitException {
@@ -217,56 +291,85 @@ public class PostService {
         }
     }
 
-    public void uploadPostExceptionHandler(UploadResult uploadResult,
+    /*
+     * uploadPostExceptionHandler
+     *  uploadPost
+     *      postMapper.uploadPost
+     *      uploadAttachments - postMapper.uploadAttachment
+     *      setThumbnail
+     * */
+    public void uploadPostExceptionHandler(PostEditResult postEditResult,
                                            List<Attachment> attachments,
                                            PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
-        Map<String, String> errorMessage = new HashMap<>();
         try {
             uploadPost(attachments, postAuthorInfo, postContentInfo);
-
-            uploadResult.setSuccess(true);
-            uploadResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+            postEditResult.setSuccess(true);
+            postEditResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+            postEditResult.setRedirectUrl(URLConst.GET_BOARD_PAGE);
         } catch (IOException e) {
-            errorMessage.put(POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
         } catch (SQLException e) {
-            errorMessage.put(POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
         } catch (NotAllowedExtensionException e) {
-            errorMessage.put(UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
         } catch (FileSizeExceedLimitException e) {
-            errorMessage.put(UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
-        }
-
-        if (!errorMessage.isEmpty()) {
-            uploadResult.setErrorMessages(Collections.singletonList(errorMessage));
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
         }
     }
 
-    private void setThumbnail(String fileName, Long postId, String directory) throws SQLException {
-        if (!postMapper.setThumbnail(new Thumbnail(fileName, postId, directory))) {
+    @Transactional
+    public void updatePost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
+            throws SQLException, IOException {
+        PostUploadRequest postUploadRequest = new PostUploadRequest(postAuthorInfo, postContentInfo);
+
+        deleteThumbnail(postContentInfo.getPostId());
+        deleteAttachmentsByPostId(postContentInfo.getPostId());
+
+
+        if (postMapper.updatePost(postUploadRequest) != 1) {
             throw new SQLException();
         }
+
+        uploadAttachments(attachments, postUploadRequest.getPostId());
+
+        if (attachments.size() > 0) {
+            setThumbnail(attachments.get(0).getFileName(), attachments.get(0).getPostId(), attachments.get(0).getDirectory());
+        }
     }
 
-
-    public boolean isPostAccessGranted(UserInfo userInfo, Long postId, String password) {
-        PostAccessInfo postAccessInfo = postMapper.getPostAccessInfoByPostId(postId);
-        if (postAccessInfo == null) {
-            return false;
+    public void updatePostExceptionHandler(PostEditResult postEditResult,
+                                           List<Attachment> attachments,
+                                           PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
+        try {
+            updatePost(attachments, postAuthorInfo, postContentInfo);
+            postEditResult.setSuccess(true);
+            postEditResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
+            postEditResult.setRedirectUrl("/post/" + postContentInfo.getPostId());
+        } catch (IOException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_IO_EXCEPTION));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (SQLException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_SQL_EXCEPTION));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (NotAllowedExtensionException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (FileSizeExceedLimitException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
+            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
         }
-
-        if (userInfo == null) {
-            if (postAccessInfo.getUserType() == UserConst.USER_TYPE_GUEST && postAccessInfo.getPassword().equals(password)) {
-                return true;
-            }
-            return false;
-        }
-
-        return postAccessInfo.getUserType() == UserConst.USER_TYPE_MEMBER && postAccessInfo.getUserId() == userInfo.getUserId()
-                || userInfo.getUserType() == UserConst.USER_TYPE_ADMIN;
-    }
-
-    public PostUpdateInfo getPostUpdateInfoByPostId(Long postId) {
-        return postMapper.getPostUpdateInfoByPostId(postId);
     }
 
 }

@@ -2,9 +2,11 @@ package ohih.town.domain.post.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class PostUploadRequest {
     private Long userId;
     private String ip;
@@ -24,6 +26,8 @@ public class PostUploadRequest {
         this.userType = postAuthorInfo.getUserType();
         this.author = postAuthorInfo.getAuthor();
         this.password = postAuthorInfo.getPassword();
+
+        this.postId = postContentInfo.getPostId();
         this.boardId = postContentInfo.getBoardId();
         this.subject = postContentInfo.getSubject();
         this.body = postContentInfo.getBody();

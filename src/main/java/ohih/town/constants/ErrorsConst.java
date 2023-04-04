@@ -5,6 +5,9 @@ public interface ErrorsConst {
     String DATABASE_DELETE_ERROR = "database.delete.error";
 
 
+    String INVALID_ACCESS_ERROR = "invalid.access.error";
+
+
     String MAIL_SEND_ERROR = "mail.send.error";
     String USER_EMAIL_DUPLICATED = "user.email.duplicated";
     String EMAIL_VERIFICATION_FAILURE = "email.verification.failure";
@@ -39,7 +42,11 @@ public interface ErrorsConst {
 
 
     String POST_UPLOAD_IO_EXCEPTION = "post.upload.io.exception";
-    String POST_UPLOAD_SQL_EXCEPTION = "post.upload.sql.exception";
+    String POST_UPLOAD_SQL_EXCEPTION = "post.update.sql.exception";
+    String POST_UPDATE_IO_EXCEPTION = "post.update.io.exception";
+    String POST_UPDATE_SQL_EXCEPTION = "post.upload.sql.exception";
     String UPLOAD_ATTACHMENT_EXTENSION_ERROR = "upload.attachment.extension.error";
     String UPLOAD_ATTACHMENT_SIZE_ERROR = "upload.attachment.size.error";
+    String POST_PERMISSION_ERROR = "post.permission.error";
+    String POST_EXISTENCE_ERROR = "post.existence.error";
 }

@@ -9,4 +9,6 @@ public interface UtilityConst {
 
     String FILED = "field";
     String VALUE = "value";
+
+    String MESSAGE = "message";
 }
