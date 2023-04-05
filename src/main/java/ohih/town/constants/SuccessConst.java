@@ -27,4 +27,9 @@ public interface SuccessConst {
     String POST_UPLOAD_SUCCESS = "post.upload.success";
     String POST_PERMISSION_SUCCESS = "post.permission.success";
     String POST_UPDATE_SUCCESS = "post.update.success";
+    String POST_DELETE_SUCCESS = "post.delete.success";
+
+    String COMMENT_VALID = "comment.valid";
+    String COMMENT_UPLOAD_SUCCESS = "comment.upload.success";
+    String COMMENT_DELETE_SUCCESS = "comment.delete.success";
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ohih.town.domain.notification.mapper.NotificationMapper">
+    <!--  boolean createNotification(Notification notification);  -->
+    <insert id="createNotification" parameterType="Notification" useGeneratedKeys="true" keyProperty="notificationId">
+        insert into notifications (user_id, type, message, created_at, updated_at)
+        values (#{userId}, #{type}, #{message}, now(), now());
+    </insert>
+</mapper>

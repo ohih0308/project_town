@@ -2,6 +2,7 @@ package ohih.town.exception.handler;
 
 import ohih.town.constants.ErrorMessagesResourceBundle;
 import ohih.town.domain.SimpleResponse;
+import ohih.town.domain.comment.controller.CommentRestController;
 import ohih.town.domain.post.controller.PostRestController;
 import ohih.town.exception.InvalidAccessException;
 import org.springframework.http.HttpStatus;
@@ -11,8 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static ohih.town.constants.ErrorsConst.INVALID_ACCESS_ERROR;
 
-@RestControllerAdvice(assignableTypes = {PostRestController.class})
-public class PostExceptionHandler {
+@RestControllerAdvice(assignableTypes = {CommentRestController.class})
+public class CommentExceptionHandler {
 
     @ExceptionHandler(InvalidAccessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -5,11 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.ValidationResult;
 import ohih.town.constants.*;
 import ohih.town.domain.SimpleResponse;
+import ohih.town.domain.comment.service.CommentService;
+import ohih.town.domain.common.dto.ActionResult;
+import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.domain.common.service.CommonService;
+import ohih.town.domain.forum.service.ForumService;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
+import ohih.town.exception.PartialDeleteException;
 import ohih.town.utilities.Utilities;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static ohih.town.constants.ConfigurationConst.ATTACHMENT_PATHS;
 import static ohih.town.constants.DateFormat.DATE_FORMAT_YYYY_MM_DD;
@@ -37,37 +42,11 @@ import static ohih.town.utilities.Utilities.replaceAttachmentsInBody;
 @Slf4j
 public class PostService {
 
+    private final CommonService commonService;
+    private final CommentService commentService;
+
     private final PostMapper postMapper;
 
-
-    private ValidationResult checkValidation(Pattern pattern,
-                                             ResourceBundle errorMessageSource, ResourceBundle successMessageSource,
-                                             String invalidMessage,
-                                             String validMessage,
-                                             String field,
-                                             String input) {
-        ValidationResult validationResult = new ValidationResult();
-        boolean isValid = Utilities.isValidPattern(pattern, input);
-
-        Map<String, String> message = new HashMap<>();
-
-        Map<String, Boolean> fieldValidation = new HashMap<>();
-
-        if (isValid) {
-            message.put(field, successMessageSource.getString(validMessage));
-            validationResult.setIsValid(true);
-            fieldValidation.put(field, true);
-        } else {
-            message.put(field, errorMessageSource.getString(invalidMessage));
-            validationResult.setIsValid(false);
-            fieldValidation.put(field, false);
-        }
-
-        validationResult.setFieldValidation(fieldValidation);
-        validationResult.setMessage(message);
-
-        return validationResult;
-    }
 
     public List<Attachment> extractAttachmentsFromPost(Long boardId, List<String> extractedImages) {
         List<Attachment> attachments = new ArrayList<>();
@@ -95,25 +74,25 @@ public class PostService {
     }
 
 
-    public boolean checkValidations(PostEditResult postEditResult,
-                                    PostAuthorInfo postAuthorInfo,
+    public boolean checkValidations(ActionResult actionResult,
+                                    AuthorInfo authorInfo,
                                     PostContentInfo postContentInfo) {
         boolean isValid = true;
 
         ValidationResult[] validationResults = {
-                checkValidation(ValidationPatterns.USERNAME,
+                commonService.checkValidation(ValidationPatterns.USERNAME,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         USER_USERNAME_INVALID, USER_USERNAME_VALID,
-                        PostConst.AUTHOR, postAuthorInfo.getAuthor()),
-                checkValidation(ValidationPatterns.PASSWORD,
+                        PostConst.AUTHOR, authorInfo.getAuthor()),
+                commonService.checkValidation(ValidationPatterns.PASSWORD,
                         USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
-                        PostConst.PASSWORD, postAuthorInfo.getPassword()),
-                checkValidation(ValidationPatterns.SUBJECT,
+                        PostConst.PASSWORD, authorInfo.getPassword()),
+                commonService.checkValidation(ValidationPatterns.SUBJECT,
                         POST_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         POST_SUBJECT_INVALID, POST_SUBJECT_VALID,
                         PostConst.SUBJECT, postContentInfo.getSubject()),
-                checkValidation(ValidationPatterns.BODY,
+                commonService.checkValidation(ValidationPatterns.BODY,
                         POST_ERROR_MESSAGES, SUCCESS_MESSAGES,
                         POST_BODY_INVALID, POST_BODY_VALID,
                         PostConst.BODY, postContentInfo.getBody())
@@ -127,26 +106,14 @@ public class PostService {
             errorMessages.add(validationResult.getMessage());
 
             if (!validationResult.getIsValid()) {
-                postEditResult.setFieldValidations(fieldValidations);
-                postEditResult.setErrorMessages(errorMessages);
+                actionResult.setFieldValidations(fieldValidations);
+                actionResult.setErrorMessages(errorMessages);
                 isValid = false;
             }
         }
         return isValid;
     }
 
-
-    public void setPostAuthor(PostAuthorInfo postAuthorInfo, UserInfo userInfo, String ip) {
-        postAuthorInfo.setIp(ip);
-        if (userInfo == null) {
-            postAuthorInfo.setUserType(UserConst.USER_TYPE_GUEST);
-        } else {
-            postAuthorInfo.setUserId(userInfo.getUserId());
-            postAuthorInfo.setUserType(userInfo.getUserType());
-            postAuthorInfo.setAuthor(userInfo.getUsername());
-            postAuthorInfo.setPassword("");
-        }
-    }
 
     public void setPostContent(PostContentInfo postContentInfo, List<Attachment> attachments) {
         for (Attachment attachment : attachments) {
@@ -205,7 +172,7 @@ public class PostService {
         return postMapper.getAttachmentByPostId(postId);
     }
 
-    public void deleteAttachmentsByPostId(Long postId) {
+    public void deleteAttachmentsByPostId(Long postId) throws PartialDeleteException {
         List<Attachment> attachments = getAttachmentsByPostId(postId);
 
         for (Attachment attachment : attachments) {
@@ -217,7 +184,7 @@ public class PostService {
 
             if (!postMapper.deleteAttachmentsByFileName(attachment.getFileName())) {
                 log.info("File delete failed. {}", attachment.getFileName());
-
+                throw new PartialDeleteException();
             }
         }
     }
@@ -234,12 +201,17 @@ public class PostService {
     }
 
 
+    public PostAccessInfo getPostAccessInfoByPostId(Long postId) {
+        return postMapper.getPostAccessInfoByPostId(postId);
+    }
+
     public SimpleResponse checkPostAccessPermission(UserInfo userInfo, String password, Long postId) {
-        PostAccessInfo postAccessInfo = postMapper.getPostAccessInfoByPostId(postId);
         SimpleResponse simpleResponse = new SimpleResponse();
+        PostAccessInfo postAccessInfo = getPostAccessInfoByPostId(postId);
         simpleResponse.setSuccess(false);
 
         if (postAccessInfo == null) {
+            simpleResponse.setMessage(POST_ERROR_MESSAGES.getString(POST_EXISTENCE_ERROR));
             return simpleResponse;
         }
 
@@ -266,7 +238,7 @@ public class PostService {
         return simpleResponse;
     }
 
-    public PostUpdateInfo getPostUpdateInfoByPostId(Long postId) {
+    public PostUpdateRequest getPostUpdateInfoByPostId(Long postId) {
         return postMapper.getPostUpdateInfoByPostId(postId);
     }
 
@@ -276,9 +248,9 @@ public class PostService {
     }
 
     @Transactional
-    public void uploadPost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
+    public void uploadPost(List<Attachment> attachments, AuthorInfo authorInfo, PostContentInfo postContentInfo)
             throws SQLException, IOException, NotAllowedExtensionException, FileSizeExceedLimitException {
-        PostUploadRequest postUploadRequest = new PostUploadRequest(postAuthorInfo, postContentInfo);
+        PostUploadRequest postUploadRequest = new PostUploadRequest(authorInfo, postContentInfo);
 
         if (!postMapper.uploadPost(postUploadRequest)) {
             throw new SQLException();
@@ -291,44 +263,10 @@ public class PostService {
         }
     }
 
-    /*
-     * uploadPostExceptionHandler
-     *  uploadPost
-     *      postMapper.uploadPost
-     *      uploadAttachments - postMapper.uploadAttachment
-     *      setThumbnail
-     * */
-    public void uploadPostExceptionHandler(PostEditResult postEditResult,
-                                           List<Attachment> attachments,
-                                           PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
-        try {
-            uploadPost(attachments, postAuthorInfo, postContentInfo);
-            postEditResult.setSuccess(true);
-            postEditResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
-            postEditResult.setRedirectUrl(URLConst.GET_BOARD_PAGE);
-        } catch (IOException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (SQLException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (NotAllowedExtensionException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (FileSizeExceedLimitException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        }
-    }
-
     @Transactional
-    public void updatePost(List<Attachment> attachments, PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
-            throws SQLException, IOException {
-        PostUploadRequest postUploadRequest = new PostUploadRequest(postAuthorInfo, postContentInfo);
+    public void updatePost(List<Attachment> attachments, AuthorInfo authorInfo, PostContentInfo postContentInfo)
+            throws SQLException, IOException, PartialDeleteException {
+        PostUploadRequest postUploadRequest = new PostUploadRequest(authorInfo, postContentInfo);
 
         deleteThumbnail(postContentInfo.getPostId());
         deleteAttachmentsByPostId(postContentInfo.getPostId());
@@ -345,33 +283,107 @@ public class PostService {
         }
     }
 
-    public void updatePostExceptionHandler(PostEditResult postEditResult,
-                                           List<Attachment> attachments,
-                                           PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
-        try {
-            updatePost(attachments, postAuthorInfo, postContentInfo);
-            postEditResult.setSuccess(true);
-            postEditResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
-            postEditResult.setRedirectUrl("/post/" + postContentInfo.getPostId());
-        } catch (IOException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_IO_EXCEPTION));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (SQLException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_SQL_EXCEPTION));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (NotAllowedExtensionException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
-        } catch (FileSizeExceedLimitException e) {
-            Map<String, String> errorMessage = Collections.singletonMap(
-                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
-            postEditResult.setErrorMessages(Collections.singletonList(errorMessage));
+    @Transactional
+    public void deletePost(Long postId) throws PartialDeleteException, SQLException {
+        deleteThumbnail(postId);
+
+        List<Attachment> attachments = getAttachmentsByPostId(postId);
+
+        for (Attachment attachment : attachments) {
+            File file = new File(attachment.getDirectory());
+            if (!file.delete()) {
+                throw new PartialDeleteException();
+            }
+        }
+
+        deleteAttachmentsByPostId(postId);
+        commentService.deleteCommentsByPostId(postId);
+
+        if (postMapper.deletePost(postId) != 1) {
+            throw new SQLException();
         }
     }
 
-    public
+    /*
+     * uploadPostExceptionHandler
+     *  uploadPost
+     *      postMapper.uploadPost
+     *      uploadAttachments - postMapper.uploadAttachment
+     *      setThumbnail
+     * */
+    public void uploadPostExceptionHandler(ActionResult actionResult,
+                                           List<Attachment> attachments,
+                                           AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        try {
+            uploadPost(attachments, authorInfo, postContentInfo);
+            actionResult.setSuccess(true);
+            actionResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+            actionResult.setRedirectUrl(URLConst.GET_BOARD_PAGE);
+        } catch (IOException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_IO_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (SQLException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPLOAD_SQL_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (NotAllowedExtensionException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (FileSizeExceedLimitException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        }
+    }
 
+    public void updatePostExceptionHandler(ActionResult actionResult,
+                                           List<Attachment> attachments,
+                                           AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        try {
+            updatePost(attachments, authorInfo, postContentInfo);
+            actionResult.setSuccess(true);
+            actionResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
+            actionResult.setRedirectUrl("/post/" + postContentInfo.getPostId());
+        } catch (IOException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_IO_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_IO_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (SQLException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_UPLOAD_SQL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_UPDATE_SQL_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (NotAllowedExtensionException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_EXTENSION_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_EXTENSION_ERROR));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (FileSizeExceedLimitException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    UPLOAD_ATTACHMENT_SIZE_ERROR, POST_ERROR_MESSAGES.getString(UPLOAD_ATTACHMENT_SIZE_ERROR));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (PartialDeleteException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_DELETE_PARTIAL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_DELETE_PARTIAL_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        }
+    }
+
+    public void deletePostExceptionHandler(ActionResult actionResult,
+                                           Long postId, String boardName) {
+        try {
+            deletePost(postId);
+            actionResult.setSuccess(true);
+            actionResult.setSuccessMessage(SUCCESS_MESSAGES.getString(POST_DELETE_SUCCESS));
+            actionResult.setRedirectUrl("/board/" + boardName);
+        } catch (PartialDeleteException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_DELETE_PARTIAL_EXCEPTION, POST_ERROR_MESSAGES.getString(POST_DELETE_PARTIAL_EXCEPTION));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        } catch (SQLException e) {
+            Map<String, String> errorMessage = Collections.singletonMap(
+                    POST_DELETE_ERROR, POST_ERROR_MESSAGES.getString(POST_DELETE_ERROR));
+            actionResult.setErrorMessages(Collections.singletonList(errorMessage));
+        }
+    }
 }

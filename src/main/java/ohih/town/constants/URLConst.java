@@ -34,7 +34,11 @@ public interface URLConst {
     String POST_DETAILS = "/post/{postId}";
     String UPDATE_POST_FORM = "/update/post-form";
     String UPDATE_POST = "/update/post";
-    String DELETE_POST = "/delete/post/${postId}";
-
+    String DELETE_POST = "/delete/post";
     String CHECK_POST_PERMISSION = "/check/post/permission";
+
+
+    String UPLOAD_COMMENT = "/upload/comment";
+    String DELETE_COMMENT = "/delete/comment";
+    String CHECK_COMMENT_PERMISSION = "/check/comment/permission";
 }

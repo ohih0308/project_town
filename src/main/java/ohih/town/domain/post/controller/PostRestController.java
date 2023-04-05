@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.domain.SimpleResponse;
+import ohih.town.domain.common.dto.ActionResult;
+import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.domain.common.service.CommonService;
+import ohih.town.domain.forum.service.ForumService;
 import ohih.town.domain.post.dto.Attachment;
-import ohih.town.domain.post.dto.PostAuthorInfo;
 import ohih.town.domain.post.dto.PostContentInfo;
-import ohih.town.domain.post.dto.PostEditResult;
 import ohih.town.domain.post.service.PostService;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.InvalidAccessException;
@@ -29,34 +31,36 @@ import static ohih.town.utilities.Utilities.getIp;
 @Slf4j
 public class PostRestController {
 
+    private final CommonService commonService;
     private final PostService postService;
+    private final ForumService forumService;
 
 
     @PostMapping(URLConst.UPLOAD_POST)
-    public PostEditResult uploadPost(HttpServletRequest request,
-                                     @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                     PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo) {
-        PostEditResult postEditResult = new PostEditResult();
+    public ActionResult uploadPost(HttpServletRequest request,
+                                   @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                   AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        ActionResult actionResult = new ActionResult();
 
         List<Attachment> attachments = postService.extractAttachmentsFromPost(postContentInfo.getBoardId(),
                 extractBase64DataFromString(postContentInfo.getBody()));
-        postService.setPostAuthor(postAuthorInfo, userInfo, getIp(request));
+        commonService.setAuthor(authorInfo, userInfo, getIp(request));
         postService.setPostContent(postContentInfo, attachments);
 
-        if (!postService.checkValidations(postEditResult, postAuthorInfo, postContentInfo)) {
-            return postEditResult;
+        if (!postService.checkValidations(actionResult, authorInfo, postContentInfo)) {
+            return actionResult;
         }
 
-        postService.uploadPostExceptionHandler(postEditResult, attachments, postAuthorInfo, postContentInfo);
+        postService.uploadPostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
 
-        return postEditResult;
+        return actionResult;
     }
 
 
     @PostMapping(URLConst.CHECK_POST_PERMISSION)
     public SimpleResponse checkPostAccessPermission(HttpServletRequest request,
-                                                  @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                                  Long postId, String password) {
+                                                    @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                    Long postId, String password) {
         SimpleResponse simpleResponse = postService.checkPostAccessPermission(userInfo, password, postId);
         if (simpleResponse.getSuccess()) {
             SessionManager.setAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID, postId);
@@ -65,12 +69,11 @@ public class PostRestController {
     }
 
     @PostMapping(URLConst.UPDATE_POST)
-    public PostEditResult updatePost(HttpServletRequest request,
-                                     @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                     PostAuthorInfo postAuthorInfo, PostContentInfo postContentInfo)
+    public ActionResult updatePost(HttpServletRequest request,
+                                   @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                   AuthorInfo authorInfo, PostContentInfo postContentInfo)
             throws InvalidAccessException {
-        PostEditResult postEditResult = new PostEditResult();
-
+        ActionResult actionResult = new ActionResult();
 
         Long permittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
         if (permittedPostId == null || !permittedPostId.equals(postContentInfo.getPostId())) {
@@ -80,18 +83,34 @@ public class PostRestController {
 
         List<Attachment> attachments = postService.extractAttachmentsFromPost(postContentInfo.getBoardId(),
                 extractBase64DataFromString(postContentInfo.getBody()));
-        postService.setPostAuthor(postAuthorInfo, userInfo, getIp(request));
+        commonService.setAuthor(authorInfo, userInfo, getIp(request));
         postService.setPostContent(postContentInfo, attachments);
 
 
-        if (!postService.checkValidations(postEditResult, postAuthorInfo, postContentInfo)) {
-            return postEditResult;
+        if (!postService.checkValidations(actionResult, authorInfo, postContentInfo)) {
+            return actionResult;
         }
 
 
         // access validated post id session check
-        postService.updatePostExceptionHandler(postEditResult, attachments, postAuthorInfo, postContentInfo);
+        postService.updatePostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
+        SessionManager.removeAttribute(request, SessionConst.ACCESS_PERMITTED_POST_ID);
 
-        return postEditResult;
+        return actionResult;
+    }
+
+    @PostMapping(URLConst.DELETE_POST)
+    public ActionResult deletePost(HttpServletRequest request,
+                                   Long postId) {
+        ActionResult actionResult = new ActionResult();
+
+        Long permittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+        if (permittedPostId == null || !permittedPostId.equals(postId)) {
+            throw new InvalidAccessException();
+        }
+
+        postService.deletePostExceptionHandler(actionResult, postId, forumService.getBoardNameByPostId(postId));
+
+        return actionResult;
     }
 }

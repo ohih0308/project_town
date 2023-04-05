@@ -93,4 +93,10 @@
             updated_at = NOW()
         where post_id = #{postId}
     </update>
+    <!--  Integer deletePost(Long postId);  -->
+    <delete id="deletePost" parameterType="Long">
+        delete
+        from posts
+        where post_id = #{postId};
+    </delete>
 </mapper>

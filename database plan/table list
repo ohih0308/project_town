@@ -120,7 +120,6 @@ notifications
 PK  - notification_id bigint unsigned auto_increment
 FK  - user_id bigint unsigned
     - type tinyint (50) not null
-    - target_id bigint unsigned not null
     - message varchar (255) not null
     - created_at datetime not null
     - updated_at datetime not null

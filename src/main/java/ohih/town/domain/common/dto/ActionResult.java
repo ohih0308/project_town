@@ -1,4 +1,4 @@
-package ohih.town.domain.post.dto;
+package ohih.town.domain.common.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,9 +8,9 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class PostEditResult {
+public class ActionResult {
 
-    private boolean success;
+    private Boolean success;
     private Long postId;
 
     private String successMessage;
@@ -20,7 +20,7 @@ public class PostEditResult {
 
     private String redirectUrl;
 
-    public PostEditResult() {
+    public ActionResult() {
         this.success = false;
     }
 }

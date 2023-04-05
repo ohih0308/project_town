@@ -21,7 +21,7 @@ public interface PostMapper {
 
     PostAccessInfo getPostAccessInfoByPostId(Long postId);
 
-    PostUpdateInfo getPostUpdateInfoByPostId(Long postId);
+    PostUpdateRequest getPostUpdateInfoByPostId(Long postId);
 
 
     PostDetails getPostDetailsByPostId(Long postId);
@@ -29,6 +29,8 @@ public interface PostMapper {
     boolean uploadPost(PostUploadRequest postUploadRequest);
 
     Integer updatePost(PostUploadRequest postUploadRequest);
+
+    Integer deletePost(Long postId);
 
 
 }

@@ -14,15 +14,22 @@
         <typeAlias type="ohih.town.domain.post.dto.Thumbnail" alias="Thumbnail"/>
         <typeAlias type="ohih.town.domain.post.dto.PostUploadRequest" alias="PostUploadRequest"/>
         <typeAlias type="ohih.town.domain.post.dto.PostAccessInfo" alias="PostAccessInfo"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostUpdateInfo" alias="PostUpdateInfo"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostUpdateRequest" alias="PostUpdateInfo"/>
 
         <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
         <typeAlias type="ohih.town.domain.forum.dto.BoardPost" alias="BoardPost"/>
+
+        <typeAlias type="ohih.town.domain.comment.dto.CommentUploadRequest" alias="CommentUploadRequest"/>
+        <typeAlias type="ohih.town.domain.comment.dto.CommentAccessInfo" alias="CommentAccessInfo"/>
+
+        <typeAlias type="ohih.town.domain.notification.dto.Notification" alias="Notification"/>
     </typeAliases>
 
     <mappers>
         <mapper resource="mybatis.mappers.ForumMapper.xml"/>
         <mapper resource="mybatis.mappers.UserMapper.xml"/>
         <mapper resource="mybatis.mappers.PostMapper.xml"/>
+        <mapper resource="mybatis.mappers.CommentMapper.xml"/>
+        <mapper resource="mybatis.mappers.NotificationMapper.xml"/>
     </mappers>
 </configuration>

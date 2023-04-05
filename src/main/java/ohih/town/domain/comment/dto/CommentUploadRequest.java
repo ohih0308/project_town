@@ -1,14 +1,12 @@
-package ohih.town.domain.post.dto;
+package ohih.town.domain.comment.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import ohih.town.domain.common.dto.AuthorInfo;
 
 @Getter
 @Setter
-@ToString
-public class PostUploadRequest {
+public class CommentUploadRequest {
     private Long userId;
     private String ip;
     private Integer userType;
@@ -16,21 +14,16 @@ public class PostUploadRequest {
     private String password;
 
     private Long postId;
-    private Long boardId;
-    private String subject;
-    private String body;
+    private String comment;
 
-
-    public PostUploadRequest(AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+    public CommentUploadRequest(AuthorInfo authorInfo, CommentContentInfo commentContentInfo) {
         this.userId = authorInfo.getUserId();
         this.ip = authorInfo.getIp();
         this.userType = authorInfo.getUserType();
         this.author = authorInfo.getAuthor();
         this.password = authorInfo.getPassword();
 
-        this.postId = postContentInfo.getPostId();
-        this.boardId = postContentInfo.getBoardId();
-        this.subject = postContentInfo.getSubject();
-        this.body = postContentInfo.getBody();
+        this.postId = commentContentInfo.getPostId();
+        this.comment = commentContentInfo.getComment();
     }
 }

@@ -8,23 +8,18 @@ import ohih.town.constants.*;
 import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
 import ohih.town.domain.forum.service.ForumService;
-import ohih.town.domain.post.dto.PostEditResult;
 import ohih.town.domain.post.service.PostService;
-import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ohih.town.constants.ForumConst.*;
 import static ohih.town.constants.PagingConst.postsPerPage;

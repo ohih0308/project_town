@@ -9,4 +9,5 @@ public interface SessionConst {
     String USER_INFO = "userInfo";
 
     String ACCESS_PERMITTED_POST_ID = "access_permitted_post_id";
+    String ACCESS_PERMITTED_COMMENT_ID = "access_permitted_comment_id";
 }

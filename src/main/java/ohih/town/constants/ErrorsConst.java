@@ -45,8 +45,16 @@ public interface ErrorsConst {
     String POST_UPLOAD_SQL_EXCEPTION = "post.update.sql.exception";
     String POST_UPDATE_IO_EXCEPTION = "post.update.io.exception";
     String POST_UPDATE_SQL_EXCEPTION = "post.upload.sql.exception";
+    String POST_DELETE_PARTIAL_EXCEPTION = "post.delete.partial.exception";
     String UPLOAD_ATTACHMENT_EXTENSION_ERROR = "upload.attachment.extension.error";
     String UPLOAD_ATTACHMENT_SIZE_ERROR = "upload.attachment.size.error";
     String POST_PERMISSION_ERROR = "post.permission.error";
     String POST_EXISTENCE_ERROR = "post.existence.error";
+    String POST_DELETE_ERROR = "post.delete.error";
+
+    String COMMENT_INVALID = "comment.invalid";
+    String COMMENT_UPLOAD_SQL_EXCEPTION = "comment.upload.sql.exception";
+    String COMMENT_PERMISSION_ERROR = "comment.permission.error";
+    String COMMENT_EXISTENCE_ERROR = "comment.existence.error";
+    String COMMENT_DELETE_SQL_EXCEPTION = "comment.delete.sql.exception";
 }

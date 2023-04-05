@@ -2,13 +2,15 @@ package ohih.town.domain.post.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-public class PostAuthorInfo {
+@ToString
+public class PostUpdateRequest {
+    private Long postId;
     private Long userId;
-    private String ip;
-    private Integer userType;
     private String author;
-    private String password;
+    private String subject;
+    private String body;
 }
