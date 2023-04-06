@@ -12,18 +12,15 @@ import ohih.town.domain.common.dto.ActionResult;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.common.service.CommonService;
 import ohih.town.domain.notification.service.NotificationService;
-import ohih.town.domain.post.dto.PostAccessInfo;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.PartialDeleteException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
 import java.util.*;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.*;
+import static ohih.town.constants.ErrorMessageResourceBundle.*;
 import static ohih.town.constants.ErrorsConst.*;
-import static ohih.town.constants.ErrorsConst.POST_UPLOAD_IO_EXCEPTION;
 import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
 
@@ -31,8 +28,6 @@ import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES
 @RequiredArgsConstructor
 public class CommentService {
     private final CommonService commonService;
-    private final NotificationService notificationService;
-
     private final CommentMapper commentMapper;
 
 
@@ -153,8 +148,6 @@ public class CommentService {
                     COMMENT_UPLOAD_SQL_EXCEPTION, COMMENT_ERROR_MESSAGES.getString(COMMENT_UPLOAD_SQL_EXCEPTION));
             actionResult.setErrorMessages(Collections.singletonList(errorMessage));
         }
-
-        notificationService.createPostCommentNotification(commentContentInfo.getPostId());
     }
 
     public void deleteCommentExceptionHandler(ActionResult actionResult,

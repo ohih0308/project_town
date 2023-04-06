@@ -2,13 +2,15 @@ package ohih.town.domain.user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
-public class RegisterResult {
+@ToString
+public class RegisterRequestResult {
 
     private Boolean success;
     private Long userId;
@@ -19,4 +21,8 @@ public class RegisterResult {
     private String successMessage;
 
     private String redirectUrl;
+
+    public RegisterRequestResult() {
+        this.success = false;
+    }
 }

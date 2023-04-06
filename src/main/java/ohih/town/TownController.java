@@ -17,15 +17,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
+import static ohih.town.constants.ConfigurationConst.FILE_PATHS;
 import static ohih.town.constants.ForumConst.*;
 import static ohih.town.constants.PagingConst.postsPerPage;
 import static ohih.town.constants.PostConst.POST_DETAILS;
 import static ohih.town.constants.PostConst.POST_UPDATE_INFO;
-import static ohih.town.constants.UtilityConst.*;
+import static ohih.town.constants.UtilityConst.PAGING;
+import static ohih.town.constants.UtilityConst.SEARCH;
 
 @Controller
 @RequiredArgsConstructor
@@ -120,7 +124,7 @@ public class TownController {
         }
     }
 
-    @PostMapping(URLConst.DELETE_POST)
+    @PostMapping(URLConst.DELETE_POST_FORM)
     public String deletePost(HttpServletRequest request,
                              @PathVariable Long postId) {
         String boardName = forumService.getBoardNameByPostId(postId);

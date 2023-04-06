@@ -15,7 +15,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.USER_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessageResourceBundle.COMMON_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessageResourceBundle.USER_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
@@ -26,10 +27,11 @@ public class UserService {
     private final UserMapper userMapper;
 
 
-    public Boolean isFieldDuplicated(String field, String value) {
+    private Boolean isFieldDuplicated(String field, String value) {
         Map map = new HashMap();
-        map.put(UtilityConst.FILED, field);
+        map.put(UtilityConst.FIELD, field);
         map.put(UtilityConst.VALUE, value);
+
         return userMapper.isFiledDuplicated(map);
     }
 
@@ -37,29 +39,28 @@ public class UserService {
                                    ResourceBundle errorMessageSource, ResourceBundle successMessageSource,
                                    String invalidMessage, String duplicatedMessage,
                                    String validMessage) {
-
         CheckResult checkResult = new CheckResult();
 
         if (!isValid) {
             checkResult.setIsValid(false);
-            checkResult.setIsDuplicated(true);
-
             if (isDuplicated) {
+                checkResult.setIsDuplicated(true);
                 checkResult.setMessage(errorMessageSource.getString(invalidMessage) +
+                        "\n" +
                         errorMessageSource.getString(duplicatedMessage));
             } else {
+                checkResult.setIsDuplicated(false);
                 checkResult.setMessage(errorMessageSource.getString(invalidMessage));
             }
         } else {
             checkResult.setIsValid(true);
-            checkResult.setIsDuplicated(true);
-
             if (!isDuplicated) {
                 // valid && not duplicated - success
                 checkResult.setIsDuplicated(false);
                 checkResult.setMessage(successMessageSource.getString(validMessage));
             } else {
                 // valid && duplicated - failure
+                checkResult.setIsDuplicated(true);
                 checkResult.setMessage(errorMessageSource.getString(duplicatedMessage));
             }
         }
@@ -68,17 +69,31 @@ public class UserService {
     }
 
     // If fields have null value
-    private RegisterResult checkRegisterResultNull(String VALIDATED_EMAIL, String AUTHENTICATED_EMAIL,
-                                                   String VALIDATED_USERNAME,
-                                                   RegisterRequest registerRequest) {
-        RegisterResult registerResult = new RegisterResult();
-        registerResult.setSuccess(false);
+    private RegisterRequestResult checkRegisterRequestNull(String VALIDATED_EMAIL, String AUTHENTICATED_EMAIL,
+                                                           String VALIDATED_USERNAME,
+                                                           RegisterRequest registerRequest) {
+        RegisterRequestResult registerRequestResult = new RegisterRequestResult();
+        registerRequestResult.setSuccess(false);
 
         List<Map<String, String>> errorFields = new ArrayList<>();
         List<Map<String, String>> errorMessages = new ArrayList<>();
 
 
-        if (VALIDATED_EMAIL == null || AUTHENTICATED_EMAIL == null || registerRequest.getEmail() == null) {
+        if (VALIDATED_EMAIL == null || AUTHENTICATED_EMAIL == null) {
+            Map<String, String> message = new HashMap<>();
+            message.put(UserConst.EMAIL, COMMON_ERROR_MESSAGES.getString(INVALID_ACCESS_ERROR));
+
+            errorMessages.add(message);
+        }
+
+        if (VALIDATED_USERNAME == null) {
+            Map<String, String> message = new HashMap<>();
+            message.put(UserConst.USERNAME, COMMON_ERROR_MESSAGES.getString(INVALID_ACCESS_ERROR));
+
+            errorMessages.add(message);
+        }
+
+        if (registerRequest.getEmail() == null) {
             Map<String, String> field = new HashMap<>();
             field.put(UserConst.EMAIL, null);
             Map<String, String> message = new HashMap<>();
@@ -88,7 +103,7 @@ public class UserService {
             errorMessages.add(message);
         }
 
-        if (VALIDATED_USERNAME == null || registerRequest.getUsername() == null) {
+        if (registerRequest.getUsername() == null) {
             Map<String, String> field = new HashMap<>();
             field.put(UserConst.USERNAME, null);
             Map<String, String> message = new HashMap<>();
@@ -118,7 +133,7 @@ public class UserService {
             errorMessages.add(message);
         }
 
-        if (registerRequest.getConfirmPassword() == null || !registerRequest.getAgreement()) {
+        if (!registerRequest.getAgreement()) {
             Map<String, String> field = new HashMap<>();
             field.put(UserConst.AGREEMENT, null);
             Map<String, String> message = new HashMap<>();
@@ -129,12 +144,14 @@ public class UserService {
         }
 
 
-        return registerResult;
+        registerRequestResult.setErrorFields(errorFields);
+        registerRequestResult.setErrorMessages(errorMessages);
+        return registerRequestResult;
     }
 
     // If fields not valid
-    private RegisterResult checkRegisterResultValid(RegisterRequest registerRequest) {
-        RegisterResult registerResult = new RegisterResult();
+    private RegisterRequestResult checkRegisterRequestValid(RegisterRequest registerRequest) {
+        RegisterRequestResult registerRequestResult = new RegisterRequestResult();
 
         List<Map<String, String>> errorFields = new ArrayList<>();
         List<Map<String, String>> errorMessages = new ArrayList<>();
@@ -158,6 +175,7 @@ public class UserService {
                 registerRequest.getPassword());
 
         CheckResult checkConfirmPassword = checkConfirmPassword(registerRequest.getPassword(), registerRequest.getConfirmPassword());
+
 
         if (!checkEmail.getIsValid() || checkEmail.getIsDuplicated()) {
             Map<String, String> field = new HashMap<>();
@@ -199,10 +217,10 @@ public class UserService {
             errorMessages.add(message);
         }
 
-        registerResult.setErrorFields(errorFields);
-        registerResult.setErrorMessages(errorMessages);
+        registerRequestResult.setErrorFields(errorFields);
+        registerRequestResult.setErrorMessages(errorMessages);
 
-        return registerResult;
+        return registerRequestResult;
     }
 
 
@@ -234,12 +252,11 @@ public class UserService {
         Boolean isValid = Utilities.isValidPattern(pattern, input);
         Boolean isDuplicated = isFieldDuplicated(field, input);
 
-        CheckResult checkResult = checkField(isValid, isDuplicated,
+
+        return checkField(isValid, isDuplicated,
                 errorMessageSource, successMessageSource,
                 invalidMessage, duplicatedMessage
                 , validMessage);
-
-        return checkResult;
     }
 
     public CheckResult checkConfirmPassword(String password, String confirmPassword) {
@@ -248,11 +265,13 @@ public class UserService {
         if (password == null || confirmPassword == null) {
             checkResult.setIsValid(false);
             checkResult.setMessage(USER_ERROR_MESSAGES.getString(USER_CONFIRM_PASSWORD_NULL));
+
+            return checkResult;
         }
 
         if (password.equals(confirmPassword)) {
             checkResult.setIsValid(true);
-            checkResult.setMessage(USER_CONFIRM_PASSWORD_VALID);
+            checkResult.setMessage(SUCCESS_MESSAGES.getString(USER_CONFIRM_PASSWORD_VALID));
         } else {
             checkResult.setIsValid(false);
             checkResult.setMessage(USER_ERROR_MESSAGES.getString(USER_CONFIRM_PASSWORD_INVALID));
@@ -262,23 +281,29 @@ public class UserService {
     }
 
 
-    public RegisterResult validateRegisterRequest(String VALIDATED_EMAIL, String AUTHENTICATED_EMAIL,
-                                                  String VALIDATED_USERNAME,
-                                                  RegisterRequest registerRequest) {
-        RegisterResult registerResult = new RegisterResult();
+    public RegisterRequestResult validateRegisterRequest(String VALIDATED_EMAIL, String AUTHENTICATED_EMAIL,
+                                                         String VALIDATED_USERNAME,
+                                                         RegisterRequest registerRequest) {
+        RegisterRequestResult registerRequestResult = new RegisterRequestResult();
 
-        RegisterResult registerResultNullCheck = checkRegisterResultNull(
+        RegisterRequestResult registerRequestResultNullCheck = checkRegisterRequestNull(
                 VALIDATED_EMAIL, AUTHENTICATED_EMAIL,
                 VALIDATED_USERNAME,
                 registerRequest);
 
-        List<Map<String, String>> errorFields = new ArrayList<>(registerResultNullCheck.getErrorFields());
-        List<Map<String, String>> errorMessages = new ArrayList<>(registerResultNullCheck.getErrorMessages());
+        if (!registerRequestResultNullCheck.getErrorFields().isEmpty()
+                || !registerRequestResultNullCheck.getErrorMessages().isEmpty()) {
+            return registerRequestResultNullCheck;
+        }
+
+
+        List<Map<String, String>> errorFields = new ArrayList<>();
+        List<Map<String, String>> errorMessages = new ArrayList<>();
 
 
         // If the register request form has different values than the session uploaded values
-        if (!VALIDATED_EMAIL.equals(registerRequest.getEmail())
-                || !AUTHENTICATED_EMAIL.equals(registerRequest.getEmail())) {
+        if (!Objects.equals(VALIDATED_EMAIL, registerRequest.getEmail())
+                || !Objects.equals(AUTHENTICATED_EMAIL, registerRequest.getEmail())) {
             Map<String, String> field = new HashMap<>();
             field.put(UserConst.EMAIL, registerRequest.getEmail());
 
@@ -289,7 +314,7 @@ public class UserService {
             errorMessages.add(message);
         }
 
-        if (!VALIDATED_USERNAME.equals(registerRequest.getUsername())) {
+        if (!Objects.equals(VALIDATED_USERNAME, registerRequest.getUsername())) {
             Map<String, String> field = new HashMap<>();
             field.put(UserConst.USERNAME, registerRequest.getUsername());
 
@@ -301,30 +326,48 @@ public class UserService {
         }
 
 
-        RegisterResult registerResultValidCheck = checkRegisterResultValid(registerRequest);
+        // validation and duplication check
+        RegisterRequestResult registerRequestResultValidCheck = checkRegisterRequestValid(registerRequest);
 
-        if (!registerResultValidCheck.getErrorFields().isEmpty()) {
-            errorFields.addAll(registerResultValidCheck.getErrorFields());
+        if (!registerRequestResultValidCheck.getErrorFields().isEmpty()) {
+            errorFields.addAll(registerRequestResultValidCheck.getErrorFields());
         }
 
-        if (!registerResultValidCheck.getErrorMessages().isEmpty()) {
-            errorMessages.addAll(registerResultValidCheck.getErrorMessages());
+        if (!registerRequestResultValidCheck.getErrorMessages().isEmpty()) {
+            errorMessages.addAll(registerRequestResultValidCheck.getErrorMessages());
         }
 
-        registerResult.setErrorFields(errorFields);
-        registerResult.setErrorMessages(errorMessages);
+        registerRequestResult.setErrorFields(errorFields);
+        registerRequestResult.setErrorMessages(errorMessages);
 
-        return registerResult;
+        return registerRequestResult;
     }
 
     @Transactional
-    public void registerUser(String email, String username, String password) {
-        Register register = new Register(email, username, password);
-        userMapper.registerUser(register);
+    public void registerUser(String email, String username, String password) throws SQLException {
+        RegisterUser registerUser = new RegisterUser(email, username, password);
 
-        userMapper.initGuestbookConfig(register.getUserId());
+        if (!userMapper.registerUser(registerUser) || !userMapper.initGuestbookConfig(registerUser.getUserId())) {
+            throw new SQLException();
+        }
     }
 
+    public void registerUserExceptionHandler(RegisterRequestResult registerRequestResult,
+                                                              RegisterRequest registerRequest) {
+        try {
+            registerUser(registerRequest.getEmail(), registerRequest.getUsername(), registerRequest.getPassword());
+
+            registerRequestResult.setSuccess(true);
+            registerRequestResult.setRedirectUrl(URLConst.HOME);
+            registerRequestResult.setSuccessMessage(SUCCESS_MESSAGES.getString(USER_REGISTRATION_SUCCESS));
+        } catch (SQLException e) {
+            registerRequestResult.setSuccess(false);
+
+            registerRequestResult.setErrorMessages(
+                    Collections.singletonList(
+                            Collections.singletonMap(null, USER_ERROR_MESSAGES.getString(USER_REGISTER_SQL_EXCEPTION))));
+        }
+    }
 
     public LoginResult login(String email, String password) {
         LoginResult loginResult = new LoginResult();
@@ -352,8 +395,6 @@ public class UserService {
             loginResult.setRedirectUrl(URLConst.HOME);
             loginResult.setUserInfo(userInfo);
         }
-
-        System.out.println(userInfo.toString());
 
         return loginResult;
     }

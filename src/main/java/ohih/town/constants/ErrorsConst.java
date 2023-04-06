@@ -28,7 +28,7 @@ public interface ErrorsConst {
     String USER_CONFIRM_PASSWORD_NULL = "user.confirm_password.null";
     String USER_AGREEMENT_MISSING = "user.agreement.missing";
 
-
+    String USER_REGISTER_SQL_EXCEPTION = "user.register.sql.exception";
     String USER_LOGIN_FAILURE_INVALID_CREDENTIALS = "user.login.failure.invalid.credentials";
 
 

@@ -2,11 +2,10 @@ package ohih.town.domain.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ohih.town.constants.NotificationConst;
-import ohih.town.constants.NotificationMessageResourceBundle;
 import ohih.town.domain.notification.dto.Notification;
 import ohih.town.domain.notification.mapper.NotificationMapper;
 import ohih.town.domain.post.dto.PostAccessInfo;
+import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.post.service.PostService;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +17,6 @@ import static ohih.town.constants.NotificationMessageResourceBundle.NOTIFICATION
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
-
-    private final PostService postService;
 
     private final NotificationMapper notificationMapper;
 
@@ -34,10 +31,9 @@ public class NotificationService {
     }
 
 
-    public Long createPostCommentNotification(Long postId) {
+    public Long createPostCommentNotification(PostAccessInfo postAccessInfo) {
         Notification notification = new Notification();
 
-        PostAccessInfo postAccessInfo = postService.getPostAccessInfoByPostId(postId);
         notification.setUserId(postAccessInfo.getUserId());
         notification.setType(NEW_COMMENT);
         notification.setMessage(NOTIFICATION_MESSAGES.getString(NOTIFICATION_COMMENT_UPLOADED));

@@ -2,7 +2,7 @@ package ohih.town.config;
 
 import lombok.RequiredArgsConstructor;
 import ohih.town.constants.URLConst;
-import ohih.town.interceptor.IsLoginInterceptor;
+import ohih.town.interceptors.IsLoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

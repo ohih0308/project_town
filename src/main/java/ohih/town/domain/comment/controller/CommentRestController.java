@@ -12,6 +12,9 @@ import ohih.town.domain.comment.service.CommentService;
 import ohih.town.domain.common.dto.ActionResult;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.common.service.CommonService;
+import ohih.town.domain.notification.service.NotificationService;
+import ohih.town.domain.post.dto.PostAccessInfo;
+import ohih.town.domain.post.service.PostService;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.InvalidAccessException;
 import ohih.town.session.SessionManager;
@@ -29,6 +32,9 @@ public class CommentRestController {
 
     private final CommonService commonService;
     private final CommentService commentService;
+    private final NotificationService notificationService;
+    private final PostService postService;
+
 
 
     @PostMapping(URLConst.UPLOAD_COMMENT)
@@ -44,6 +50,11 @@ public class CommentRestController {
         }
 
         commentService.uploadCommentExceptionHandler(actionResult, authorInfo, commentContentInfo);
+
+        if (actionResult.getSuccess()) {
+            PostAccessInfo postAccessInfo = postService.getPostAccessInfoByPostId(commentContentInfo.getPostId());
+            notificationService.createPostCommentNotification(postAccessInfo);
+        }
         return actionResult;
     }
 

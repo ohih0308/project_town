@@ -5,7 +5,7 @@
     <typeAliases>
         <typeAlias type="ohih.town.domain.forum.dto.Forum" alias="Forum"/>
 
-        <typeAlias type="ohih.town.domain.user.dto.Register" alias="Register"/>
+        <typeAlias type="ohih.town.domain.user.dto.RegisterUser" alias="RegisterUser"/>
         <typeAlias type="ohih.town.domain.user.dto.LoginResult" alias="LoginResult"/>
         <typeAlias type="ohih.town.domain.user.dto.ProfileImage" alias="ProfileImage"/>
         <typeAlias type="ohih.town.domain.user.dto.GuestbookPermission" alias="GuestbookPermission"/>
@@ -14,7 +14,8 @@
         <typeAlias type="ohih.town.domain.post.dto.Thumbnail" alias="Thumbnail"/>
         <typeAlias type="ohih.town.domain.post.dto.PostUploadRequest" alias="PostUploadRequest"/>
         <typeAlias type="ohih.town.domain.post.dto.PostAccessInfo" alias="PostAccessInfo"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostUpdateRequest" alias="PostUpdateInfo"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostUpdateRequest" alias="PostUpdateRequest"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostUpdateInfo" alias="PostUpdateInfo"/>
 
         <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
         <typeAlias type="ohih.town.domain.forum.dto.BoardPost" alias="BoardPost"/>

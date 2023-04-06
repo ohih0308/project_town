@@ -11,7 +11,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.MAIL_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessageResourceBundle.MAIL_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.EMAIL_VERIFICATION_FAILURE;
 import static ohih.town.constants.SuccessConst.EMAIL_VERIFICATION_SUCCESS;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;

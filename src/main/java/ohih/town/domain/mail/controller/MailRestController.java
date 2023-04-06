@@ -18,14 +18,13 @@ import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.MAIL_ERROR_MESSAGES;
-import static ohih.town.constants.ErrorMessagesResourceBundle.USER_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessageResourceBundle.MAIL_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorMessageResourceBundle.USER_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.EMAIL_VERIFICATION_REQUEST;
 import static ohih.town.constants.SessionConst.VALIDATED_EMAIL;
 import static ohih.town.constants.SuccessConst.USER_EMAIL_VALID;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
-import static ohih.town.session.SessionManager.getAttributes;
 
 @RestController
 @RequiredArgsConstructor

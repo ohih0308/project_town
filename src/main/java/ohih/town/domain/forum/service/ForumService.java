@@ -20,6 +20,7 @@ import static ohih.town.constants.UtilityConst.SEARCH;
 @Service
 @RequiredArgsConstructor
 public class ForumService {
+
     private final ForumMapper forumMapper;
 
 

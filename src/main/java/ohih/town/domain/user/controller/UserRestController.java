@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static ohih.town.constants.ErrorMessagesResourceBundle.*;
+import static ohih.town.constants.ErrorMessageResourceBundle.*;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.VALIDATED_USERNAME;
 import static ohih.town.constants.SuccessConst.*;
@@ -63,27 +63,21 @@ public class UserRestController {
     }
 
     @PostMapping(URLConst.REGISTER_URL)
-    public RegisterResult register(HttpServletRequest request,
-                                   RegisterRequest registerRequest) {
+    public RegisterRequestResult register(HttpServletRequest request,
+                                          RegisterRequest registerRequest) {
         String VALIDATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_EMAIL);
         String AUTHENTICATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.AUTHENTICATED_EMAIL);
         String VALIDATED_USERNAME = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_USERNAME);
 
-        RegisterResult registerResult = userService.validateRegisterRequest(VALIDATED_EMAIL, AUTHENTICATED_EMAIL,
+        RegisterRequestResult registerRequestResult = userService.validateRegisterRequest(VALIDATED_EMAIL, AUTHENTICATED_EMAIL,
                 VALIDATED_USERNAME,
                 registerRequest);
 
-        if (registerResult.getErrorFields().isEmpty() && registerResult.getErrorMessages().isEmpty()) {
-            userService.registerUser(registerRequest.getEmail(),
-                    registerRequest.getUsername(),
-                    registerRequest.getPassword());
-
-            registerResult.setSuccess(true);
-            registerResult.setRedirectUrl(URLConst.HOME);
-            registerResult.setSuccessMessage(SUCCESS_MESSAGES.getString(USER_REGISTRATION_SUCCESS));
+        if (registerRequestResult.getErrorFields().isEmpty() && registerRequestResult.getErrorMessages().isEmpty()) {
+            userService.registerUserExceptionHandler(registerRequestResult, registerRequest);
         }
 
-        return registerResult;
+        return registerRequestResult;
     }
 
 

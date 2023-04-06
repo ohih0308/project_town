@@ -6,13 +6,13 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Register {
+public class RegisterUser {
     private Long userId;
     private String email;
     private String username;
     private String password;
 
-    public Register(String email, String username, String password) {
+    public RegisterUser(String email, String username, String password) {
         this.email = email;
         this.username = username;
         this.password = password;

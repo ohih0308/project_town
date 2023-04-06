@@ -1,4 +1,4 @@
-package ohih.town.interceptor;
+package ohih.town.interceptors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

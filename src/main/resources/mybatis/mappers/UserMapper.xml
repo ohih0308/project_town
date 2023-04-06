@@ -11,12 +11,12 @@
         from users
         where #{field} = #{value};
     </select>
-    <!--  void registerUser(Register register);  -->
-    <insert id="registerUser" parameterType="Register" useGeneratedKeys="true" keyProperty="id">
+    <!--  boolean registerUser(RegisterUser registerUser);  -->
+    <insert id="registerUser" parameterType="RegisterUser" useGeneratedKeys="true" keyProperty="id">
         insert into users (user_type, email, username, password, created_at)
         values (1, #{email}, #{username}, #{password}, now());
     </insert>
-    <!--  void initGuestbookConfig(Long userId);  -->
+    <!--  boolean initGuestbookConfig(Long userId);  -->
     <insert id="initGuestbookConfig" parameterType="Long">
         insert into guestbook_configs (user_id, activation, private_read, member_write, guest_write)
         values (#{userId}, 1, 0, 1, 1);

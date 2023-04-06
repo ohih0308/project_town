@@ -2,7 +2,7 @@ package ohih.town.domain.user.mapper;
 
 import ohih.town.domain.user.dto.GuestbookPermission;
 import ohih.town.domain.user.dto.ProfileImage;
-import ohih.town.domain.user.dto.Register;
+import ohih.town.domain.user.dto.RegisterUser;
 import ohih.town.domain.user.dto.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,9 +13,9 @@ public interface UserMapper {
     // register
     boolean isFiledDuplicated(Map<String, String> map);
 
-    void registerUser(Register register);
+    boolean registerUser(RegisterUser registerUser);
 
-    void initGuestbookConfig(Long userId);
+    boolean initGuestbookConfig(Long userId);
 
 
     // login

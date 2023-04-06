@@ -7,7 +7,7 @@ public interface UtilityConst {
     String SEARCH = "search";
     String PAGING = "paging";
 
-    String FILED = "field";
+    String FIELD = "field";
     String VALUE = "value";
 
     String MESSAGE = "message";

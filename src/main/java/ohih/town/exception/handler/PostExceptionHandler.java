@@ -1,6 +1,6 @@
 package ohih.town.exception.handler;
 
-import ohih.town.constants.ErrorMessagesResourceBundle;
+import ohih.town.constants.ErrorMessageResourceBundle;
 import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.post.controller.PostRestController;
 import ohih.town.exception.InvalidAccessException;
@@ -17,6 +17,6 @@ public class PostExceptionHandler {
     @ExceptionHandler(InvalidAccessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public SimpleResponse handleInvalidAccessException() {
-        return new SimpleResponse(false, ErrorMessagesResourceBundle.COMMON_ERROR_MESSAGES.getString(INVALID_ACCESS_ERROR));
+        return new SimpleResponse(false, ErrorMessageResourceBundle.COMMON_ERROR_MESSAGES.getString(INVALID_ACCESS_ERROR));
     }
 }
