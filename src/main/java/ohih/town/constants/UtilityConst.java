@@ -2,7 +2,7 @@ package ohih.town.constants;
 
 public interface UtilityConst {
 
-    Integer UUID_FULL_INDEX = 35;
+    Integer UUID_FULL_INDEX = 36;
 
     String SEARCH = "search";
     String PAGING = "paging";

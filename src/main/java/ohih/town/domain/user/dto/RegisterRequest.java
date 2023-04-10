@@ -8,14 +8,36 @@ import lombok.Setter;
 import javax.validation.constraints.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
+
+    private Long userId;
 
     private String email;
     private String username;
     private String password;
     private String confirmPassword;
-    private Boolean agreement;
+    private boolean agreement;
+
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    public void setAgreement(boolean agreement) {
+        this.agreement = agreement;
+    }
 }

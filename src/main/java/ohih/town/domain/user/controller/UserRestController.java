@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import static ohih.town.constants.ErrorMessageResourceBundle.*;
@@ -36,14 +35,12 @@ public class UserRestController {
     public CheckResult checkUsername(HttpServletRequest request,
                                      String username) {
         CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.USERNAME,
-                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
-                USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED,
+                UserConst.USERNAME, username,
                 USER_USERNAME_VALID,
-                UserConst.USERNAME, username);
+                USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED);
 
-        if (checkResult.getIsValid() && !checkResult.getIsDuplicated()) {
+        if (checkResult.isValid() && !checkResult.isDuplicated()) {
             SessionManager.setAttributes(request, VALIDATED_USERNAME, username);
-
         }
 
         return checkResult;
@@ -52,32 +49,40 @@ public class UserRestController {
     @PostMapping(URLConst.CHECK_PASSWORD)
     public CheckResult checkPassword(String password) {
         return userService.checkValidation(ValidationPatterns.PASSWORD,
-                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
-                USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
-                password);
+                password,
+                USER_PASSWORD_VALID, USER_PASSWORD_INVALID);
     }
 
     @PostMapping(URLConst.CHECK_CONFIRM_PASSWORD)
     public CheckResult checkConfirmPassword(String password, String confirmPassword) {
-        return userService.checkConfirmPassword(password, confirmPassword);
+        return userService.checkStringEquality(password, confirmPassword,
+                USER_CONFIRM_PASSWORD_VALID,
+                USER_CONFIRM_PASSWORD_INVALID);
     }
 
     @PostMapping(URLConst.REGISTER_URL)
-    public RegisterRequestResult register(HttpServletRequest request,
-                                          RegisterRequest registerRequest) {
+    public RegisterResult register(HttpServletRequest request,
+                                   RegisterRequest registerRequest) {
+        RegisterResult registerResult = new RegisterResult();
+
         String VALIDATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_EMAIL);
         String AUTHENTICATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.AUTHENTICATED_EMAIL);
         String VALIDATED_USERNAME = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_USERNAME);
 
-        RegisterRequestResult registerRequestResult = userService.validateRegisterRequest(VALIDATED_EMAIL, AUTHENTICATED_EMAIL,
-                VALIDATED_USERNAME,
+        CheckResult checkResult = userService.checkRegisterRequest(VALIDATED_EMAIL, AUTHENTICATED_EMAIL, VALIDATED_USERNAME,
                 registerRequest);
 
-        if (registerRequestResult.getErrorFields().isEmpty() && registerRequestResult.getErrorMessages().isEmpty()) {
-            userService.registerUserExceptionHandler(registerRequestResult, registerRequest);
+        if (checkResult.isValid()) {
+            SessionManager.removeAttribute(request, SessionConst.VALIDATED_EMAIL);
+            SessionManager.removeAttribute(request, SessionConst.AUTHENTICATED_EMAIL);
+            SessionManager.removeAttribute(request, SessionConst.VALIDATED_USERNAME);
+
+            return userService.registerUserExceptionHandler(registerRequest);
         }
 
-        return registerRequestResult;
+        registerResult.setMessages(checkResult.getMessages());
+
+        return registerResult;
     }
 
 
@@ -100,156 +105,115 @@ public class UserRestController {
 
     // condition: isLoginInterceptor
     @PostMapping(URLConst.UPLOAD_PROFILE_IMAGE)
-    public SimpleResponse uploadProfileImage(HttpServletRequest request,
-                                             @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                             MultipartFile multipartFile) {
-        SimpleResponse simpleResponse = new SimpleResponse();
+    public ProfileImageActionResult uploadProfileImage(HttpServletRequest request,
+                                                       @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                       MultipartFile multipartFile) {
+        ProfileImageActionResult profileImageActionResult = userService.uploadProfileImage(multipartFile, userInfo.getUserId());
 
-        try {
-            ProfileImage profileImage;
+        userInfo.setDirectory(profileImageActionResult.getProfileImage().getDirectory());
+        userInfo.setExtension(profileImageActionResult.getProfileImage().getExtension());
 
-            if (userService.findProfileImageByUserId(userInfo.getUserId()) == null) {
-                profileImage = userService.uploadProfileImage(multipartFile, userInfo.getUserId());
-            } else {
-                profileImage = userService.updateProfileImage(multipartFile, userInfo.getUserId());
-                SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
-            }
+        SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
 
-            userInfo.setSavedFileName(profileImage.getSavedFileName());
-            userInfo.setExtension(profileImage.getExtension());
-            userInfo.setDirectory(profileImage.getDirectory().substring(profileImage.getDirectory().lastIndexOf("/static/" + 8)));
-
-            SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
-            SessionManager.updateAttribute(request, SessionConst.USER_INFO, profileImage);
-
-            simpleResponse.setSuccess(true);
-            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(UPLOAD_PROFILE_IMAGE_SUCCESS));
-        } catch (IOException e) {
-            simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(MAIL_ERROR_MESSAGES.getString(UPLOAD_PROFILE_IMAGE_FAILURE));
-        }
-
-        return simpleResponse;
+        return profileImageActionResult;
     }
 
     // condition: isLoginInterceptor
-    @PostMapping(URLConst.DELETE_PROFILE_IMAGE)
-    public SimpleResponse deleteProfileImage(HttpServletRequest request,
-                                             @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
-        SimpleResponse simpleResponse = new SimpleResponse();
-        ProfileImage profileImage = userService.findProfileImageByUserId(userInfo.getUserId());
+    @PostMapping(URLConst.UPDATE_PROFILE_IMAGE)
+    public ProfileImageActionResult updateProfileImage(HttpServletRequest request,
+                                                       @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                       MultipartFile multipartFile) {
+        ProfileImageActionResult profileImageActionResult = userService.updateProfileImage(multipartFile, userInfo.getUserId(), userInfo.getDirectory());
 
-        if (profileImage == null) {
-            simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(MAIL_ERROR_MESSAGES.getString(ErrorsConst.DELETE_PROFILE_IMAGE_FAILURE_NOT_UPLOADED));
-        } else {
-            try {
-                userService.deleteProfileImage(profileImage.getDirectory(), userInfo.getUserId());
+        userInfo.setDirectory(profileImageActionResult.getProfileImage().getDirectory());
+        userInfo.setExtension(profileImageActionResult.getProfileImage().getExtension());
 
-                userInfo.setSavedFileName(null);
-                userInfo.setExtension(null);
-                userInfo.setDirectory(null);
+        SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
 
-                SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
-            } catch (SQLException e) {
-                simpleResponse.setSuccess(false);
-                simpleResponse.setMessage(MAIL_ERROR_MESSAGES.getString(ErrorsConst.DELETE_PROFILE_IMAGE_FAILURE));
-            }
-        }
-        return simpleResponse;
+        return profileImageActionResult;
+    }
+
+    // condition: isLoginInterceptor
+    @PostMapping(URLConst.UPLOAD_PROFILE_IMAGE)
+    public ProfileImageActionResult deleteProfileImage(HttpServletRequest request,
+                                                       @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
+        ProfileImageActionResult profileImageActionResult = userService.deleteProfileImage(userInfo.getUserId(), userInfo.getDirectory());
+
+        userInfo.setDirectory(null);
+        userInfo.setExtension(null);
+
+        SessionManager.updateAttribute(request, SessionConst.USER_INFO, userInfo);
+
+        return profileImageActionResult;
     }
 
     // condition: isLoginInterceptor
     @PostMapping(URLConst.UPDATE_USERNAME)
-    public CheckResult updateUsername(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                      String username) {
+    public UserInfoUpdateResult updateUsername(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                               String username) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
         CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.USERNAME,
-                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
-                USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED,
+                UserConst.USERNAME, username,
                 USER_USERNAME_VALID,
-                UserConst.USERNAME, username);
+                USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED);
 
-        if (checkResult.getIsValid() && checkResult.getIsDuplicated()) {
-            try {
-                userService.updateUsername(userInfo.getUserId(), username);
-                checkResult.setMessage(SUCCESS_MESSAGES.getString(USERNAME_UPDATE_SUCCESS));
-            } catch (SQLException e) {
-                checkResult.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
-            }
+        if (checkResult.isValid() && !checkResult.isDuplicated()) {
+            userService.updateUsername(userInfoUpdateResult, userInfo.getUserId(), username);
+        } else {
+            userInfoUpdateResult.setMessages(checkResult.getMessages());
         }
-        return checkResult;
+
+        return userInfoUpdateResult;
     }
 
     // condition: isLoginInterceptor
     @PostMapping(URLConst.UPDATE_PASSWORD)
-    public CheckResult updatePassword(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                      String password) {
+    public UserInfoUpdateResult updatePassword(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                               String password) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
         CheckResult checkResult = userService.checkValidation(ValidationPatterns.PASSWORD,
-                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
-                USER_PASSWORD_INVALID, USER_PASSWORD_VALID,
-                password);
+                password,
+                USER_PASSWORD_VALID, USER_PASSWORD_INVALID);
 
-        if (checkResult.getIsValid()) {
-            try {
-                userService.updatePassword(userInfo.getUserId(), password);
-                checkResult.setMessage(SUCCESS_MESSAGES.getString(PASSWORD_UPDATE_SUCCESS));
-            } catch (SQLException e) {
-                checkResult.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
-            }
-        }
-        return checkResult;
-    }
-
-    // condition: isLoginInterceptor
-    @PostMapping(URLConst.DEACTIVATE)
-    public SimpleResponse deactivate(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
-        SimpleResponse simpleResponse = new SimpleResponse();
-
-        try {
-            userService.deactivate(userInfo.getUserId());
-            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(DEACTIVATE_SUCCESS));
-        } catch (SQLException e) {
-            simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_DELETE_ERROR));
+        if (checkResult.isValid()) {
+            userService.updatePassword(userInfoUpdateResult, userInfo.getUserId(), password);
+        } else {
+            userInfoUpdateResult.setMessages(checkResult.getMessages());
         }
 
-        return simpleResponse;
+        return userInfoUpdateResult;
     }
+
+    // condition: isLoginInterceptor posts, comments all delete
+//    @PostMapping(URLConst.DEACTIVATE)
+//    public UserInfoUpdateResult deactivate(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
+//        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
+//
+//        userService.deactivate(userInfoUpdateResult, userInfo.getUserId());
+//
+//        return userInfoUpdateResult;
+//    }
 
 
     // condition: isLoginInterceptor
     @PostMapping(UPDATE_GUESTBOOK_PERMISSION)
-    public SimpleResponse updateGuestbookPermissions(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                                     GuestbookPermission guestbookPermission) {
-        SimpleResponse simpleResponse = new SimpleResponse();
+    public UserInfoUpdateResult updateGuestbookPermissions(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                           GuestbookPermission guestbookPermission) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
 
-        try {
-            userService.updateGuestbookPermission(userInfo.getUserId(), guestbookPermission);
-            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
-            simpleResponse.setSuccess(true);
-        } catch (SQLException e) {
-            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
-            simpleResponse.setSuccess(false);
-        }
+        userService.updateGuestbookPermission(userInfoUpdateResult, userInfo.getUserId(), guestbookPermission);
 
-        return simpleResponse;
+        return userInfoUpdateResult;
     }
 
     // condition: isLoginInterceptor
     @PostMapping(UPDATE_GUESTBOOK_ACTIVATION)
-    public SimpleResponse updateGuestbookActivation(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
-                                                    boolean activation) {
-        SimpleResponse simpleResponse = new SimpleResponse();
+    public UserInfoUpdateResult updateGuestbookActivation(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
+                                                          boolean activation) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
 
-        try {
-            userService.updateGuestbookActivation(userInfo.getUserId(), activation);
-            simpleResponse.setSuccess(true);
-            simpleResponse.setMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
-        } catch (SQLException e) {
-            simpleResponse.setSuccess(false);
-            simpleResponse.setMessage(COMMON_ERROR_MESSAGES.getString(DATABASE_UPDATE_ERROR));
-        }
+        userService.updateGuestbookActivation(userInfoUpdateResult, userInfo.getUserId(), activation);
 
-        return simpleResponse;
+        return userInfoUpdateResult;
     }
 }

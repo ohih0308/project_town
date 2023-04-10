@@ -28,14 +28,19 @@ public interface ErrorsConst {
     String USER_CONFIRM_PASSWORD_NULL = "user.confirm_password.null";
     String USER_AGREEMENT_MISSING = "user.agreement.missing";
 
+    String REGISTER_REQUEST_NULL = "register.request.null";
     String USER_REGISTER_SQL_EXCEPTION = "user.register.sql.exception";
     String USER_LOGIN_FAILURE_INVALID_CREDENTIALS = "user.login.failure.invalid.credentials";
 
 
     String UPLOAD_PROFILE_IMAGE_FAILURE = "upload.profile.image.failure";
-    String DELETE_PROFILE_IMAGE_FAILURE_NOT_UPLOADED = "delete.profile.image.failure.not.uploaded";
+    String UPDATE_PROFILE_IMAGE_FAILURE = "update.profile.image.failure";
     String DELETE_PROFILE_IMAGE_FAILURE = "delete.profile.image.failure";
-
+    String UPDATE_USERNAME_FAILURE = "update.username.failure";
+    String UPDATE_PASSWORD_FAILURE = "update.password.failure";
+    String DEACTIVATE_ACCOUNT_FAILURE = "deactivate.account.failure";
+    String GUESTBOOK_PERMISSION_UPDATE_FAILURE = "guestbook.permission.update.failure";
+    String GUESTBOOK_ACTIVATION_UPDATE_FAILURE = "guestbook.activation.update.failure";
 
     String POST_SUBJECT_INVALID = "post.subject.invalid";
     String POST_BODY_INVALID = "post.body.invalid";

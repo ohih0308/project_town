@@ -15,4 +15,6 @@ public interface UserConst {
     String USER_ID = "user_id";
 
     String ACTIVATION = "activation";
+
+    String REGISTER_REQUEST = "register_request";
 }

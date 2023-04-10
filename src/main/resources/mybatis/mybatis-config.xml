@@ -5,7 +5,7 @@
     <typeAliases>
         <typeAlias type="ohih.town.domain.forum.dto.Forum" alias="Forum"/>
 
-        <typeAlias type="ohih.town.domain.user.dto.RegisterUser" alias="RegisterUser"/>
+        <typeAlias type="ohih.town.domain.user.dto.RegisterRequest" alias="RegisterRequest"/>
         <typeAlias type="ohih.town.domain.user.dto.LoginResult" alias="LoginResult"/>
         <typeAlias type="ohih.town.domain.user.dto.ProfileImage" alias="ProfileImage"/>
         <typeAlias type="ohih.town.domain.user.dto.GuestbookPermission" alias="GuestbookPermission"/>

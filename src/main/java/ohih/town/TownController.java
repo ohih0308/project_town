@@ -4,7 +4,9 @@ package ohih.town;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ohih.town.constants.*;
+import ohih.town.constants.SessionConst;
+import ohih.town.constants.URLConst;
+import ohih.town.constants.ViewConst;
 import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
 import ohih.town.domain.forum.service.ForumService;
@@ -21,9 +23,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.List;
 
-import static ohih.town.constants.ConfigurationConst.FILE_PATHS;
 import static ohih.town.constants.ForumConst.*;
 import static ohih.town.constants.PagingConst.postsPerPage;
 import static ohih.town.constants.PostConst.POST_DETAILS;
@@ -44,12 +49,18 @@ public class TownController {
 
 
     @GetMapping("/beans")
-    public String beans() {
+    public String beans() throws SQLException {
         String[] beans = applicationContext.getBeanDefinitionNames();
 
-        for (String bean : beans) {
-            log.info("bean name = {}", bean);
-        }
+//        for (String bean : beans) {
+//            log.info("bean name = {}", bean);
+//        }
+        DataSource dataSource = applicationContext.getBean(DataSource.class);
+        Connection connection = dataSource.getConnection();
+        DatabaseMetaData metaData = connection.getMetaData();
+        String dbName = metaData.getDatabaseProductName();
+        System.out.println("Database name: " + dbName);
+
         return ViewConst.HOME;
     }
 

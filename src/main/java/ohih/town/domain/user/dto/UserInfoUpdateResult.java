@@ -7,10 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CheckResult {
-
-    private boolean isValid;
-    private boolean isDuplicated;
-
+public class UserInfoUpdateResult {
+    private boolean success;
     private List<String> messages;
 }

@@ -8,6 +8,7 @@ import ohih.town.domain.post.dto.Attachment;
 import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -79,6 +80,24 @@ public class Utilities {
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
     }
+
+    public static boolean checkValidation(Pattern pattern, String input) {
+        if (input == null) {
+            return false;
+        }
+        Matcher matcher = pattern.matcher(input);
+        return matcher.matches();
+    }
+
+//    public static boolean checkObjectContainsNull (Object object) throws IllegalAccessException {
+//        for (Field field : object.getClass().getDeclaredFields()) {
+//            field.setAccessible(true);
+//            if (field.get(object) == null) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public static String createCode(int length) {
         UUID uuid = UUID.randomUUID();

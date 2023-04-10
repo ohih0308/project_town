@@ -19,6 +19,7 @@ public interface URLConst {
     String LOGOUT = "/logout";
 
     String UPLOAD_PROFILE_IMAGE = "/upload/profile-image";
+    String UPDATE_PROFILE_IMAGE = "/update/profile-image";
     String DELETE_PROFILE_IMAGE = "/delete/profile-image";
     String UPDATE_USERNAME = "/update/username";
     String UPDATE_PASSWORD = "/update/password";

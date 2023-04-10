@@ -7,10 +7,8 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CheckResult {
-
-    private boolean isValid;
-    private boolean isDuplicated;
-
+public class RegisterResult {
+    private boolean success;
     private List<String> messages;
+    private String redirectUrl;
 }
