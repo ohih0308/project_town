@@ -18,6 +18,8 @@ import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+
 import static ohih.town.constants.ErrorMessageResourceBundle.MAIL_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorMessageResourceBundle.USER_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.*;
@@ -40,12 +42,11 @@ public class MailRestController {
         MailResult mailResult = new MailResult();
 
         CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.EMAIL,
-                USER_ERROR_MESSAGES, SUCCESS_MESSAGES,
                 USER_EMAIL_INVALID, USER_EMAIL_DUPLICATED,
                 USER_EMAIL_VALID,
                 UserConst.EMAIL, email);
 
-        if (checkResult.getIsValid() && !checkResult.getIsDuplicated()) {
+        if (checkResult.isValid() && !checkResult.isDuplicated()) {
             try {
                 EmailVerificationRequest emailVerificationRequest = mailService.sendVerificationCode(email);
 
@@ -60,7 +61,7 @@ public class MailRestController {
                 mailResult.setIsSent(false);
 
                 String errorMessage = MAIL_ERROR_MESSAGES.getString(MAIL_SEND_ERROR);
-                mailResult.setErrorMessage(errorMessage);
+                mailResult.setErrorMessages(Collections.singletonList(errorMessage));
             }
 
             SessionManager.setAttributes(request, SessionConst.VALIDATED_EMAIL, email);
@@ -69,7 +70,7 @@ public class MailRestController {
             mailResult.setTo(email);
             mailResult.setIsSent(false);
 
-            mailResult.setErrorMessage(checkResult.getMessage());
+            mailResult.setErrorMessages(checkResult.getMessages());
         }
 
         return mailResult;

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,5 +15,5 @@ public class MailResult {
     private String from;
     private String to;
     private Boolean isSent;
-    private String errorMessage;
+    private List<String> errorMessages;
 }

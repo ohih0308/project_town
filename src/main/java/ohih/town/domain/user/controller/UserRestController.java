@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.SQLException;
-
-import static ohih.town.constants.ErrorMessageResourceBundle.*;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SessionConst.VALIDATED_USERNAME;
 import static ohih.town.constants.SuccessConst.*;
@@ -49,40 +46,39 @@ public class UserRestController {
     @PostMapping(URLConst.CHECK_PASSWORD)
     public CheckResult checkPassword(String password) {
         return userService.checkValidation(ValidationPatterns.PASSWORD,
+                UserConst.PASSWORD,
                 password,
                 USER_PASSWORD_VALID, USER_PASSWORD_INVALID);
     }
 
     @PostMapping(URLConst.CHECK_CONFIRM_PASSWORD)
     public CheckResult checkConfirmPassword(String password, String confirmPassword) {
-        return userService.checkStringEquality(password, confirmPassword,
-                USER_CONFIRM_PASSWORD_VALID,
-                USER_CONFIRM_PASSWORD_INVALID);
+        return userService.confirmPassword(password, confirmPassword);
     }
 
     @PostMapping(URLConst.REGISTER_URL)
     public RegisterResult register(HttpServletRequest request,
                                    RegisterRequest registerRequest) {
-        RegisterResult registerResult = new RegisterResult();
-
         String VALIDATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_EMAIL);
         String AUTHENTICATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.AUTHENTICATED_EMAIL);
         String VALIDATED_USERNAME = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_USERNAME);
 
-        CheckResult checkResult = userService.checkRegisterRequest(VALIDATED_EMAIL, AUTHENTICATED_EMAIL, VALIDATED_USERNAME,
-                registerRequest);
-
-        if (checkResult.isValid()) {
-            SessionManager.removeAttribute(request, SessionConst.VALIDATED_EMAIL);
-            SessionManager.removeAttribute(request, SessionConst.AUTHENTICATED_EMAIL);
-            SessionManager.removeAttribute(request, SessionConst.VALIDATED_USERNAME);
-
-            return userService.registerUserExceptionHandler(registerRequest);
+        RegisterResult requestNullCheckResult = userService.hasNullRegisterRequest(registerRequest);
+        if (!requestNullCheckResult.getErrorMessages().isEmpty()) {
+            return requestNullCheckResult;
         }
-
-        registerResult.setMessages(checkResult.getMessages());
-
-        return registerResult;
+        RegisterResult sessionNullCheckResult = userService.verifySessionValues(VALIDATED_EMAIL, AUTHENTICATED_EMAIL, VALIDATED_USERNAME);
+        if (!sessionNullCheckResult.getErrorMessages().isEmpty()) {
+            return sessionNullCheckResult;
+        }
+        RegisterResult requestCheckFieldsResult = userService.checkRegisterRequestFields(VALIDATED_EMAIL,
+                AUTHENTICATED_EMAIL,
+                VALIDATED_USERNAME,
+                registerRequest);
+        if (!requestCheckFieldsResult.getErrorMessages().isEmpty()) {
+            return requestCheckFieldsResult;
+        }
+        return userService.registerUserExceptionHandler(registerRequest);
     }
 
 
@@ -134,7 +130,7 @@ public class UserRestController {
     }
 
     // condition: isLoginInterceptor
-    @PostMapping(URLConst.UPLOAD_PROFILE_IMAGE)
+    @PostMapping(URLConst.DELETE_PROFILE_IMAGE)
     public ProfileImageActionResult deleteProfileImage(HttpServletRequest request,
                                                        @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo) {
         ProfileImageActionResult profileImageActionResult = userService.deleteProfileImage(userInfo.getUserId(), userInfo.getDirectory());
@@ -162,7 +158,6 @@ public class UserRestController {
         } else {
             userInfoUpdateResult.setMessages(checkResult.getMessages());
         }
-
         return userInfoUpdateResult;
     }
 
@@ -172,15 +167,15 @@ public class UserRestController {
                                                String password) {
         UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
         CheckResult checkResult = userService.checkValidation(ValidationPatterns.PASSWORD,
+                UserConst.PASSWORD,
                 password,
                 USER_PASSWORD_VALID, USER_PASSWORD_INVALID);
 
-        if (checkResult.isValid()) {
+        if (checkResult.isValid() && !checkResult.isDuplicated()) {
             userService.updatePassword(userInfoUpdateResult, userInfo.getUserId(), password);
         } else {
             userInfoUpdateResult.setMessages(checkResult.getMessages());
         }
-
         return userInfoUpdateResult;
     }
 
@@ -199,21 +194,13 @@ public class UserRestController {
     @PostMapping(UPDATE_GUESTBOOK_PERMISSION)
     public UserInfoUpdateResult updateGuestbookPermissions(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                                            GuestbookPermission guestbookPermission) {
-        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
-
-        userService.updateGuestbookPermission(userInfoUpdateResult, userInfo.getUserId(), guestbookPermission);
-
-        return userInfoUpdateResult;
+        return userService.updateGuestbookPermission(userInfo.getUserId(), guestbookPermission);
     }
 
     // condition: isLoginInterceptor
     @PostMapping(UPDATE_GUESTBOOK_ACTIVATION)
     public UserInfoUpdateResult updateGuestbookActivation(@SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                                           boolean activation) {
-        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
-
-        userService.updateGuestbookActivation(userInfoUpdateResult, userInfo.getUserId(), activation);
-
-        return userInfoUpdateResult;
+        return userService.updateGuestbookActivation(userInfo.getUserId(), activation);
     }
 }

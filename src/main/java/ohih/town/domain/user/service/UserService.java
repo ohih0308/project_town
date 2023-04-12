@@ -3,6 +3,7 @@ package ohih.town.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.*;
+import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.user.dto.*;
 import ohih.town.domain.user.mapper.UserMapper;
 import ohih.town.utilities.Utilities;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static ohih.town.constants.ErrorMessageResourceBundle.COMMON_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorMessageResourceBundle.USER_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.*;
@@ -28,6 +30,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
+    ResourceBundle commonErrorMessageSource = COMMON_ERROR_MESSAGES;
     ResourceBundle successMessageSource = SUCCESS_MESSAGES;
 
 
@@ -39,145 +42,179 @@ public class UserService {
         return userMapper.checkDuplication(map);
     }
 
-    public CheckResult checkValidationAndDuplication(Pattern pattern, String filed, String input,
+    public CheckResult checkValidationAndDuplication(Pattern pattern, String field, String input,
                                                      String validMessage,
                                                      String invalidMessage, String duplicatedMessage) {
         CheckResult checkResult = new CheckResult();
         boolean isValid = Utilities.checkValidation(pattern, input);
-        boolean isDuplicated = checkDuplication(filed, input);
+        boolean isDuplicated = checkDuplication(field, input);
 
-        List<String> messages = new ArrayList<>();
+        Map<String, String> messages = new HashMap<>();
 
         if (!isValid) {
-            checkResult.setValid(false);
-            messages.add(invalidMessage);
+            messages.put(field, invalidMessage);
         }
         if (isDuplicated) {
-            checkResult.setDuplicated(false);
-            messages.add(duplicatedMessage);
+            messages.put(field, duplicatedMessage);
         }
 
         if (isValid && !isDuplicated) {
-            checkResult.setValid(true);
-            checkResult.setDuplicated(false);
-            messages.add(validMessage);
+            messages.put(field, validMessage);
         }
 
         checkResult.setMessages(messages);
+
         return checkResult;
     }
 
-    public CheckResult checkValidation(Pattern pattern, String input,
+    public CheckResult checkValidation(Pattern pattern, String field, String input,
                                        String validMessage,
                                        String invalidMessage) {
         CheckResult checkResult = new CheckResult();
+        Map<String, String> messages = new HashMap<>();
+
         checkResult.setValid(Utilities.checkValidation(pattern, input));
 
         if (checkResult.isValid()) {
-            checkResult.setMessages(Collections.singletonList(validMessage));
+            messages.put(field, validMessage);
         } else {
-            checkResult.setMessages(Collections.singletonList(invalidMessage));
+            messages.put(field, invalidMessage);
         }
+
+        checkResult.setMessages(messages);
         return checkResult;
     }
 
-    public CheckResult checkStringEquality(String string1, String string2,
-                                           String validMessage,
-                                           String invalidMessage) {
+    public CheckResult confirmPassword(String password, String confirmPassword) {
         CheckResult checkResult = new CheckResult();
+        Map<String, String> messages = new HashMap<>();
 
-        if (Objects.equals(string1, string2)) {
+        if (Objects.equals(password, confirmPassword)) {
             checkResult.setValid(true);
-            checkResult.setMessages(Collections.singletonList(validMessage));
+            messages.put(UserConst.CONFIRM_PASSWORD, successMessageSource.getString(USER_CONFIRM_PASSWORD_VALID));
         } else {
-            checkResult.setValid(false);
-            checkResult.setMessages(Collections.singletonList(invalidMessage));
+            messages.put(UserConst.CONFIRM_PASSWORD, userErrorMessageSource.getString(USER_CONFIRM_PASSWORD_INVALID));
         }
+        checkResult.setMessages(messages);
+
         return checkResult;
     }
 
-    private CheckResult checkRegisterRequestNull(RegisterRequest registerRequest) {
-        CheckResult checkResult = new CheckResult();
-        List<String> messages = new ArrayList<>();
+    public RegisterResult hasNullRegisterRequest(RegisterRequest registerRequest) {
+        RegisterResult registerResult = new RegisterResult();
+        Map<String, String> errorMessages = new HashMap<>();
 
         if (registerRequest == null) {
-            messages.add(userErrorMessageSource.getString(REGISTER_REQUEST_NULL));
+            errorMessages.put(UserConst.REGISTER_REQUEST, userErrorMessageSource.getString(USER_REGISTER_REQUEST_NULL));
         } else {
             if (registerRequest.getEmail() == null) {
-                messages.add(userErrorMessageSource.getString(USER_EMAIL_NULL));
+                errorMessages.put(UserConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_NULL));
             }
             if (registerRequest.getUsername() == null) {
-                messages.add(userErrorMessageSource.getString(USER_USERNAME_NULL));
+                errorMessages.put(UserConst.USERNAME, userErrorMessageSource.getString(USER_USERNAME_NULL));
             }
             if (registerRequest.getPassword() == null) {
-                messages.add(userErrorMessageSource.getString(USER_PASSWORD_NULL));
+                errorMessages.put(UserConst.PASSWORD, userErrorMessageSource.getString(USER_PASSWORD_NULL));
             }
             if (registerRequest.getConfirmPassword() == null) {
-                messages.add(userErrorMessageSource.getString(USER_CONFIRM_PASSWORD_NULL));
+                errorMessages.put(UserConst.CONFIRM_PASSWORD, userErrorMessageSource.getString(USER_CONFIRM_PASSWORD_NULL));
             }
         }
-        checkResult.setValid(messages.size() == 0);
-        checkResult.setMessages(messages);
-        return checkResult;
+
+        if (!errorMessages.isEmpty()) {
+            registerResult.setErrorMessages(errorMessages);
+            registerResult.setResultMessage(userErrorMessageSource.getString(USER_REGISTER_REQUEST_NULL));
+        }
+
+        return registerResult;
     }
 
-    public CheckResult checkRegisterRequest(String validatedEmail, String authenticatedEmail,
-                                            String validatedUsername,
-                                            RegisterRequest registerRequest) {
-        CheckResult checkResult = new CheckResult();
+    public RegisterResult verifySessionValues(String validatedEmail,
+                                              String authenticatedEmail,
+                                              String validatedUsername) {
+        RegisterResult registerResult = new RegisterResult();
+        Map<String, String> errorMessages = new HashMap<>();
 
-        // Check for null in register request.
-        CheckResult checkRegisterRequestNull = checkRegisterRequestNull(registerRequest);
-        if (checkRegisterRequestNull.isValid()) {
-            return checkRegisterRequestNull;
+        if (validatedEmail == null) {
+            errorMessages.put(UserConst.VALIDATED_EMAIL, userErrorMessageSource.getString(USER_EMAIL_VALIDATED_NULL));
+        }
+        if (authenticatedEmail == null) {
+            errorMessages.put(UserConst.AUTHENTICATED_EMAIL, userErrorMessageSource.getString(USER_EMAIL_AUTHENTICATED_NULL));
+        }
+        if (validatedUsername == null) {
+            errorMessages.put(UserConst.VALIDATED_USERNAME, userErrorMessageSource.getString(USER_USERNAME_VALIDATED_NULL));
         }
 
-
-        // Check the email and username if they are different from the session values
-        List<String> messages = new ArrayList<>();
-        if (!Objects.equals(validatedEmail, registerRequest.getEmail())
-                || !Objects.equals(authenticatedEmail, registerRequest.getEmail())) {
-            messages.add(userErrorMessageSource.getString(USER_EMAIL_EMAIL_MISMATCH));
-        }
-        if (!Objects.equals(validatedUsername, registerRequest.getUsername())) {
-            messages.add(userErrorMessageSource.getString(USER_USERNAME_USERNAME_MISMATCH));
+        if (!errorMessages.isEmpty()) {
+            registerResult.setErrorMessages(errorMessages);
+            registerResult.setResultMessage(commonErrorMessageSource.getString(USER_REGISTER_FAILED));
         }
 
+        return registerResult;
+    }
 
-        // Check validation and duplication of fields
+    public RegisterResult checkRegisterRequestFields(String validatedEmail,
+                                                     String authenticatedEmail,
+                                                     String validatedUsername,
+                                                     RegisterRequest registerRequest) {
+        RegisterResult registerResult = new RegisterResult();
+        Map<String, String> errorMessages = new HashMap<>();
+
+        if (!validatedEmail.equals(registerRequest.getEmail())
+                || !authenticatedEmail.equals(registerRequest.getEmail())) {
+            errorMessages.put(UserConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_EMAIL_MISMATCH));
+        }
+        if (!validatedUsername.equals(registerRequest.getUsername())) {
+            errorMessages.put(UserConst.USERNAME, userErrorMessageSource.getString(USER_USERNAME_USERNAME_MISMATCH));
+        }
+
         CheckResult checkEmail = checkValidationAndDuplication(ValidationPatterns.EMAIL,
-                UserConst.USERNAME, registerRequest.getEmail(),
-                USER_EMAIL_VALID, USER_EMAIL_INVALID, USER_EMAIL_DUPLICATED);
+                UserConst.EMAIL, registerRequest.getEmail(),
+                successMessageSource.getString(USER_EMAIL_VALID),
+                userErrorMessageSource.getString(USER_EMAIL_INVALID),
+                userErrorMessageSource.getString(USER_EMAIL_DUPLICATED));
         CheckResult checkUsername = checkValidationAndDuplication(ValidationPatterns.USERNAME,
                 UserConst.USERNAME, registerRequest.getUsername(),
-                USER_USERNAME_VALID, USER_USERNAME_INVALID, USER_USERNAME_DUPLICATED);
+                successMessageSource.getString(USER_USERNAME_VALID),
+                userErrorMessageSource.getString(USER_USERNAME_INVALID),
+                userErrorMessageSource.getString(USER_USERNAME_DUPLICATED));
         CheckResult checkPassword = checkValidation(ValidationPatterns.PASSWORD,
-                registerRequest.getPassword(), USER_PASSWORD_VALID, USER_PASSWORD_INVALID);
-        CheckResult checkConfirmPassword = checkStringEquality(registerRequest.getPassword(), registerRequest.getConfirmPassword(),
-                USER_CONFIRM_PASSWORD_VALID, USER_CONFIRM_PASSWORD_INVALID);
+                UserConst.PASSWORD, registerRequest.getPassword(),
+                successMessageSource.getString(USER_PASSWORD_VALID),
+                userErrorMessageSource.getString(USER_PASSWORD_INVALID));
+        CheckResult checkConfirmPassword = confirmPassword(registerRequest.getPassword(),
+                registerRequest.getConfirmPassword());
 
-        if (!checkEmail.isValid() || checkEmail.isDuplicated()) {
-            messages.addAll(checkEmail.getMessages());
+        if (!checkEmail.isValid()) {
+            errorMessages.put(UserConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_INVALID));
         }
-        if (!checkUsername.isValid() || checkUsername.isDuplicated()) {
-            messages.addAll(checkUsername.getMessages());
+        if (checkEmail.isDuplicated()) {
+            errorMessages.put(UserConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_DUPLICATED));
         }
-        if (!checkPassword.isValid() || checkPassword.isDuplicated()) {
-            messages.addAll(checkPassword.getMessages());
+        if (!checkUsername.isValid()) {
+            errorMessages.put(UserConst.USERNAME, userErrorMessageSource.getString(USER_USERNAME_INVALID));
+        }
+        if (checkUsername.isDuplicated()) {
+            errorMessages.put(UserConst.USERNAME, userErrorMessageSource.getString(USER_USERNAME_DUPLICATED));
+        }
+        if (!checkPassword.isValid()) {
+            errorMessages.put(UserConst.PASSWORD, userErrorMessageSource.getString(USER_PASSWORD_INVALID));
         }
         if (!checkConfirmPassword.isValid()) {
-            messages.addAll(checkConfirmPassword.getMessages());
+            errorMessages.put(UserConst.CONFIRM_PASSWORD, userErrorMessageSource.getString(USER_CONFIRM_PASSWORD_INVALID));
         }
-
         if (!registerRequest.isAgreement()) {
-            messages.add(userErrorMessageSource.getString(USER_AGREEMENT_MISSING));
+            errorMessages.put(UserConst.AGREEMENT, userErrorMessageSource.getString(USER_AGREEMENT_MISSING));
         }
 
-        checkResult.setMessages(messages);
-        checkResult.setValid(messages.isEmpty());
+        if (!errorMessages.isEmpty()) {
+            registerResult.setErrorMessages(errorMessages);
+            registerResult.setResultMessage(commonErrorMessageSource.getString(INVALID_ACCESS_ERROR));
+        }
 
-        return checkEmail;
+        return registerResult;
     }
+
 
     @Transactional
     public void registerUser(RegisterRequest registerRequest) throws SQLException {
@@ -192,10 +229,10 @@ public class UserService {
         try {
             registerUser(registerRequest);
             registerResult.setSuccess(true);
-            registerResult.setMessages(Collections.singletonList(successMessageSource.getString(USER_REGISTRATION_SUCCESS)));
+            registerResult.setResultMessage(successMessageSource.getString(USER_REGISTRATION_SUCCESS));
             registerResult.setRedirectUrl(URLConst.HOME);
         } catch (SQLException e) {
-            registerResult.setMessages(Collections.singletonList(userErrorMessageSource.getString(USER_REGISTER_SQL_EXCEPTION)));
+            registerResult.setResultMessage(userErrorMessageSource.getString(USER_REGISTER_SQL_EXCEPTION));
         }
         return registerResult;
     }
@@ -204,37 +241,38 @@ public class UserService {
     // login
     public LoginResult login(String email, String password) {
         LoginResult loginResult = new LoginResult();
-        loginResult.setRedirectUrl(URLConst.LOGIN);
+        Map<String, String> errorMessages = new HashMap<>();
 
-        List<String> messages = new ArrayList<>();
-
-        CheckResult checkEmail = checkValidation(ValidationPatterns.EMAIL, email,
-                successMessageSource.getString(USER_EMAIL_VALID), userErrorMessageSource.getString(USER_EMAIL_INVALID));
-        CheckResult checkPassword = checkValidation(ValidationPatterns.PASSWORD, password,
-                successMessageSource.getString(USER_PASSWORD_VALID), userErrorMessageSource.getString(USER_PASSWORD_INVALID));
+        CheckResult checkEmail = checkValidation(ValidationPatterns.EMAIL, UserConst.EMAIL, email,
+                successMessageSource.getString(USER_EMAIL_VALID),
+                userErrorMessageSource.getString(USER_EMAIL_INVALID));
+        CheckResult checkPassword = checkValidation(ValidationPatterns.PASSWORD, UserConst.PASSWORD, password,
+                successMessageSource.getString(USER_PASSWORD_VALID),
+                userErrorMessageSource.getString(USER_PASSWORD_INVALID));
 
         if (!checkEmail.isValid()) {
-            messages.addAll(checkEmail.getMessages());
+            errorMessages.putAll(checkEmail.getMessages());
         }
         if (!checkPassword.isValid()) {
-            messages.addAll(checkPassword.getMessages());
+            errorMessages.putAll(checkPassword.getMessages());
         }
 
-        if (!messages.isEmpty()) {
-            loginResult.setMessage(messages);
+        if (!checkEmail.isValid() || !checkPassword.isValid()) {
+            loginResult.setErrorMessages(errorMessages);
+            loginResult.setResultMessage(userErrorMessageSource.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
             return loginResult;
         }
 
         UserInfo userInfo = getUserByEmailAndPassword(email, password);
+
         if (userInfo != null) {
             loginResult.setSuccess(true);
-            messages.add(successMessageSource.getString(USER_LOGIN_SUCCESS));
+            loginResult.setResultMessage(successMessageSource.getString(USER_LOGIN_SUCCESS));
             loginResult.setRedirectUrl(URLConst.HOME);
             loginResult.setUserInfo(userInfo);
         } else {
-            messages.add(userErrorMessageSource.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
+            loginResult.setResultMessage(userErrorMessageSource.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
         }
-        loginResult.setMessage(messages);
 
         return loginResult;
     }
@@ -248,6 +286,7 @@ public class UserService {
     }
 
 
+    // profile image
     private ProfileImage extractProfileImageFromRequest(MultipartFile multipartFile, Long userId)
             throws NullPointerException {
         String filePath = ConfigurationResourceBundle.FILE_PATHS.getString(ConfigurationConst.PROFILE_IMAGE_DIRECTORY);
@@ -291,7 +330,7 @@ public class UserService {
         if (profileImageActionResult.isSuccess()) {
             profileImageActionResult.setMessage(successMessageSource.getString(UPLOAD_PROFILE_IMAGE_SUCCESS));
         } else {
-            profileImageActionResult.setMessage(userErrorMessageSource.getString(UPLOAD_PROFILE_IMAGE_FAILURE));
+            profileImageActionResult.setMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPLOAD_FAILURE));
         }
 
         return profileImageActionResult;
@@ -325,7 +364,7 @@ public class UserService {
         if (profileImageActionResult.isSuccess()) {
             profileImageActionResult.setMessage(successMessageSource.getString(UPDATE_PROFILE_IMAGE_SUCCESS));
         } else {
-            profileImageActionResult.setMessage(userErrorMessageSource.getString(UPDATE_PROFILE_IMAGE_FAILURE));
+            profileImageActionResult.setMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPDATE_FAILURE));
         }
 
         return profileImageActionResult;
@@ -353,7 +392,7 @@ public class UserService {
         if (profileImageActionResult.isSuccess()) {
             profileImageActionResult.setMessage(successMessageSource.getString(DELETE_PROFILE_IMAGE_SUCCESS));
         } else {
-            profileImageActionResult.setMessage(userErrorMessageSource.getString(DELETE_PROFILE_IMAGE_FAILURE));
+            profileImageActionResult.setMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_DELETE_FAILURE));
         }
 
         return profileImageActionResult;
@@ -364,15 +403,18 @@ public class UserService {
         map.put(UserConst.USER_ID, userId);
         map.put(UserConst.USERNAME, username);
 
+        Map<String, String> messages = new HashMap<>();
         try {
             if (!userMapper.updateUsername(map)) {
                 throw new SQLException();
             }
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setMessages(Collections.singletonList(successMessageSource.getString(USERNAME_UPDATE_SUCCESS)));
+            messages.put(UserConst.USERNAME, successMessageSource.getString(USERNAME_UPDATE_SUCCESS));
         } catch (SQLException e) {
-            userInfoUpdateResult.setMessages(Collections.singletonList(userErrorMessageSource.getString(UPDATE_USERNAME_FAILURE)));
+            messages.put(UserConst.USERNAME, userErrorMessageSource.getString(USER_UPDATE_USERNAME_FAILURE));
         }
+
+        userInfoUpdateResult.setMessages(messages);
     }
 
     public void updatePassword(UserInfoUpdateResult userInfoUpdateResult, Long userId, String password) {
@@ -380,15 +422,18 @@ public class UserService {
         map.put(UserConst.USER_ID, userId);
         map.put(UserConst.PASSWORD, password);
 
+        Map<String, String> messages = new HashMap<>();
         try {
             if (!userMapper.updatePassword(map)) {
                 throw new SQLException();
             }
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setMessages(Collections.singletonList(successMessageSource.getString(PASSWORD_UPDATE_SUCCESS)));
+            messages.put(UserConst.PASSWORD, successMessageSource.getString(PASSWORD_UPDATE_SUCCESS));
         } catch (SQLException e) {
-            userInfoUpdateResult.setMessages(Collections.singletonList(userErrorMessageSource.getString(UPDATE_PASSWORD_FAILURE)));
+            messages.put(UserConst.PASSWORD, userErrorMessageSource.getString(USER_UPDATE_PASSWORD_FAILURE));
         }
+
+        userInfoUpdateResult.setMessages(messages);
     }
 
 //    public void deactivate(UserInfoUpdateResult userInfoUpdateResult, Long userId) {
@@ -404,8 +449,9 @@ public class UserService {
 //
 //    }
 
-    public void updateGuestbookPermission(UserInfoUpdateResult userInfoUpdateResult,
-                                          Long userId, GuestbookPermission guestbookPermission) {
+    public UserInfoUpdateResult updateGuestbookPermission(Long userId, GuestbookPermission guestbookPermission) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
+        Map<String, String> messages = new HashMap<>();
         guestbookPermission.setUserId(userId);
 
         try {
@@ -413,26 +459,32 @@ public class UserService {
                 throw new SQLException();
             }
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setMessages(Collections.singletonList(successMessageSource.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS)));
+            messages.put(UserConst.GUESTBOOK_PERMISSION, successMessageSource.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
         } catch (SQLException e) {
-            userInfoUpdateResult.setMessages(Collections.singletonList(userErrorMessageSource.getString(GUESTBOOK_PERMISSION_UPDATE_FAILURE)));
+            messages.put(UserConst.GUESTBOOK_PERMISSION, userErrorMessageSource.getString(USER_GUESTBOOK_PERMISSION_UPDATE_FAILURE));
         }
+
+        return userInfoUpdateResult;
     }
 
-    public void updateGuestbookActivation(UserInfoUpdateResult userInfoUpdateResult,
-                                          Long userId, boolean activation) {
+    public UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean activation) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
+        Map<String, String> messages = new HashMap<>();
+
         Map<String, Object> map = new HashMap<>();
         map.put(UserConst.USER_ID, userId);
-        map.put(UserConst.ACTIVATION, activation);
+        map.put(UserConst.GUESTBOOK_ACTIVATION, activation);
 
         try {
             if (!userMapper.updateGuestbookActivation(map)) {
                 throw new SQLException();
             }
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setMessages(Collections.singletonList(successMessageSource.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS)));
+            messages.put(UserConst.GUESTBOOK_ACTIVATION, successMessageSource.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
         } catch (SQLException e) {
-            userInfoUpdateResult.setMessages(Collections.singletonList(userErrorMessageSource.getString(GUESTBOOK_ACTIVATION_UPDATE_FAILURE)));
+            messages.put(UserConst.GUESTBOOK_ACTIVATION, userErrorMessageSource.getString(USER_GUESTBOOK_ACTIVATION_UPDATE_FAILURE));
         }
+
+        return userInfoUpdateResult;
     }
 }

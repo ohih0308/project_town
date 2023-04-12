@@ -17,4 +17,11 @@ public interface UserConst {
     String ACTIVATION = "activation";
 
     String REGISTER_REQUEST = "register_request";
+
+    String VALIDATED_EMAIL = "validated_email";
+    String AUTHENTICATED_EMAIL = "authenticated_email";
+    String VALIDATED_USERNAME = "validated_username";
+
+    String GUESTBOOK_PERMISSION = "guestbook_permission";
+    String GUESTBOOK_ACTIVATION = "activation";
 }
