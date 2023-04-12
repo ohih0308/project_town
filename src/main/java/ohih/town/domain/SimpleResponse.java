@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SimpleResponse {
-    boolean success;
+    Boolean success;
     String message;
 }

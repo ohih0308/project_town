@@ -1,4 +1,4 @@
-package ohih.town.domain.mail;
+package ohih.town.domain.mail.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

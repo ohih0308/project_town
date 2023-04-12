@@ -7,15 +7,20 @@ public interface ErrorsConst {
     String INVALID_ACCESS_ERROR = "invalid.access.error";
 
 
+    // Mail
+    String MAIL_VERIFICATION_SENT_FAILURE = "mail.verification.sent.failure";
+    String MAIL_VERIFICATION_EMAIL_MISMATCH = "mail.verification.email_mismatch";
+    String MAIL_VERIFICATION_REQUEST_NOTFOUND = "mail.verification.request.notfound";
+    String MAIL_VERIFICATION_EMAIL_NOT_SENT = "mail.verification.email.not.sent";
+    String MAIL_VERIFICATION_CODE_NULL = "mail.verification_code.null";
+    String MAIL_VERIFICATION_EMAIL_FAILURE = "mail.verification.email.failure";
+
     // Email
-    String MAIL_SEND_ERROR = "mail.send.error";
     String USER_EMAIL_DUPLICATED = "user.email.duplicated";
-    String EMAIL_VERIFICATION_FAILURE = "email.verification.failure";
     String USER_EMAIL_NULL = "user.email.null";
     String USER_EMAIL_INVALID = "user.email.invalid";
     String USER_EMAIL_EMAIL_MISMATCH = "user.email.email_mismatch";
     String USER_EMAIL_VALIDATED_NULL = "user.email.validated.null";
-    String USER_EMAIL_AUTHENTICATED_NULL = "user.email.authenticated.null";
 
     // Username
     String USER_USERNAME_NULL = "user.username.null";
@@ -31,7 +36,7 @@ public interface ErrorsConst {
     String USER_CONFIRM_PASSWORD_NULL = "user.confirm_password.null";
 
     // Register
-    String USER_REGISTER_FAILED = "user.register.failed";
+    String USER_REGISTER_FAILURE = "user.register.failure";
     String USER_AGREEMENT_MISSING = "user.agreement.missing";
     String USER_REGISTER_REQUEST_NULL = "user.register.request.null";
     String USER_REGISTER_SQL_EXCEPTION = "user.register.sql.exception";

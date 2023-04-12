@@ -2,74 +2,63 @@ package ohih.town.domain.mail.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UserConst;
 import ohih.town.constants.ValidationPatterns;
-import ohih.town.domain.mail.EmailVerificationRequest;
-import ohih.town.domain.mail.EmailVerificationResult;
-import ohih.town.domain.mail.MailProperties;
-import ohih.town.domain.mail.MailResult;
+import ohih.town.domain.SimpleResponse;
+import ohih.town.domain.mail.dto.EmailVerificationResult;
+import ohih.town.domain.mail.dto.MailResult;
 import ohih.town.domain.mail.service.MailService;
 import ohih.town.domain.user.dto.CheckResult;
 import ohih.town.domain.user.service.UserService;
 import ohih.town.session.SessionManager;
-import org.springframework.mail.MailException;
+import ohih.town.utilities.Utilities;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
+import java.util.ResourceBundle;
 
-import static ohih.town.constants.ErrorMessageResourceBundle.MAIL_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorMessageResourceBundle.USER_ERROR_MESSAGES;
 import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.SessionConst.EMAIL_VERIFICATION_CODE;
 import static ohih.town.constants.SessionConst.EMAIL_VERIFICATION_REQUEST;
-import static ohih.town.constants.SessionConst.VALIDATED_EMAIL;
 import static ohih.town.constants.SuccessConst.USER_EMAIL_VALID;
-import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
+import static ohih.town.constants.UserConst.VERIFICATION_CODE_LENGTH;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MailRestController {
+    @Value("#{verificationMail['mail.from']}")
+    private String from;
+
+    private final ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
 
     private final UserService userService;
     private final MailService mailService;
-    private MailProperties mailProperties = new MailProperties();
 
 
     @PostMapping(URLConst.SEND_VERIFICATION_CODE)
     public MailResult sendVerificationCode(HttpServletRequest request, String email) {
-        MailResult mailResult = new MailResult();
-
+        MailResult mailResult = new MailResult(from, email);
         CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.EMAIL,
                 USER_EMAIL_INVALID, USER_EMAIL_DUPLICATED,
                 USER_EMAIL_VALID,
                 UserConst.EMAIL, email);
 
-        if (checkResult.isValid() && !checkResult.isDuplicated()) {
-            try {
-                EmailVerificationRequest emailVerificationRequest = mailService.sendVerificationCode(email);
+        if (checkResult.isValid() && checkResult.isDuplicated()) {
+            String verificationCode = Utilities.createCode(VERIFICATION_CODE_LENGTH);
 
-                SessionManager.setAttributes(request, EMAIL_VERIFICATION_REQUEST, emailVerificationRequest);
+            mailService.sendVerificationCode(mailResult, email, verificationCode);
 
-                mailResult.setFrom(mailProperties.getFrom());
-                mailResult.setTo(email);
-                mailResult.setIsSent(true);
-            } catch (MailException e) {
-                mailResult.setFrom(mailProperties.getFrom());
-                mailResult.setTo(email);
-                mailResult.setIsSent(false);
-
-                String errorMessage = MAIL_ERROR_MESSAGES.getString(MAIL_SEND_ERROR);
-                mailResult.setErrorMessages(Collections.singletonList(errorMessage));
-            }
-
-            SessionManager.setAttributes(request, SessionConst.VALIDATED_EMAIL, email);
+            log.info("email = {}, verification code = {}", email, verificationCode);
+            SessionManager.setAttributes(request, EMAIL_VERIFICATION_CODE, verificationCode);
+            SessionManager.setAttributes(request, EMAIL_VERIFICATION_REQUEST, email);
         } else {
-            mailResult.setFrom(mailProperties.getFrom());
-            mailResult.setTo(email);
-            mailResult.setIsSent(false);
-
+            mailResult.setResultMessage(userErrorMessageSource.getString(MAIL_VERIFICATION_SENT_FAILURE));
             mailResult.setErrorMessages(checkResult.getMessages());
         }
 
@@ -78,15 +67,17 @@ public class MailRestController {
 
     @PostMapping(URLConst.VERIFY_EMAIL_CODE)
     public EmailVerificationResult verifyEmailCode(HttpServletRequest request,
-                                                   String emailVerificationCode) {
-        EmailVerificationRequest EMAIL_VERIFICATION_REQUEST = (EmailVerificationRequest) SessionManager.getAttributes(request, SessionConst.EMAIL_VERIFICATION_REQUEST);
-        EmailVerificationResult emailVerificationResult = mailService.verifyEmailCode(EMAIL_VERIFICATION_REQUEST, emailVerificationCode);
+                                                   String email, String verificationCode) {
+
+        String EMAIL_VERIFICATION_REQUEST = (String) SessionManager.getAttributes(request, SessionConst.EMAIL_VERIFICATION_REQUEST);
+        String EMAIL_VERIFICATION_CODE = (String) SessionManager.getAttributes(request, SessionConst.EMAIL_VERIFICATION_CODE);
+
+        EmailVerificationResult emailVerificationResult = mailService.verifyEmailCode(EMAIL_VERIFICATION_REQUEST, EMAIL_VERIFICATION_CODE, email, verificationCode);
 
         if (emailVerificationResult.getSuccess()) {
-            SessionManager.setAttributes(request, SessionConst.AUTHENTICATED_EMAIL, EMAIL_VERIFICATION_REQUEST.getEmail());
-            SessionManager.removeAttribute(request, SessionConst.EMAIL_VERIFICATION_REQUEST);
-        } else {
-            SessionManager.removeAttribute(request, VALIDATED_EMAIL);
+            SessionManager.setAttributes(request, SessionConst.VALIDATED_EMAIL, email);
+            SessionManager.removeAttribute(request, EMAIL_VERIFICATION_CODE);
+            SessionManager.removeAttribute(request, EMAIL_VERIFICATION_REQUEST);
         }
 
         return emailVerificationResult;

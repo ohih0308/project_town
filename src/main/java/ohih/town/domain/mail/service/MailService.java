@@ -2,20 +2,23 @@ package ohih.town.domain.mail.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ohih.town.domain.mail.EmailVerificationResult;
-import ohih.town.domain.mail.MailProperties;
-import ohih.town.domain.mail.EmailVerificationRequest;
-import ohih.town.utilities.Utilities;
+import ohih.town.domain.mail.dto.EmailVerificationResult;
+import ohih.town.domain.mail.dto.MailResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import static ohih.town.constants.ErrorMessageResourceBundle.MAIL_ERROR_MESSAGES;
-import static ohih.town.constants.ErrorsConst.EMAIL_VERIFICATION_FAILURE;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import static ohih.town.constants.ErrorMessageResourceBundle.*;
+import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.EMAIL_VERIFICATION_SUCCESS;
+import static ohih.town.constants.SuccessConst.VERIFICATION_EMAIL_SENT;
 import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES;
-import static ohih.town.constants.UserConst.VERIFICATION_CODE_LENGTH;
 
 @Service
 @RequiredArgsConstructor
@@ -23,44 +26,65 @@ import static ohih.town.constants.UserConst.VERIFICATION_CODE_LENGTH;
 public class MailService {
     private final JavaMailSender javaMailSender;
 
+    private final ResourceBundle mailMessageSource = MAIL_ERROR_MESSAGES;
+    private final ResourceBundle successMessageSource = SUCCESS_MESSAGES;
+    private final ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
+    private final ResourceBundle commonErrorMessageSource = COMMON_ERROR_MESSAGES;
 
-    public EmailVerificationRequest sendVerificationCode(String email) throws MailException {
-        EmailVerificationRequest emailVerificationRequest = new EmailVerificationRequest();
 
-        String verificationCode = Utilities.createCode(VERIFICATION_CODE_LENGTH);
-        emailVerificationRequest.setVerificationCode(verificationCode);
-        emailVerificationRequest.setEmail(email);
+    @Value("#{verificationMail['mail.verification.subject']}")
+    private String verificationSubject;
+    @Value("#{verificationMail['mail.verification.body']}")
+    private String verificationBody;
 
-        MailProperties mailProperties = new MailProperties(verificationCode);
-        mailProperties.setTo(email);
+    public void sendVerificationCode(MailResult mailResult, String email, String verificationCode) {
+        mailResult.setTo(email);
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(mailProperties.getFrom());
-        simpleMailMessage.setTo(mailProperties.getTo());
-        simpleMailMessage.setSubject(mailProperties.getSubject());
-        simpleMailMessage.setText(mailProperties.getBody());
+        simpleMailMessage.setFrom(mailResult.getFrom());
+        simpleMailMessage.setTo(email);
+        simpleMailMessage.setSubject(verificationSubject);
+        simpleMailMessage.setText(verificationBody.replace("${verification-code}", verificationCode));
 
         try {
             javaMailSender.send(simpleMailMessage);
+            mailResult.setSuccess(true);
+            mailResult.setResultMessage(successMessageSource.getString(VERIFICATION_EMAIL_SENT));
         } catch (MailException e) {
-            throw e;
+            mailResult.setResultMessage(mailMessageSource.getString(MAIL_VERIFICATION_SENT_FAILURE));
+            log.info("{}", e.getMessage());
         }
-
-        log.info("verificationCode = {}", verificationCode);
-        return emailVerificationRequest;
     }
 
-    public EmailVerificationResult verifyEmailCode(EmailVerificationRequest EMAIL_VERIFICATION_REQUEST, String emailVerificationCode) {
-        EmailVerificationResult emailVerificationResult = new EmailVerificationResult();
 
-        if (emailVerificationCode == null || !emailVerificationCode.equals(EMAIL_VERIFICATION_REQUEST.getVerificationCode())) {
-            emailVerificationResult.setVerifiedEmail(null);
-            emailVerificationResult.setSuccess(false);
-            emailVerificationResult.setMessage(MAIL_ERROR_MESSAGES.getString(EMAIL_VERIFICATION_FAILURE));
-        } else {
-            emailVerificationResult.setVerifiedEmail(EMAIL_VERIFICATION_REQUEST.getEmail());
+    public EmailVerificationResult verifyEmailCode(String EMAIL_VERIFICATION_REQUEST,
+                                                   String EMAIL_VERIFICATION_CODE,
+                                                   String email,
+                                                   String verificationCode) {
+        EmailVerificationResult emailVerificationResult = new EmailVerificationResult();
+        List<String> errorMessages = new ArrayList<>();
+
+        if (EMAIL_VERIFICATION_REQUEST == null) {
+            errorMessages.add(mailMessageSource.getString(MAIL_VERIFICATION_REQUEST_NOTFOUND));
+        } else if (email == null) {
+            errorMessages.add(userErrorMessageSource.getString(USER_EMAIL_NULL));
+        } else if (!EMAIL_VERIFICATION_REQUEST.equals(email)) {
+            errorMessages.add(mailMessageSource.getString(MAIL_VERIFICATION_EMAIL_MISMATCH));
+        }
+
+        if (EMAIL_VERIFICATION_CODE == null) {
+            errorMessages.add(mailMessageSource.getString(MAIL_VERIFICATION_EMAIL_NOT_SENT));
+        } else if (verificationCode == null) {
+            errorMessages.add(mailMessageSource.getString(MAIL_VERIFICATION_CODE_NULL));
+        }
+
+
+        if (EMAIL_VERIFICATION_CODE.equals(verificationCode)) {
             emailVerificationResult.setSuccess(true);
-            emailVerificationResult.setMessage(SUCCESS_MESSAGES.getString(EMAIL_VERIFICATION_SUCCESS));
+            emailVerificationResult.setResultMessage(successMessageSource.getString(EMAIL_VERIFICATION_SUCCESS));
+        } else {
+            errorMessages.add(mailMessageSource.getString(MAIL_VERIFICATION_EMAIL_FAILURE));
+            emailVerificationResult.setErrorMessages(errorMessages);
         }
 
         return emailVerificationResult;

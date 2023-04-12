@@ -16,6 +16,7 @@ import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,19 +49,24 @@ public class TownController {
     ApplicationContext applicationContext;
 
 
+    @Value("#{verificationMail['mail.from']}")
+    private String from;
+    @Value("#{verificationMail['mail.verification.subject']}")
+    private String subject;
+    @Value("#{verificationMail['mail.verification.body']}")
+    private String body;
+
     @GetMapping("/beans")
-    public String beans() throws SQLException {
+    public String beans() {
         String[] beans = applicationContext.getBeanDefinitionNames();
 
-//        for (String bean : beans) {
-//            log.info("bean name = {}", bean);
-//        }
-        DataSource dataSource = applicationContext.getBean(DataSource.class);
-        Connection connection = dataSource.getConnection();
-        DatabaseMetaData metaData = connection.getMetaData();
-        String dbName = metaData.getDatabaseProductName();
-        System.out.println("Database name: " + dbName);
+        for (String bean : beans) {
+            log.info("bean name = {}", bean);
+        }
 
+        System.out.println("from = " + from);
+        System.out.println("subject = " + subject);
+        System.out.println("body = " + body.replace("${verification-code}", "hello"));
         return ViewConst.HOME;
     }
 

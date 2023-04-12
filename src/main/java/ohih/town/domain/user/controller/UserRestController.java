@@ -60,19 +60,17 @@ public class UserRestController {
     public RegisterResult register(HttpServletRequest request,
                                    RegisterRequest registerRequest) {
         String VALIDATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_EMAIL);
-        String AUTHENTICATED_EMAIL = (String) SessionManager.getAttributes(request, SessionConst.AUTHENTICATED_EMAIL);
         String VALIDATED_USERNAME = (String) SessionManager.getAttributes(request, SessionConst.VALIDATED_USERNAME);
 
         RegisterResult requestNullCheckResult = userService.hasNullRegisterRequest(registerRequest);
         if (!requestNullCheckResult.getErrorMessages().isEmpty()) {
             return requestNullCheckResult;
         }
-        RegisterResult sessionNullCheckResult = userService.verifySessionValues(VALIDATED_EMAIL, AUTHENTICATED_EMAIL, VALIDATED_USERNAME);
+        RegisterResult sessionNullCheckResult = userService.verifySessionValues(VALIDATED_EMAIL, VALIDATED_USERNAME);
         if (!sessionNullCheckResult.getErrorMessages().isEmpty()) {
             return sessionNullCheckResult;
         }
         RegisterResult requestCheckFieldsResult = userService.checkRegisterRequestFields(VALIDATED_EMAIL,
-                AUTHENTICATED_EMAIL,
                 VALIDATED_USERNAME,
                 registerRequest);
         if (!requestCheckFieldsResult.getErrorMessages().isEmpty()) {

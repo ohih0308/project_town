@@ -2,6 +2,8 @@ package ohih.town.constants;
 
 public interface SuccessConst {
     String EMAIL_VERIFICATION_SUCCESS = "email.verification.success";
+    String VERIFICATION_EMAIL_SENT = "verification.email.sent";
+
     String USER_EMAIL_VALID = "user.email.valid";
     String USER_USERNAME_VALID = "user.username.valid";
     String USER_PASSWORD_VALID = "user.password.valid";

@@ -7,6 +7,7 @@ import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.user.dto.*;
 import ohih.town.domain.user.mapper.UserMapper;
 import ohih.town.utilities.Utilities;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,9 @@ import static ohih.town.constants.SuccessMessagesResourceBundle.SUCCESS_MESSAGES
 @Slf4j
 public class UserService {
     private final UserMapper userMapper;
+
+    @Value("#{filePaths['profile.image.directory']}")
+    private String profileImageDirectory;
 
     ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
     ResourceBundle commonErrorMessageSource = COMMON_ERROR_MESSAGES;
@@ -130,7 +134,6 @@ public class UserService {
     }
 
     public RegisterResult verifySessionValues(String validatedEmail,
-                                              String authenticatedEmail,
                                               String validatedUsername) {
         RegisterResult registerResult = new RegisterResult();
         Map<String, String> errorMessages = new HashMap<>();
@@ -138,30 +141,25 @@ public class UserService {
         if (validatedEmail == null) {
             errorMessages.put(UserConst.VALIDATED_EMAIL, userErrorMessageSource.getString(USER_EMAIL_VALIDATED_NULL));
         }
-        if (authenticatedEmail == null) {
-            errorMessages.put(UserConst.AUTHENTICATED_EMAIL, userErrorMessageSource.getString(USER_EMAIL_AUTHENTICATED_NULL));
-        }
         if (validatedUsername == null) {
             errorMessages.put(UserConst.VALIDATED_USERNAME, userErrorMessageSource.getString(USER_USERNAME_VALIDATED_NULL));
         }
 
         if (!errorMessages.isEmpty()) {
             registerResult.setErrorMessages(errorMessages);
-            registerResult.setResultMessage(commonErrorMessageSource.getString(USER_REGISTER_FAILED));
+            registerResult.setResultMessage(commonErrorMessageSource.getString(USER_REGISTER_FAILURE));
         }
 
         return registerResult;
     }
 
     public RegisterResult checkRegisterRequestFields(String validatedEmail,
-                                                     String authenticatedEmail,
                                                      String validatedUsername,
                                                      RegisterRequest registerRequest) {
         RegisterResult registerResult = new RegisterResult();
         Map<String, String> errorMessages = new HashMap<>();
 
-        if (!validatedEmail.equals(registerRequest.getEmail())
-                || !authenticatedEmail.equals(registerRequest.getEmail())) {
+        if (!validatedEmail.equals(registerRequest.getEmail())) {
             errorMessages.put(UserConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_EMAIL_MISMATCH));
         }
         if (!validatedUsername.equals(registerRequest.getUsername())) {
@@ -289,13 +287,11 @@ public class UserService {
     // profile image
     private ProfileImage extractProfileImageFromRequest(MultipartFile multipartFile, Long userId)
             throws NullPointerException {
-        String filePath = ConfigurationResourceBundle.FILE_PATHS.getString(ConfigurationConst.PROFILE_IMAGE_DIRECTORY);
-
         String savedFileName = Utilities.createCode(UtilityConst.UUID_FULL_INDEX);
         String originalFilename = multipartFile.getOriginalFilename();
         assert originalFilename != null;
-        String extension = filePath.substring(originalFilename.lastIndexOf(".") + 1);
-        String directory = filePath + "/" + savedFileName + "." + extension;
+        String extension = profileImageDirectory.substring(originalFilename.lastIndexOf(".") + 1);
+        String directory = profileImageDirectory + "/" + savedFileName + "." + extension;
 
         ProfileImage profileImage = new ProfileImage();
         profileImage.setSavedFileName(savedFileName);
