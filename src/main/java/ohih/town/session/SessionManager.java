@@ -41,4 +41,13 @@ public class SessionManager {
         }
         return false;
     }
+
+    public static boolean areAttributesNull(String[] attributesNames) {
+        for (String attributeName : attributesNames) {
+            if (attributeName != null) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

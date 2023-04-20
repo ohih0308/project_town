@@ -7,12 +7,10 @@ import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UserConst;
 import ohih.town.constants.ValidationPatterns;
-import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.mail.dto.EmailVerificationResult;
 import ohih.town.domain.mail.dto.MailResult;
 import ohih.town.domain.mail.service.MailService;
-import ohih.town.domain.user.dto.CheckResult;
-import ohih.town.domain.user.service.UserService;
+import ohih.town.domain.common.dto.FieldValidation;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,19 +35,19 @@ public class MailRestController {
 
     private final ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
 
-    private final UserService userService;
+    private final UserServiceImpl2 userServiceImpl2;
     private final MailService mailService;
 
 
     @PostMapping(URLConst.SEND_VERIFICATION_CODE)
     public MailResult sendVerificationCode(HttpServletRequest request, String email) {
         MailResult mailResult = new MailResult(from, email);
-        CheckResult checkResult = userService.checkValidationAndDuplication(ValidationPatterns.EMAIL,
+        FieldValidation fieldValidation = userServiceImpl2.checkValidationAndDuplication(ValidationPatterns.EMAIL,
                 USER_EMAIL_INVALID, USER_EMAIL_DUPLICATED,
                 USER_EMAIL_VALID,
                 UserConst.EMAIL, email);
 
-        if (checkResult.isValid() && checkResult.isDuplicated()) {
+        if (fieldValidation.isValid() && fieldValidation.isDuplicated()) {
             String verificationCode = Utilities.createCode(VERIFICATION_CODE_LENGTH);
 
             mailService.sendVerificationCode(mailResult, email, verificationCode);
@@ -59,7 +57,7 @@ public class MailRestController {
             SessionManager.setAttributes(request, EMAIL_VERIFICATION_REQUEST, email);
         } else {
             mailResult.setResultMessage(userErrorMessageSource.getString(MAIL_VERIFICATION_SENT_FAILURE));
-            mailResult.setErrorMessages(checkResult.getMessages());
+            mailResult.setErrorMessages(fieldValidation.getMessages());
         }
 
         return mailResult;

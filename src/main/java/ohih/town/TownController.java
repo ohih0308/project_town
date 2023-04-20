@@ -10,7 +10,7 @@ import ohih.town.constants.ViewConst;
 import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
 import ohih.town.domain.forum.service.ForumService;
-import ohih.town.domain.post.service.PostService;
+import ohih.town.domain.post.service.PostService123;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
@@ -24,10 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.List;
 
 import static ohih.town.constants.ForumConst.*;
@@ -43,7 +39,7 @@ import static ohih.town.constants.UtilityConst.SEARCH;
 public class TownController {
 
     private final ForumService forumService;
-    private final PostService postService;
+    private final PostService123 postService123;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -119,7 +115,7 @@ public class TownController {
     @GetMapping(URLConst.POST_DETAILS)
     public String getPostDetails(Model model,
                                  @PathVariable Long postId) {
-        model.addAttribute(POST_DETAILS, postService.getPostDetailsByPostId(postId));
+        model.addAttribute(POST_DETAILS, postService123.getPostDetailsByPostId(postId));
         return ViewConst.POST_DETAILS;
     }
 
@@ -136,7 +132,7 @@ public class TownController {
         if (permittedPostId == null || permittedPostId != postId) {
             return "redirect:/post/" + postId;
         } else {
-            model.addAttribute(POST_UPDATE_INFO, postService.getPostUpdateInfoByPostId(postId));
+            model.addAttribute(POST_UPDATE_INFO, postService123.getPostUpdateInfoByPostId(postId));
             return ViewConst.UPDATE_POST_FORM;
         }
     }

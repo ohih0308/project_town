@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.domain.notification.dto.Notification;
 import ohih.town.domain.notification.mapper.NotificationMapper;
 import ohih.town.domain.post.dto.PostAccessInfo;
-import ohih.town.domain.post.mapper.PostMapper;
-import ohih.town.domain.post.service.PostService;
 import org.springframework.stereotype.Service;
 
 import static ohih.town.constants.NotificationConst.NEW_COMMENT;

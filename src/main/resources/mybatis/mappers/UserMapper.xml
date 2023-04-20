@@ -4,105 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="ohih.town.domain.user.mapper.UserMapper">
-    <!--  boolean checkDuplication(Map<String, String> map);  -->
-    <select id="checkDuplication" parameterType="Map" resultType="boolean">
-        select count(#{field})
+
+    <!--  boolean isDuplicated(Map<String, String> map);  -->
+    <select id="isDuplicated" parameterType="Map" resultType="Integer">
+        select count(*)
         from users
         where #{field} = #{value};
     </select>
 
 
-    <!--  boolean isFiledDuplicated(Map<String, String> map);  -->
-    <select id="isFiledDuplicated" parameterType="Map" resultType="boolean">
-        select count(#{field})
-        from users
-        where #{field} = #{value};
-    </select>
-    <!--  boolean registerUser(RegisterRequest registerRequest);  -->
-    <insert id="registerUser" parameterType="RegisterRequest" useGeneratedKeys="true" keyProperty="userId">
-        insert into users (user_type, email, username, password, created_at)
-        values (1, #{email}, #{username}, #{password}, now());
-    </insert>
-    <!--  boolean initializeGuestBookConfig (Long userId);  -->
-    <insert id="initializeGuestBookConfig" parameterType="Long">
-        insert into guestbook_configs (user_id, activation, private_read, member_write, guest_write)
-        values (#{userId}, 1, 0, 1, 1);
-    </insert>
-
-
-    <!--  UserInfo getUserByEmailAndPassword(Map<String, String> map);  -->
-    <select id="getUserByEmailAndPassword" parameterType="Map" resultType="UserInfo">
-        select u.user_id          as userId,
-               u.user_type        as userType,
-               u.email,
-               u.username,
-               pi.saved_file_name as savedFileName,
-               pi.extension,
-               pi.directory
-        from users as u
-                 left join profile_images as pi on u.user_id = pi.user_id
-        where u.email = #{email}
-          and u.password = #{password};
-    </select>
-
-
-    <!--  boolean uploadProfileImage(ProfileImage profileImage);  -->
-    <insert id="uploadProfileImage" parameterType="ProfileImage">
-        INSERT INTO profile_images(saved_file_name, user_id, original_file_name, extension, directory)
-        VALUES (#{savedFile_Name}, #{userId}, #{originalFileName}, #{extension}, #{directory})
-    </insert>
-    <!--  void updateProfileImage(ProfileImage profileImage);  -->
-    <update id="updateProfileImage" parameterType="ProfileImage">
-        update profile_images
-        set saved_file_name    = #{savedFileName},
-            original_file_name = #{originalFileName},
-            extension          = #{extension},
-            directory          = #{directory}
-        where user_id = #{userId}
-    </update>
-    <!--  void deleteProfileImage(Long userId);  -->
-    <delete id="deleteProfileImage" parameterType="Long">
-        delete
-        from profile_image
-        where user_id = #{userId};
-    </delete>
-
-
-    <!--  void updateUsername (Map map);  -->
-    <update id="updateUsername" parameterType="Map">
-        update users
-        set username = #{username}
-        where user_id = #{user_id};
-    </update>
-    <!--  void updatePassword (Map map);  -->
-    <update id="updatePassword" parameterType="Map">
-        update users
-        set password = #{password}
-        where user_id = #{user_id};
-    </update>
-
-
-    <!--  boolean deactivate(Long userId);  -->
-    <delete id="deactivate" parameterType="Long">
-        delete
-        from user
-        where user_id = #{userId};
-    </delete>
-
-
-    <!--  boolean updateGuestbookPermission(GuestbookPermission guestbookPermission);  -->
-    <update id="updateGuestbookPermission" parameterType="GuestbookPermission">
-        UPDATE guestbook_configs
-        SET private_read = #{privateRead},
-            member_write = #{memberWrite},
-            guest_write  = #{guestWrite}
-        WHERE user_id = #{userId}
-    </update>
-
-    <!--  boolean updateGuestbookActivation(Map map);  -->
-    <update id="updateGuestbookActivation" parameterType="Map">
-        update guestbook_configs
-        set activation = #{activation}
-        where user_id = #{user_id};
-    </update>
 </mapper>

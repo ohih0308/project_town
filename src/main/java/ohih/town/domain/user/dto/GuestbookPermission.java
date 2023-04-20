@@ -8,7 +8,7 @@ import lombok.Setter;
 public class GuestbookPermission {
     private Long userId;
 
-    private boolean private_read;
+    private boolean privateRead;
     private boolean memberWrite;
     private boolean guestWrite;
 }

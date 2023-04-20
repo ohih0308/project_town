@@ -12,10 +12,11 @@ import ohih.town.domain.common.service.CommonService;
 import ohih.town.domain.forum.service.ForumService;
 import ohih.town.domain.post.dto.Attachment;
 import ohih.town.domain.post.dto.PostContentInfo;
-import ohih.town.domain.post.service.PostService;
+import ohih.town.domain.post.service.PostService123;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.InvalidAccessException;
 import ohih.town.session.SessionManager;
+import ohih.town.utilities.Utilities;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +33,7 @@ import static ohih.town.utilities.Utilities.getIp;
 public class PostRestController {
 
     private final CommonService commonService;
-    private final PostService postService;
+    private final PostService123 postService123;
     private final ForumService forumService;
 
 
@@ -42,16 +43,16 @@ public class PostRestController {
                                    AuthorInfo authorInfo, PostContentInfo postContentInfo) {
         ActionResult actionResult = new ActionResult();
 
-        List<Attachment> attachments = postService.extractAttachmentsFromPost(postContentInfo.getBoardId(),
+        List<Attachment> attachments = postService123.extractAttachmentsFromPost(postContentInfo.getBoardId(),
                 extractBase64DataFromString(postContentInfo.getBody()));
-        commonService.setAuthor(authorInfo, userInfo, getIp(request));
-        postService.setPostContent(postContentInfo, attachments);
+        Utilities.setAuthor(authorInfo, userInfo, getIp(request));
+        postService123.setPostContent(postContentInfo, attachments);
 
-        if (!postService.checkValidations(actionResult, authorInfo, postContentInfo)) {
+        if (!postService123.checkValidations(actionResult, authorInfo, postContentInfo)) {
             return actionResult;
         }
 
-        postService.uploadPostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
+        postService123.uploadPostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
 
         return actionResult;
     }
@@ -61,7 +62,7 @@ public class PostRestController {
     public SimpleResponse checkPostAccessPermission(HttpServletRequest request,
                                                     @Nullable @SessionAttribute(SessionConst.USER_INFO) UserInfo userInfo,
                                                     Long postId, String password) {
-        SimpleResponse simpleResponse = postService.checkPostAccessPermission(userInfo, password, postId);
+        SimpleResponse simpleResponse = postService123.checkPostAccessPermission(userInfo, password, postId);
         if (simpleResponse.getSuccess()) {
             SessionManager.setAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID, postId);
         }
@@ -80,20 +81,18 @@ public class PostRestController {
             throw new InvalidAccessException();
         }
 
-
-        List<Attachment> attachments = postService.extractAttachmentsFromPost(postContentInfo.getBoardId(),
+        List<Attachment> attachments = postService123.extractAttachmentsFromPost(postContentInfo.getBoardId(),
                 extractBase64DataFromString(postContentInfo.getBody()));
-        commonService.setAuthor(authorInfo, userInfo, getIp(request));
-        postService.setPostContent(postContentInfo, attachments);
+        Utilities.setAuthor(authorInfo, userInfo, getIp(request));
+        postService123.setPostContent(postContentInfo, attachments);
 
-
-        if (!postService.checkValidations(actionResult, authorInfo, postContentInfo)) {
+        if (!postService123.checkValidations(actionResult, authorInfo, postContentInfo)) {
             return actionResult;
         }
 
 
         // access validated post id session check
-        postService.updatePostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
+        postService123.updatePostExceptionHandler(actionResult, attachments, authorInfo, postContentInfo);
         SessionManager.removeAttribute(request, SessionConst.ACCESS_PERMITTED_POST_ID);
 
         return actionResult;
@@ -109,7 +108,7 @@ public class PostRestController {
             throw new InvalidAccessException();
         }
 
-        postService.deletePostExceptionHandler(actionResult, postId, forumService.getBoardNameByPostId(postId));
+        postService123.deletePostExceptionHandler(actionResult, postId, forumService.getBoardNameByPostId(postId));
 
         return actionResult;
     }

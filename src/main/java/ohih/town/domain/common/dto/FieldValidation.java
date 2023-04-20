@@ -1,16 +1,13 @@
-package ohih.town.domain.user.dto;
+package ohih.town.domain.common.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.Map;
 
 @Getter
 @Setter
-@ToString
-public class CheckResult {
-
+public class FieldValidation {
     private boolean isValid;
     private boolean isDuplicated;
 

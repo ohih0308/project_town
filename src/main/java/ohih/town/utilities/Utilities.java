@@ -4,11 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import ohih.town.constants.AllowedExtensionList;
 import ohih.town.constants.ConfigurationConst;
 import ohih.town.constants.PagingConst;
+import ohih.town.constants.UserConst;
+import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.post.dto.Attachment;
+import ohih.town.domain.common.dto.FieldValidation;
+import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -73,14 +76,6 @@ public class Utilities {
         return new Paging(totalCount, totalPages, startPage, endPage, presentPage, firstContent, itemsPerPage);
     }
 
-    public static Boolean isValidPattern(Pattern pattern, String input) {
-        if (input == null) {
-            return false;
-        }
-        Matcher matcher = pattern.matcher(input);
-        return matcher.matches();
-    }
-
     public static boolean checkValidation(Pattern pattern, String input) {
         if (input == null) {
             return false;
@@ -88,16 +83,6 @@ public class Utilities {
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
     }
-
-//    public static boolean checkObjectContainsNull (Object object) throws IllegalAccessException {
-//        for (Field field : object.getClass().getDeclaredFields()) {
-//            field.setAccessible(true);
-//            if (field.get(object) == null) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public static String createCode(int length) {
         UUID uuid = UUID.randomUUID();
@@ -156,5 +141,44 @@ public class Utilities {
         if (fileSize > ConfigurationConst.FILE_MAX_SIZE) {
             throw new FileSizeExceedLimitException();
         }
+    }
+
+
+    public static void setAuthor(AuthorInfo authorInfo, UserInfo userInfo, String ip) {
+        authorInfo.setIp(ip);
+        if (userInfo == null) {
+            authorInfo.setUserType(UserConst.USER_TYPE_GUEST);
+        } else {
+            authorInfo.setUserId(userInfo.getUserId());
+            authorInfo.setUserType(userInfo.getUserType());
+            authorInfo.setAuthor(userInfo.getUsername());
+            authorInfo.setPassword("");
+        }
+    }
+
+    public static FieldValidation checkValidation(Pattern pattern, String field, String input,
+                                                  String validMessage,
+                                                  String invalidMessage) {
+        FieldValidation fieldValidation = new FieldValidation();
+        Map<String, String> messages = new HashMap<>();
+
+        fieldValidation.setValid(checkValidation(pattern, input));
+
+        if (fieldValidation.isValid()) {
+            messages.put(field, validMessage);
+        } else {
+            messages.put(field, invalidMessage);
+        }
+
+        fieldValidation.setMessages(messages);
+        return fieldValidation;
+    }
+
+    public static Map<String, String> checkAuthor(AuthorInfo authorInfo) {
+        Map<String, String> messages = new HashMap<>();
+
+
+
+        return messages;
     }
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 @Setter
 public class ActionResult {
 
-    private Boolean success;
+    private boolean success;
     private Long postId;
 
     private String successMessage;
