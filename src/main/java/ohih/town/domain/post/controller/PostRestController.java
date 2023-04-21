@@ -9,7 +9,7 @@ import ohih.town.domain.SimpleResponse;
 import ohih.town.domain.common.dto.ActionResult;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.common.service.CommonService;
-import ohih.town.domain.forum.service.ForumService;
+import ohih.town.domain.forum.service.ForumService123;
 import ohih.town.domain.post.dto.Attachment;
 import ohih.town.domain.post.dto.PostContentInfo;
 import ohih.town.domain.post.service.PostService123;
@@ -34,7 +34,7 @@ public class PostRestController {
 
     private final CommonService commonService;
     private final PostService123 postService123;
-    private final ForumService forumService;
+    private final ForumService123 forumService123;
 
 
     @PostMapping(URLConst.UPLOAD_POST)
@@ -108,7 +108,7 @@ public class PostRestController {
             throw new InvalidAccessException();
         }
 
-        postService123.deletePostExceptionHandler(actionResult, postId, forumService.getBoardNameByPostId(postId));
+        postService123.deletePostExceptionHandler(actionResult, postId, forumService123.getBoardNameByPostId(postId));
 
         return actionResult;
     }

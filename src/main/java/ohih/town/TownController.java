@@ -9,7 +9,7 @@ import ohih.town.constants.URLConst;
 import ohih.town.constants.ViewConst;
 import ohih.town.domain.forum.dto.BoardPost;
 import ohih.town.domain.forum.dto.Forum;
-import ohih.town.domain.forum.service.ForumService;
+import ohih.town.domain.forum.service.ForumService123;
 import ohih.town.domain.post.service.PostService123;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Paging;
@@ -38,7 +38,7 @@ import static ohih.town.constants.UtilityConst.SEARCH;
 @Slf4j
 public class TownController {
 
-    private final ForumService forumService;
+    private final ForumService123 forumService123;
     private final PostService123 postService123;
 
     @Autowired
@@ -81,7 +81,7 @@ public class TownController {
 
     @GetMapping(URLConst.FORUM_SELECTION)
     public String getAllForums(Model model) {
-        List<Forum> forums = forumService.getAllForums();
+        List<Forum> forums = forumService123.getAllForums();
 
         model.addAttribute(FORUM, forums);
         return ViewConst.FORUM_SELECTION;
@@ -98,10 +98,10 @@ public class TownController {
     public String getBoardPage(Model model,
                                @PathVariable String boardName,
                                Integer presentPage, Search search) {
-        Long boardPostTotalCount = forumService.getBoardPostTotalCount(boardName, search);
+        Long boardPostTotalCount = forumService123.getBoardPostTotalCount(boardName, search);
 
         Paging paging = Utilities.getPaging(boardPostTotalCount, presentPage, postsPerPage);
-        List<BoardPost> boardPosts = forumService.getBoardPosts(paging, search, boardName);
+        List<BoardPost> boardPosts = forumService123.getBoardPosts(paging, search, boardName);
 
         model.addAttribute(BOARD_NAME, boardName);
         model.addAttribute(PAGING, paging);
@@ -140,7 +140,7 @@ public class TownController {
     @PostMapping(URLConst.DELETE_POST_FORM)
     public String deletePost(HttpServletRequest request,
                              @PathVariable Long postId) {
-        String boardName = forumService.getBoardNameByPostId(postId);
+        String boardName = forumService123.getBoardNameByPostId(postId);
         Long permittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
 
         if (permittedPostId == null || permittedPostId != postId) {
