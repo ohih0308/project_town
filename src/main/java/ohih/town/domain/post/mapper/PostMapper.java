@@ -7,6 +7,9 @@ import java.util.List;
 
 @Mapper
 public interface PostMapper {
+    Long getUserIdByPostId(Long postId);
+
+
     List<Attachment> getAttachmentByPostId(Long postId);
 
     boolean uploadAttachment(Attachment attachment);

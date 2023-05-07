@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProfileImageActionResult {
+public class ProfileImageResult {
     private boolean success;
-    private String message;
-    private ProfileImage profileImage;
+    private String resultMessage;
+    private String profileImageDirectory;
 }

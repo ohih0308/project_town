@@ -3,27 +3,11 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <typeAliases>
-        <typeAlias type="ohih.town.domain.forum.dto.Forum" alias="Forum"/>
-
         <typeAlias type="ohih.town.domain.user.dto.RegisterRequest" alias="RegisterRequest"/>
-        <typeAlias type="ohih.town.domain.user.dto.LoginResult" alias="LoginResult"/>
+        <typeAlias type="ohih.town.domain.user.dto.UserInfo" alias="UserInfo"/>
         <typeAlias type="ohih.town.domain.user.dto.ProfileImage" alias="ProfileImage"/>
         <typeAlias type="ohih.town.domain.user.dto.GuestbookPermission" alias="GuestbookPermission"/>
 
-        <typeAlias type="ohih.town.domain.post.dto.Attachment" alias="Attachment"/>
-        <typeAlias type="ohih.town.domain.post.dto.Thumbnail" alias="Thumbnail"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostUploadRequest" alias="PostUploadRequest"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostAccessInfo" alias="PostAccessInfo"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostUpdateRequest" alias="PostUpdateRequest"/>
-        <typeAlias type="ohih.town.domain.post.dto.PostUpdateInfo" alias="PostUpdateInfo"/>
-
-        <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
-        <typeAlias type="ohih.town.domain.forum.dto.BoardPost" alias="BoardPost"/>
-
-        <typeAlias type="ohih.town.domain.comment.dto.CommentUploadRequest" alias="CommentUploadRequest"/>
-        <typeAlias type="ohih.town.domain.comment.dto.CommentAccessInfo" alias="CommentAccessInfo"/>
-
-        <typeAlias type="ohih.town.domain.notification.dto.Notification" alias="Notification"/>
     </typeAliases>
 
     <mappers>

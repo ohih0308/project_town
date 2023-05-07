@@ -8,6 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface CommentMapper {
+    boolean isPostIdExists(Long postId);
+
     boolean uploadComment(CommentUploadRequest commentUploadRequest);
 
     CommentAccessInfo getCommentAccessInfoByCommentId(Long commentId);

@@ -11,4 +11,7 @@ public interface UtilityConst {
     String VALUE = "value";
 
     String MESSAGE = "message";
+
+    String COMMENT = "comment";
+
 }

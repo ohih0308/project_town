@@ -4,8 +4,7 @@ public interface SessionConst {
     String EMAIL_VERIFICATION_REQUEST = "email_verification_request";
     String EMAIL_VERIFICATION_CODE = "email_verification_code";
 
-    String VALIDATED_EMAIL = "validate_email";
-    String VALIDATED_USERNAME = "validated_username";
+    String VERIFIED_EMAIL = "verified_email";
 
     String USER_INFO = "userInfo";
 

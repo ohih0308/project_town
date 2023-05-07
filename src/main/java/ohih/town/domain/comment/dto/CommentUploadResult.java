@@ -1,4 +1,4 @@
-package ohih.town.domain.user.dto;
+package ohih.town.domain.comment.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,9 +8,11 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class RegisterResult {
-    private boolean isRegistered;
+public class CommentUploadResult {
+    boolean isUploaded;
     private Map<String, String> errorMessages = new HashMap<>();
     private String resultMessage;
-    private String redirectUrl;
+
+    private Long postId;
+    private Long commentId;
 }

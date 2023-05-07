@@ -1,4 +1,4 @@
-package ohih.town.domain.mail.dto;
+package ohih.town.domain.user.dto;
 
 import lombok.*;
 

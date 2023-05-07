@@ -4,16 +4,13 @@ public interface URLConst {
     String RETURN_MESSAGE = "return-message";
 
     String HOME = "/";
-    String REGISTER_URL = "/register";
 
     String SEND_VERIFICATION_CODE = "/send/verification-code";
-    String VERIFY_EMAIL_CODE = "/verify/email-code";
-
-    String CHECK_USERNAME = "/check/username";
-
-    String CHECK_PASSWORD = "/check/password";
-
-    String CHECK_CONFIRM_PASSWORD = "/check/confirm-password";
+    String VERIFY_EMAIL = "/verify/email";
+    String VERIFY_USERNAME = "/verify/username";
+    String VERIFY_PASSWORD = "/verify/password";
+    String VERIFY_PASSWORD_CONFIRMATION = "/verify/password-confirmation";
+    String REGISTER = "/register";
 
     String LOGIN = "/login";
     String LOGOUT = "/logout";
@@ -37,10 +34,10 @@ public interface URLConst {
     String UPDATE_POST = "/update/post";
     String DELETE_POST_FORM = "/delete/post-form";
     String DELETE_POST = "/delete/post";
-    String CHECK_POST_PERMISSION = "/check/post/permission";
+    String ACCESS_PERMISSION_POST = "/access-permission/post/";
 
 
     String UPLOAD_COMMENT = "/upload/comment";
     String DELETE_COMMENT = "/delete/comment";
-    String CHECK_COMMENT_PERMISSION = "/check/comment/permission";
+    String ACCESS_PERMISSION_COMMENT = "/access-permission/comment/";
 }

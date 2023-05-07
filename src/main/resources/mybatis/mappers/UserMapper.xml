@@ -9,8 +9,79 @@
     <select id="isDuplicated" parameterType="Map" resultType="Integer">
         select count(*)
         from users
-        where #{field} = #{value};
+        where
+        <choose>
+            <when test="field == 'email'">
+                email = #{value}
+            </when>
+            <when test="field == 'username'">
+                username = #{value}
+            </when>
+        </choose>
     </select>
+
+    <!--  void registerUser(RegisterRequest registerRequest);  -->
+    <insert id="registerUser" parameterType="RegisterRequest" useGeneratedKeys="true" keyProperty="userId">
+        insert into users (user_type, email, username, password, created_at)
+        values (2, #{email}, #{username}, #{password}, now());
+    </insert>
+
+    <!--  boolean initGuestbookConfigs(Long userId);  -->
+    <insert id="initGuestbookConfigs" parameterType="Long">
+        insert into guestbook_configs (user_id, activation, private_read, member_write, guest_write)
+        values (#{userId}, 1, 0, 1, 1);
+    </insert>
+
+    <!--  UserInfo login(Map<String, String> map);  -->
+    <select id="login" parameterType="Map" resultType="UserInfo">
+        select u.user_id as userId, u.user_type as userType, u.email, u.username, pi.directory
+        from users as u
+                 left join profile_images as pi on u.user_id = pi.user_id
+        where email = #{email}
+          and password = #{password};
+    </select>
+
+    <!--  Integer uploadProfileImage(ProfileImage profileImage);  -->
+    <insert id="uploadProfileImage" parameterType="ProfileImage">
+        insert into profile_images (saved_file_name, user_id, original_file_name, extension, directory)
+        values (#{savedFileName}, #{userId}, #{originalFileName}, #{extension}, #{directory});
+    </insert>
+
+    <!--  boolean updateProfileImage(String directory);  -->
+    <update id="updateProfileImage" parameterType="ProfileImage">
+        update users
+        set saved_file_name    = #{savedFileName},
+            original_file_name = #{originalFileName},
+            extension          = #{extension},
+            directory          = #{directory}
+        where user_id = #{userId};
+    </update>
+
+    <!--  boolean deleteProfileImage(String directory);  -->
+    <delete id="deleteProfileImage" parameterType="String">
+        delete
+        from profile_images
+        where directory = #{directory};
+    </delete>
+
+    <!--  boolean updateUserInfo(Map<String, String> map);  -->
+    <update id="updateUserInfo" parameterType="Map">
+        update users
+        set #{field} = #{value}
+        where user_id = #{user_id};
+    </update>
+
+    <!--  boolean updateGuestbookPermission(GuestbookPermission guestbookPermission);  -->
+    <update id="updateGuestbookPermission" parameterType="GuestbookPermission">
+        update guestbook_congifs
+        set private_read = #{privateRead},
+            member_write = #{memberWrite},
+            guest_write  = #{guestWrite}
+        where user_id = #{userId};
+    </update>
+
+    <!--  boolean updateGuestbookActivation(Map<String, Object> map);  -->
+
 
 
 </mapper>

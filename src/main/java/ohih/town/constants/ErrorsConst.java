@@ -1,6 +1,8 @@
 package ohih.town.constants;
 
 public interface ErrorsConst {
+
+
     String DATABASE_UPDATE_ERROR = "database.update.error";
     String DATABASE_DELETE_ERROR = "database.delete.error";
 
@@ -9,10 +11,11 @@ public interface ErrorsConst {
 
     // Mail
     String MAIL_VERIFICATION_SENT_FAILURE = "mail.verification.sent.failure";
-    String MAIL_VERIFICATION_EMAIL_MISMATCH = "mail.verification.email_mismatch";
+    String MAIL_VERIFICATION_EMAIL_MISMATCH = "mail.verification.email.mismatch";
+    String MAIL_VERIFICATION_CODE_MISMATCH = "mail.verification.code.mismatch";
     String MAIL_VERIFICATION_REQUEST_NOTFOUND = "mail.verification.request.notfound";
     String MAIL_VERIFICATION_EMAIL_NOT_SENT = "mail.verification.email.not.sent";
-    String MAIL_VERIFICATION_CODE_NULL = "mail.verification_code.null";
+    String MAIL_VERIFICATION_CODE_NULL = "mail.verification.code.null";
     String MAIL_VERIFICATION_EMAIL_FAILURE = "mail.verification.email.failure";
 
     // Email
@@ -32,8 +35,8 @@ public interface ErrorsConst {
     // Password
     String USER_PASSWORD_NULL = "user.password.null";
     String USER_PASSWORD_INVALID = "user.password.invalid";
-    String USER_CONFIRM_PASSWORD_INVALID = "user.confirm_password.invalid";
-    String USER_CONFIRM_PASSWORD_NULL = "user.confirm_password.null";
+    String USER_PASSWORD_CONFIRMATION_INVALID = "user.password_confirmation.invalid";
+    String USER_PASSWORD_CONFIRMATION_NULL = "user.password_confirmation.null";
 
     // Register
     String USER_REGISTER_FAILURE = "user.register.failure";
@@ -71,9 +74,15 @@ public interface ErrorsConst {
     String POST_EXISTENCE_ERROR = "post.existence.error";
     String POST_DELETE_ERROR = "post.delete.error";
 
-    String COMMENT_INVALID = "comment.invalid";
-    String COMMENT_UPLOAD_SQL_EXCEPTION = "comment.upload.sql.exception";
-    String COMMENT_PERMISSION_ERROR = "comment.permission.error";
-    String COMMENT_EXISTENCE_ERROR = "comment.existence.error";
-    String COMMENT_DELETE_SQL_EXCEPTION = "comment.delete.sql.exception";
+
+    // Comment
+    String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";
+    String COMMENT_AUTHOR_INVALID = "comment.author.invalid";
+    String COMMENT_PASSWORD_INVALID = "comment.password.invalid";
+    String COMMENT_COMMENT_INVALID = "comment.comment.invalid";
+
+    String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
+
+    String COMMENT_ACCESS_DENIED =  "comment.access.denied";
+    String COMMENT_DELETE_FAILURE = "comment.delete.failure";
 }

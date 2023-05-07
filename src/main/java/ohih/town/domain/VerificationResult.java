@@ -1,14 +1,16 @@
-package ohih.town.domain.user.dto;
+package ohih.town.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Map;
 
 @Getter
 @Setter
-public class EmailVerificationResult {
-    private Boolean isVerified;
+@ToString
+public class VerificationResult {
+    private boolean isVerified;
 
     private Map<String, String> messages;
     private String verifiedValue;

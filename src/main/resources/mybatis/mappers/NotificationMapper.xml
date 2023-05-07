@@ -6,7 +6,7 @@
 <mapper namespace="ohih.town.domain.notification.mapper.NotificationMapper">
     <!--  boolean createNotification(Notification notification);  -->
     <insert id="createNotification" parameterType="Notification" useGeneratedKeys="true" keyProperty="notificationId">
-        insert into notifications (user_id, type, message, created_at, updated_at)
-        values (#{userId}, #{type}, #{message}, now(), now());
+        insert into notifications (user_id, type, message, redirect_url, created_at, updated_at)
+        values (#{userId}, #{type}, #{message}, #{redirectUrl}, now(), now());
     </insert>
 </mapper>

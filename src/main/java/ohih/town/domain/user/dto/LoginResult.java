@@ -12,7 +12,7 @@ import java.util.Map;
 @Setter
 public class LoginResult {
 
-    private boolean success;
+    private boolean isLoggedIn;
     private String resultMessage;
     private Map<String, String> errorMessages = new HashMap<>();
     private String redirectUrl = URLConst.LOGIN;

@@ -1,13 +1,9 @@
 package ohih.town.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
-import ohih.town.constants.AllowedExtensionList;
-import ohih.town.constants.ConfigurationConst;
-import ohih.town.constants.PagingConst;
-import ohih.town.constants.UserConst;
+import ohih.town.constants.*;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.post.dto.Attachment;
-import ohih.town.domain.common.dto.FieldValidation;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.FileSizeExceedLimitException;
 import ohih.town.exception.NotAllowedExtensionException;
@@ -76,7 +72,7 @@ public class Utilities {
         return new Paging(totalCount, totalPages, startPage, endPage, presentPage, firstContent, itemsPerPage);
     }
 
-    public static boolean checkValidation(Pattern pattern, String input) {
+    public static boolean isValidated(Pattern pattern, String input) {
         if (input == null) {
             return false;
         }
@@ -106,8 +102,8 @@ public class Utilities {
         return attachments;
     }
 
-    public static String extractExtension(String file) {
-        return file.substring(file.indexOf('/') + 1, file.indexOf(';'));
+    public static String extractExtension(String fileName) {
+        return fileName.substring(fileName.indexOf('/') + 1, fileName.indexOf(';'));
     }
 
     public static String replaceAttachmentsInBody(String body, Attachment attachment, String ENCODE_TYPE) {
@@ -147,38 +143,12 @@ public class Utilities {
     public static void setAuthor(AuthorInfo authorInfo, UserInfo userInfo, String ip) {
         authorInfo.setIp(ip);
         if (userInfo == null) {
-            authorInfo.setUserType(UserConst.USER_TYPE_GUEST);
+            authorInfo.setUserType(DomainConst.USER_TYPE_GUEST);
         } else {
             authorInfo.setUserId(userInfo.getUserId());
             authorInfo.setUserType(userInfo.getUserType());
             authorInfo.setAuthor(userInfo.getUsername());
             authorInfo.setPassword("");
         }
-    }
-
-    public static FieldValidation checkValidation(Pattern pattern, String field, String input,
-                                                  String validMessage,
-                                                  String invalidMessage) {
-        FieldValidation fieldValidation = new FieldValidation();
-        Map<String, String> messages = new HashMap<>();
-
-        fieldValidation.setValid(checkValidation(pattern, input));
-
-        if (fieldValidation.isValid()) {
-            messages.put(field, validMessage);
-        } else {
-            messages.put(field, invalidMessage);
-        }
-
-        fieldValidation.setMessages(messages);
-        return fieldValidation;
-    }
-
-    public static Map<String, String> checkAuthor(AuthorInfo authorInfo) {
-        Map<String, String> messages = new HashMap<>();
-
-
-
-        return messages;
     }
 }

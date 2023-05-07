@@ -9,5 +9,6 @@ import java.util.Map;
 @Setter
 public class UserInfoUpdateResult {
     private boolean success;
-    private Map<String, String> messages;
+    private Map<String, String> errorMessages;
+    private String resultMessage;
 }

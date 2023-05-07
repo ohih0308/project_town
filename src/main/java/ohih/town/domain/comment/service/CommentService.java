@@ -1,6 +1,11 @@
 package ohih.town.domain.comment.service;
 
+import ohih.town.domain.AccessPermissionCheckResult;
+import ohih.town.domain.VerificationResult;
 import ohih.town.domain.comment.dto.CommentContentInfo;
+import ohih.town.domain.comment.dto.CommentDeleteResult;
+import ohih.town.domain.comment.dto.CommentUploadRequest;
+import ohih.town.domain.comment.dto.CommentUploadResult;
 import ohih.town.domain.common.dto.AuthorInfo;
 
 public interface CommentService {
@@ -10,14 +15,15 @@ public interface CommentService {
      *   AuthorInfo, CommentContentInfo
      * */
 
-    void uploadComment(AuthorInfo authorInfo, CommentContentInfo commentContentInfo);
+    VerificationResult verifyCommentUploadRequest(CommentUploadRequest commentUploadRequest);
 
-    void deleteComment(Long commentId);
+    CommentUploadResult uploadComment(CommentUploadRequest commentUploadRequest);
+
+    CommentDeleteResult deleteComment(Long accessPermittedCommentId, Long commentId);
 
     void deleteCommentsByPostId(Long postId);
 
-
-    boolean checkAccessPermission(Long userId, String password, Long commentId);
+    AccessPermissionCheckResult checkAccessPermission(Long userId, Long commentId, String password);
 
     Integer getTotalCountsByPostId(Long postId);
 

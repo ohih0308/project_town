@@ -8,6 +8,8 @@ public interface ValidationPatterns {
     Pattern USERNAME = Pattern.compile("^[a-zA-Z0-9_-]{3,50}$");
     Pattern PASSWORD = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z0-9\\d]{8,50}$");
 
+    Pattern GUEST_PASSWORD = Pattern.compile("^[a-zA-Z0-9]{4,16}$");
+
     Pattern SUBJECT = Pattern.compile("^\\S.{5,50}\\S$");
     Pattern BODY = Pattern.compile("^\\S.{5,20000}\\S$");
 
