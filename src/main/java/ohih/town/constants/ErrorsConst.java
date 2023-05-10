@@ -59,20 +59,12 @@ public interface ErrorsConst {
 
 
     // Post
+    String POST_AUTHOR_INVALID = "post.author.invalid";
+    String POST_PASSWORD_INVALID = "post.password.invalid";
     String POST_SUBJECT_INVALID = "post.subject.invalid";
     String POST_BODY_INVALID = "post.body.invalid";
 
-
-    String POST_UPLOAD_IO_EXCEPTION = "post.upload.io.exception";
-    String POST_UPLOAD_SQL_EXCEPTION = "post.update.sql.exception";
-    String POST_UPDATE_IO_EXCEPTION = "post.update.io.exception";
-    String POST_UPDATE_SQL_EXCEPTION = "post.upload.sql.exception";
-    String POST_DELETE_PARTIAL_EXCEPTION = "post.delete.partial.exception";
-    String UPLOAD_ATTACHMENT_EXTENSION_ERROR = "upload.attachment.extension.error";
-    String UPLOAD_ATTACHMENT_SIZE_ERROR = "upload.attachment.size.error";
-    String POST_PERMISSION_ERROR = "post.permission.error";
-    String POST_EXISTENCE_ERROR = "post.existence.error";
-    String POST_DELETE_ERROR = "post.delete.error";
+    String POST_UPLOAD_FAILURE = "post.upload.failure";
 
 
     // Comment
@@ -83,6 +75,6 @@ public interface ErrorsConst {
 
     String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
 
-    String COMMENT_ACCESS_DENIED =  "comment.access.denied";
+    String COMMENT_ACCESS_DENIED = "comment.access.denied";
     String COMMENT_DELETE_FAILURE = "comment.delete.failure";
 }

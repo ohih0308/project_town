@@ -17,7 +17,7 @@ public interface PostMapper {
     boolean deleteAttachmentsByFileName(String fileName);
 
 
-    boolean setThumbnail(Thumbnail thumbnail);
+    boolean uploadThumbnail(Attachment attachment);
 
     void deleteThumbnailByPostId(Long postId);
 

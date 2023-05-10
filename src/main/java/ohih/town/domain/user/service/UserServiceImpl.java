@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static ohih.town.constants.DomainConst.*;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.SuccessConst.*;
-import static ohih.town.constants.DomainConst.*;
 
 @Service
 @Slf4j

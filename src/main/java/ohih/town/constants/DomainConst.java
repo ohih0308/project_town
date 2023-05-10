@@ -1,6 +1,8 @@
 package ohih.town.constants;
 
 public interface DomainConst {
+    String VALID_GUEST_PASSWORD = "validGuestPassword";
+
     String FORUM = "forum";
     String BOARD_NAME = "board_name";
     String BOARD_POSTS = "board_posts";

@@ -71,6 +71,4 @@ public class CommentRestController {
 
         return commentService.deleteComment(accessPermittedCommentId, commentId);
     }
-
-
 }

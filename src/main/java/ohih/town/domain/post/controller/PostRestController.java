@@ -1,8 +1,18 @@
 package ohih.town.domain.post.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ohih.town.constants.URLConst;
+import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.domain.post.dto.PostContentInfo;
+import ohih.town.domain.post.dto.PostUploadResult;
+import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.utilities.Utilities;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,4 +96,15 @@ public class PostRestController {
 //
 //        return actionResult;
 //    }
+
+    @PostMapping(URLConst.UPLOAD_POST)
+    public PostUploadResult uploadPost(HttpServletRequest request,
+                                       @Nullable @SessionAttribute UserInfo userInfo,
+                                       AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        String ip = Utilities.getIp(request);
+        Utilities.setAuthor(authorInfo, userInfo, ip);
+
+
+        return null;
+    }
 }

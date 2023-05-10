@@ -31,8 +31,8 @@
     </delete>
 
 
-    <!--  boolean setThumbnail(Thumbnail thumbnail);  -->
-    <insert id="setThumbnail" parameterType="Thumbnail">
+    <!--  boolean uploadThumbnail(Attachment attachment);  -->
+    <insert id="uploadThumbnail" parameterType="Attachment">
         insert into thumbnails (post_id, file_name, directory)
         values (#{postId}, #{fileName}, #{directory});
     </insert>

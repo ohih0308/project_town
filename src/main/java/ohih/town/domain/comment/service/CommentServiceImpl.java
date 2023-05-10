@@ -36,16 +36,16 @@ public class CommentServiceImpl implements CommentService {
         Map<String, String> messages = new HashMap<>();
 
         if (!commentMapper.isPostIdExists(commentUploadRequest.getPostId())) {
-            messages.put(DomainConst.POST_ID, userErrorMessageSource.getString(ErrorsConst.COMMENT_POST_ID_INVALID));
+            messages.put(DomainConst.POST_ID, commentErrorMessageSource.getString(ErrorsConst.COMMENT_POST_ID_INVALID));
         }
         if (commentUploadRequest.getAuthor() == null) {
-            messages.put(DomainConst.AUTHOR, userErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, commentErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
         }
         if (commentUploadRequest.getPassword() == null) {
-            messages.put(DomainConst.PASSWORD, userErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, commentErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
         }
         if (commentUploadRequest.getComment() == null) {
-            messages.put(UtilityConst.COMMENT, userErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, commentErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
         }
 
         if (!messages.isEmpty()) {
@@ -59,13 +59,13 @@ public class CommentServiceImpl implements CommentService {
         boolean commentValidation = Utilities.isValidated(ValidationPatterns.COMMENT, commentUploadRequest.getComment());
 
         if (!authorValidation) {
-            messages.put(DomainConst.AUTHOR, userErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, commentErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
         }
         if (!passwordValidation) {
-            messages.put(DomainConst.PASSWORD, userErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, commentErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
         }
         if (!commentValidation) {
-            messages.put(UtilityConst.COMMENT, userErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, commentErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
         }
 
         if (messages.isEmpty()) {
@@ -84,7 +84,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!verificationResult.isVerified()) {
             commentUploadResult.setErrorMessages(verificationResult.getMessages());
-            commentUploadResult.setResultMessage(userErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentUploadResult.setResultMessage(commentErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
             return commentUploadResult;
         }
 
@@ -96,10 +96,38 @@ public class CommentServiceImpl implements CommentService {
             commentUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentUploadResult.setResultMessage(userErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentUploadResult.setResultMessage(commentErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
         }
 
         return commentUploadResult;
+    }
+
+    @Override
+    public AccessPermissionCheckResult checkAccessPermission(Long userId, Long commentId, String password) {
+        AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
+        accessPermissionCheckResult.setId(commentId);
+
+        CommentAccessInfo commentAccessInfo = commentMapper.getCommentAccessInfoByCommentId(commentId);
+
+        boolean isAccessible = false;
+        accessPermissionCheckResult.setMessage(commentErrorMessageSource.getString(COMMENT_ACCESS_DENIED));
+
+        if (Objects.equals(commentAccessInfo.getUserType(), USER_TYPE_GUEST)) {
+            if (Objects.equals(commentAccessInfo.getPassword(), password)) {
+                isAccessible = true;
+            }
+        } else {
+            if (Objects.equals(commentAccessInfo.getUserId(), userId)) {
+                isAccessible = true;
+            }
+        }
+
+        if (isAccessible) {
+            accessPermissionCheckResult.setAccessible(true);
+            accessPermissionCheckResult.setMessage(SUCCESS_MESSAGES.getString(COMMENT_ACCESS_PERMITTED));
+        }
+
+        return accessPermissionCheckResult;
     }
 
     @Override
@@ -129,34 +157,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteCommentsByPostId(Long postId) {
 
-    }
-
-    @Override
-    public AccessPermissionCheckResult checkAccessPermission(Long userId, Long commentId, String password) {
-        AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
-        accessPermissionCheckResult.setId(commentId);
-
-        CommentAccessInfo commentAccessInfo = commentMapper.getCommentAccessInfoByCommentId(commentId);
-
-        boolean isAccessible = false;
-        accessPermissionCheckResult.setMessage(commentErrorMessageSource.getString(COMMENT_ACCESS_DENIED));
-
-        if (Objects.equals(commentAccessInfo.getUserType(), USER_TYPE_GUEST)) {
-            if (Objects.equals(commentAccessInfo.getPassword(), password)) {
-                isAccessible = true;
-            }
-        } else {
-            if (Objects.equals(commentAccessInfo.getUserId(), userId)) {
-                isAccessible = true;
-            }
-        }
-
-        if (isAccessible) {
-            accessPermissionCheckResult.setAccessible(true);
-            accessPermissionCheckResult.setMessage(SUCCESS_MESSAGES.getString(COMMENT_ACCESS_PERMITTED));
-        }
-
-        return accessPermissionCheckResult;
     }
 
 

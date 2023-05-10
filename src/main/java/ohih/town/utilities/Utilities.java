@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ohih.town.constants.DomainConst.VALID_GUEST_PASSWORD;
+import static ohih.town.constants.EncodeTypeConst.BASE_64;
+
 public class Utilities {
     private static final String CLASS_PATH = "src/main/resources/static/";
     private static final String BASE_64_PATTERN_OPEN = "data:image/";
@@ -86,10 +89,10 @@ public class Utilities {
         return uuid.toString().substring(0, length);
     }
 
-    public static List<String> extractBase64DataFromString(String body) {
+    public static List<String> extractImages(String str) {
         List<String> attachments = new ArrayList<>();
         Pattern pattern = Pattern.compile("<img[^>]*src=[\"']?([^>\"']+)[\"']?[^>]*>");
-        Matcher matcher = pattern.matcher(body);
+        Matcher matcher = pattern.matcher(str);
         while (matcher.find()) {
             String imgSrc = matcher.group(1);
             if (imgSrc.startsWith("data:image")) { // base64 인코딩된 이미지인 경우
@@ -106,10 +109,10 @@ public class Utilities {
         return fileName.substring(fileName.indexOf('/') + 1, fileName.indexOf(';'));
     }
 
-    public static String replaceAttachmentsInBody(String body, Attachment attachment, String ENCODE_TYPE) {
+    public static String replaceAttachments(String body, Attachment attachment) {
         String originalText = BASE_64_PATTERN_OPEN +
                 attachment.getExtension() + ";" +
-                ENCODE_TYPE + "," +
+                BASE_64 + "," +
                 attachment.getImageData();
 
         String newText = attachment.getDirectory().substring(
@@ -148,7 +151,7 @@ public class Utilities {
             authorInfo.setUserId(userInfo.getUserId());
             authorInfo.setUserType(userInfo.getUserType());
             authorInfo.setAuthor(userInfo.getUsername());
-            authorInfo.setPassword("");
+            authorInfo.setPassword(VALID_GUEST_PASSWORD);
         }
     }
 }
