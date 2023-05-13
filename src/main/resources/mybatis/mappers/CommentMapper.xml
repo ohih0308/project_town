@@ -18,9 +18,12 @@
         values (#{postId}, #{userType}, #{userId}, #{ip}, #{author}, #{password}, #{comment}, now());
     </insert>
 
-    <!--  CommentAccessInfo getCommentAccessInfoByCommentId(Long commentId);  -->
-    <select id="getCommentAccessInfoByCommentId" parameterType="Long" resultType="CommentAccessInfo">
-        select comment_id as commentId, user_id as userId, user_type as userType, password
+    <!--  AccessInfo getAccessInfo(Long commentId);  -->
+    <select id="getAccessInfo" parameterType="Long" resultType="AccessInfo">
+        select comment_id as commentId,
+               user_id    as userId,
+               user_type  as userType,
+               password
         from comments
         where comment_id = #{commentId};
     </select>

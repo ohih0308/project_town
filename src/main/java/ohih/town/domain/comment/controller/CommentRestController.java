@@ -11,8 +11,10 @@ import ohih.town.domain.comment.dto.CommentDeleteResult;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentUploadResult;
 import ohih.town.domain.comment.service.CommentService;
+import ohih.town.domain.comment.service.CommentServiceImpl;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.notification.service.NotificationService;
+import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Utilities;
@@ -26,8 +28,8 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 @Slf4j
 public class CommentRestController {
 
-    private final CommentService commentService;
-    private final NotificationService notificationService;
+    private final CommentServiceImpl commentService;
+    private final NotificationServiceImpl notificationService;
 
     @PostMapping(URLConst.UPLOAD_COMMENT)
     public CommentUploadResult uploadComment(HttpServletRequest request,

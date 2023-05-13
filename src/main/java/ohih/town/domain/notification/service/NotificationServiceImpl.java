@@ -3,25 +3,25 @@ package ohih.town.domain.notification.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.NotificationConst;
-import ohih.town.constants.ResourceBundleConst;
 import ohih.town.constants.URLConst;
 import ohih.town.domain.notification.dto.Notification;
 import ohih.town.domain.notification.mapper.NotificationMapper;
 import ohih.town.domain.post.mapper.PostMapper;
+import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 
 import static ohih.town.constants.NotificationConst.NOTIFICATION_COMMENT_UPLOADED;
+import static ohih.town.constants.ResourceBundleConst.NOTIFICATION_MESSAGES;
 
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final PostMapper postMapper;
 
-    ResourceBundle NOTIFICATION_MESSAGES = ResourceBundleConst.NOTIFICATION_MESSAGES;
 
     @Override
     public void createNewCommentNotification(Long postId) {

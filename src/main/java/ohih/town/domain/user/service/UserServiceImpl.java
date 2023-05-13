@@ -24,6 +24,8 @@ import java.util.Objects;
 
 import static ohih.town.constants.DomainConst.*;
 import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
+import static ohih.town.constants.ResourceBundleConst.USER_ERROR_MESSAGES;
 import static ohih.town.constants.SuccessConst.*;
 
 @Service
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
         MailSendResult mailSendResult = MailSendResult.builder()
                 .from(from)
                 .to(email)
-                .resultMessage(userErrorMessageSource.getString(MAIL_VERIFICATION_SENT_FAILURE))
+                .resultMessage(USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_SENT_FAILURE))
                 .build();
 
         Map<String, String> errorMessages = new HashMap<>();
@@ -59,10 +61,10 @@ public class UserServiceImpl implements UserService {
         boolean isDuplicated = isDuplicated(DomainConst.EMAIL, email);
 
         if (!isValidated) {
-            errorMessages.put(DomainConst.EMAIL, userErrorMessageSource.getString(ErrorsConst.USER_EMAIL_INVALID));
+            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorsConst.USER_EMAIL_INVALID));
         }
         if (isDuplicated) {
-            errorMessages.put(DomainConst.EMAIL, userErrorMessageSource.getString(ErrorsConst.USER_EMAIL_DUPLICATED));
+            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorsConst.USER_EMAIL_DUPLICATED));
         }
 
         if (!isValidated || isDuplicated) {
@@ -80,7 +82,7 @@ public class UserServiceImpl implements UserService {
         try {
             javaMailSender.send(simpleMailMessage);
             mailSendResult.setSent(true);
-            mailSendResult.setResultMessage(successMessageSource.getString(VERIFICATION_EMAIL_SENT));
+            mailSendResult.setResultMessage(SUCCESS_MESSAGES.getString(VERIFICATION_EMAIL_SENT));
         } catch (MailException e) {
             log.info("MailException. email = {}.", email);
         }
@@ -95,16 +97,16 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
 
         if (EMAIL_VERIFICATION_REQUEST == null) {
-            messages.put(SessionConst.EMAIL_VERIFICATION_REQUEST, userErrorMessageSource.getString(MAIL_VERIFICATION_EMAIL_NOT_SENT));
+            messages.put(SessionConst.EMAIL_VERIFICATION_REQUEST, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_EMAIL_NOT_SENT));
         }
         if (EMAIL_VERIFICATION_CODE == null) {
-            messages.put(SessionConst.EMAIL_VERIFICATION_CODE, userErrorMessageSource.getString(MAIL_VERIFICATION_CODE_NULL));
+            messages.put(SessionConst.EMAIL_VERIFICATION_CODE, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_CODE_NULL));
         }
         if (email == null) {
-            messages.put(DomainConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_NULL));
+            messages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(USER_EMAIL_NULL));
         }
         if (verificationCode == null) {
-            messages.put(SessionConst.EMAIL_VERIFICATION_CODE, userErrorMessageSource.getString(MAIL_VERIFICATION_CODE_NULL));
+            messages.put(SessionConst.EMAIL_VERIFICATION_CODE, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_CODE_NULL));
         }
 
         if (!messages.isEmpty()) {
@@ -113,15 +115,15 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!EMAIL_VERIFICATION_REQUEST.equals(email)) {
-            messages.put(DomainConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_EMAIL_MISMATCH));
+            messages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(USER_EMAIL_EMAIL_MISMATCH));
         } else {
             if (EMAIL_VERIFICATION_CODE.equals(verificationCode)) {
-                messages.put(SessionConst.EMAIL_VERIFICATION_CODE, successMessageSource.getString(EMAIL_VERIFICATION_SUCCESS));
+                messages.put(SessionConst.EMAIL_VERIFICATION_CODE, SUCCESS_MESSAGES.getString(EMAIL_VERIFICATION_SUCCESS));
 
                 verificationResult.setVerified(true);
                 verificationResult.setVerifiedValue(email);
             } else {
-                messages.put(SessionConst.EMAIL_VERIFICATION_CODE, userErrorMessageSource.getString(MAIL_VERIFICATION_CODE_MISMATCH));
+                messages.put(SessionConst.EMAIL_VERIFICATION_CODE, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_CODE_MISMATCH));
             }
         }
 
@@ -145,22 +147,22 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
 
         if (email == null) {
-            messages.put(DomainConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_NULL));
+            messages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(USER_EMAIL_NULL));
         } else {
             boolean isValidated = Utilities.isValidated(ValidationPatterns.EMAIL, email);
             boolean isDuplicated = isDuplicated(EMAIL, email);
 
             if (!isValidated) {
-                messages.put(DomainConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_INVALID));
+                messages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(USER_EMAIL_INVALID));
             }
             if (isDuplicated) {
-                messages.put(DomainConst.EMAIL, userErrorMessageSource.getString(USER_EMAIL_DUPLICATED));
+                messages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(USER_EMAIL_DUPLICATED));
             }
 
             if (isValidated && !isDuplicated) {
                 verificationResult.setVerified(true);
                 verificationResult.setVerifiedValue(email);
-                messages.put(EMAIL, successMessageSource.getString(USER_EMAIL_VALID));
+                messages.put(EMAIL, SUCCESS_MESSAGES.getString(USER_EMAIL_VALID));
             }
         }
 
@@ -175,22 +177,22 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
 
         if (username == null) {
-            messages.put(USERNAME, userErrorMessageSource.getString(USER_USERNAME_NULL));
+            messages.put(USERNAME, USER_ERROR_MESSAGES.getString(USER_USERNAME_NULL));
         } else {
             boolean isDuplicated = isDuplicated(USERNAME, username);
             boolean isValidated = Utilities.isValidated(ValidationPatterns.USERNAME, username);
 
             if (isDuplicated) {
-                messages.put(USERNAME, userErrorMessageSource.getString(USER_USERNAME_DUPLICATED));
+                messages.put(USERNAME, USER_ERROR_MESSAGES.getString(USER_USERNAME_DUPLICATED));
             }
             if (!isValidated) {
-                messages.put(USERNAME, userErrorMessageSource.getString(USER_USERNAME_INVALID));
+                messages.put(USERNAME, USER_ERROR_MESSAGES.getString(USER_USERNAME_INVALID));
             }
 
             if (isValidated && !isDuplicated) {
                 verificationResult.setVerified(true);
                 verificationResult.setVerifiedValue(username);
-                messages.put(USERNAME, successMessageSource.getString(USER_USERNAME_VALID));
+                messages.put(USERNAME, SUCCESS_MESSAGES.getString(USER_USERNAME_VALID));
             }
         }
 
@@ -206,9 +208,9 @@ public class UserServiceImpl implements UserService {
         verificationResult.setVerified(Utilities.isValidated(ValidationPatterns.PASSWORD, password));
 
         if (verificationResult.isVerified()) {
-            messages.put(DomainConst.PASSWORD, successMessageSource.getString(USER_PASSWORD_VALID));
+            messages.put(DomainConst.PASSWORD, SUCCESS_MESSAGES.getString(USER_PASSWORD_VALID));
         } else {
-            messages.put(DomainConst.PASSWORD, userErrorMessageSource.getString(USER_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, USER_ERROR_MESSAGES.getString(USER_PASSWORD_INVALID));
         }
 
         verificationResult.setMessages(messages);
@@ -222,10 +224,10 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
 
         if (!Utilities.isValidated(ValidationPatterns.PASSWORD, password)) {
-            messages.put(PASSWORD, userErrorMessageSource.getString(USER_PASSWORD_INVALID));
+            messages.put(PASSWORD, USER_ERROR_MESSAGES.getString(USER_PASSWORD_INVALID));
         }
         if (!Utilities.isValidated(ValidationPatterns.PASSWORD, passwordConfirmation)) {
-            messages.put(PASSWORD_CONFIRMATION, userErrorMessageSource.getString(USER_PASSWORD_CONFIRMATION_INVALID));
+            messages.put(PASSWORD_CONFIRMATION, USER_ERROR_MESSAGES.getString(USER_PASSWORD_CONFIRMATION_INVALID));
         }
 
         if (!messages.isEmpty()) {
@@ -236,9 +238,9 @@ public class UserServiceImpl implements UserService {
         verificationResult.setVerified(password.equals(passwordConfirmation));
 
         if (verificationResult.isVerified()) {
-            messages.put(PASSWORD_CONFIRMATION, successMessageSource.getString(USER_PASSWORD_CONFIRMATION_VALID));
+            messages.put(PASSWORD_CONFIRMATION, SUCCESS_MESSAGES.getString(USER_PASSWORD_CONFIRMATION_VALID));
         } else {
-            messages.put(PASSWORD_CONFIRMATION, userErrorMessageSource.getString(USER_PASSWORD_CONFIRMATION_INVALID));
+            messages.put(PASSWORD_CONFIRMATION, USER_ERROR_MESSAGES.getString(USER_PASSWORD_CONFIRMATION_INVALID));
         }
 
         verificationResult.setMessages(messages);
@@ -260,10 +262,10 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
 
         if (hasNull(registerRequest)) {
-            messages.put(REGISTER_REQUEST, userErrorMessageSource.getString(USER_REGISTER_REQUEST_NULL));
+            messages.put(REGISTER_REQUEST, USER_ERROR_MESSAGES.getString(USER_REGISTER_REQUEST_NULL));
         }
         if (verifiedEmail == null) {
-            messages.put(SessionConst.VERIFIED_EMAIL, userErrorMessageSource.getString(MAIL_VERIFICATION_REQUEST_NOTFOUND));
+            messages.put(SessionConst.VERIFIED_EMAIL, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_REQUEST_NOTFOUND));
         }
 
         if (!messages.isEmpty()) {
@@ -272,7 +274,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!verifiedEmail.equals(registerRequest.getEmail())) {
-            messages.put(EMAIL, userErrorMessageSource.getString(MAIL_VERIFICATION_EMAIL_MISMATCH));
+            messages.put(EMAIL, USER_ERROR_MESSAGES.getString(MAIL_VERIFICATION_EMAIL_MISMATCH));
         }
 
         VerificationResult emailVerification = verifyEmail(registerRequest.getEmail());
@@ -294,7 +296,7 @@ public class UserServiceImpl implements UserService {
             messages.putAll(confirmationVerification.getMessages());
         }
         if (!registerRequest.isAgreement()) {
-            messages.put(DomainConst.AGREEMENT, userErrorMessageSource.getString(USER_AGREEMENT_MISSING));
+            messages.put(DomainConst.AGREEMENT, USER_ERROR_MESSAGES.getString(USER_AGREEMENT_MISSING));
         }
 
 
@@ -315,7 +317,7 @@ public class UserServiceImpl implements UserService {
 
         if (!verificationResult.isVerified()) {
             registerResult.setErrorMessages(verificationResult.getMessages());
-            registerResult.setResultMessage(userErrorMessageSource.getString(USER_REGISTER_FAILURE));
+            registerResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_REGISTER_FAILURE));
             return registerResult;
         }
 
@@ -325,10 +327,10 @@ public class UserServiceImpl implements UserService {
         try {
             if (isRegistered || isInitialized) {
                 registerResult.setRegistered(true);
-                registerResult.setResultMessage(successMessageSource.getString(USER_REGISTER_SUCCESS));
+                registerResult.setResultMessage(SUCCESS_MESSAGES.getString(USER_REGISTER_SUCCESS));
                 registerResult.setRedirectUrl(URLConst.HOME);
             } else {
-                registerResult.setResultMessage(userErrorMessageSource.getString(USER_REGISTER_FAILURE));
+                registerResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_REGISTER_FAILURE));
                 registerResult.setRedirectUrl(URLConst.REGISTER);
                 throw new RuntimeException();
             }
@@ -357,7 +359,7 @@ public class UserServiceImpl implements UserService {
 
         if (!messages.isEmpty()) {
             loginResult.setErrorMessages(messages);
-            loginResult.setResultMessage(userErrorMessageSource.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
+            loginResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
             return loginResult;
         }
 
@@ -368,10 +370,10 @@ public class UserServiceImpl implements UserService {
         UserInfo userInfo = userMapper.login(map);
 
         if (userInfo == null) {
-            loginResult.setResultMessage(userErrorMessageSource.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
+            loginResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_LOGIN_FAILURE_INVALID_CREDENTIALS));
         } else {
             loginResult.setLoggedIn(true);
-            loginResult.setResultMessage(successMessageSource.getString(USER_LOGIN_SUCCESS));
+            loginResult.setResultMessage(SUCCESS_MESSAGES.getString(USER_LOGIN_SUCCESS));
             loginResult.setUserInfo(userInfo);
             loginResult.setResultMessage(URLConst.HOME);
         }
@@ -401,15 +403,15 @@ public class UserServiceImpl implements UserService {
                 multipartFile.transferTo(file);
 
                 profileImageResult.setSuccess(true);
-                profileImageResult.setResultMessage(successMessageSource.getString(UPLOAD_PROFILE_IMAGE_SUCCESS));
+                profileImageResult.setResultMessage(SUCCESS_MESSAGES.getString(UPLOAD_PROFILE_IMAGE_SUCCESS));
                 profileImageResult.setProfileImageDirectory(profileImage.getDirectory());
             } catch (IOException e) {
                 log.info("{}", e.getMessage());
-                profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPLOAD_FAILURE));
+                profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_UPLOAD_FAILURE));
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             }
         } else {
-            profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPLOAD_FAILURE));
+            profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_UPLOAD_FAILURE));
         }
 
         return profileImageResult;
@@ -430,15 +432,15 @@ public class UserServiceImpl implements UserService {
                     throw new IOException();
                 }
                 profileImageResult.setSuccess(true);
-                profileImageResult.setResultMessage(successMessageSource.getString(UPDATE_PROFILE_IMAGE_SUCCESS));
+                profileImageResult.setResultMessage(SUCCESS_MESSAGES.getString(UPDATE_PROFILE_IMAGE_SUCCESS));
                 profileImageResult.setProfileImageDirectory(newProfileImage.getDirectory());
             } catch (IOException e) {
                 log.info("{}", e.getMessage());
-                profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPDATE_FAILURE));
+                profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_UPDATE_FAILURE));
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             }
         } else {
-            profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_UPDATE_FAILURE));
+            profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_UPDATE_FAILURE));
         }
 
         return profileImageResult;
@@ -456,15 +458,15 @@ public class UserServiceImpl implements UserService {
                     throw new IOException();
                 }
                 profileImageResult.setSuccess(true);
-                profileImageResult.setResultMessage(successMessageSource.getString(DELETE_PROFILE_IMAGE_SUCCESS));
+                profileImageResult.setResultMessage(SUCCESS_MESSAGES.getString(DELETE_PROFILE_IMAGE_SUCCESS));
                 profileImageResult.setProfileImageDirectory(null);
             } catch (IOException e) {
                 log.info("{}", e.getMessage());
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_DELETE_FAILURE));
+                profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_DELETE_FAILURE));
             }
         } else {
-            profileImageResult.setResultMessage(userErrorMessageSource.getString(USER_PROFILE_IMAGE_DELETE_FAILURE));
+            profileImageResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_PROFILE_IMAGE_DELETE_FAILURE));
         }
 
         return profileImageResult;
@@ -487,9 +489,9 @@ public class UserServiceImpl implements UserService {
 
         if (userMapper.updateUserInfo(map)) {
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setResultMessage(successMessageSource.getString(USER_UPDATE_USERNAME_SUCCESS));
+            userInfoUpdateResult.setResultMessage(SUCCESS_MESSAGES.getString(USER_UPDATE_USERNAME_SUCCESS));
         } else {
-            userInfoUpdateResult.setResultMessage(userErrorMessageSource.getString(USER_UPDATE_USERNAME_FAILURE));
+            userInfoUpdateResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_UPDATE_USERNAME_FAILURE));
         }
 
         return userInfoUpdateResult;
@@ -512,17 +514,17 @@ public class UserServiceImpl implements UserService {
 
         if (userMapper.updateUserInfo(map)) {
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setResultMessage(successMessageSource.getString(USER_PASSWORD_UPDATE_SUCCESS));
+            userInfoUpdateResult.setResultMessage(SUCCESS_MESSAGES.getString(USER_PASSWORD_UPDATE_SUCCESS));
         } else {
-            userInfoUpdateResult.setResultMessage(userErrorMessageSource.getString(USER_UPDATE_PASSWORD_FAILURE));
+            userInfoUpdateResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_UPDATE_PASSWORD_FAILURE));
         }
 
         return userInfoUpdateResult;
     }
 
     /*
-    * deactivate user account
-    * */
+     * deactivate user account
+     * */
 
     @Override
     public UserInfoUpdateResult updateGuestbookPermission(GuestbookPermission guestbookPermission) {
@@ -530,9 +532,9 @@ public class UserServiceImpl implements UserService {
 
         if (userMapper.updateGuestbookPermission(guestbookPermission)) {
             userInfoUpdateResult.setSuccess(true);
-            userInfoUpdateResult.setResultMessage(successMessageSource.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
+            userInfoUpdateResult.setResultMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_PERMISSION_UPDATE_SUCCESS));
         } else {
-            userInfoUpdateResult.setResultMessage(userErrorMessageSource.getString(USER_GUESTBOOK_PERMISSION_UPDATE_FAILURE));
+            userInfoUpdateResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_GUESTBOOK_PERMISSION_UPDATE_FAILURE));
         }
 
         return userInfoUpdateResult;

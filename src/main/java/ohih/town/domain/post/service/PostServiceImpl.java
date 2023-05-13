@@ -3,7 +3,10 @@ package ohih.town.domain.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.DomainConst;
+import ohih.town.constants.ResourceBundleConst;
 import ohih.town.constants.ValidationPatterns;
+import ohih.town.domain.AccessInfo;
+import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
 import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.post.dto.*;
@@ -11,6 +14,7 @@ import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -21,12 +25,18 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static ohih.town.constants.DateFormat.DATE_FORMAT_YYYY_MM_DD;
+import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
 import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.ResourceBundleConst.POST_ERROR_MESSAGES;
+import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
+import static ohih.town.constants.SuccessConst.POST_ACCESS_PERMITTED;
+import static ohih.town.constants.SuccessConst.POST_UPLOAD_SUCCESS;
 import static ohih.town.constants.UtilityConst.UUID_FULL_INDEX;
 import static ohih.town.utilities.Utilities.isValidated;
 
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class PostServiceImpl implements PostService {
 
     @Value("#{filePaths['post.attachments.directory']}")
@@ -34,6 +44,33 @@ public class PostServiceImpl implements PostService {
 
     private final PostMapper postMapper;
 
+    @Override
+    public AccessPermissionCheckResult checkAccessPermission(Long userId, Long postId, String password) {
+        AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
+        accessPermissionCheckResult.setId(postId);
+
+        AccessInfo accessInfo = postMapper.getAccessInfo(postId);
+
+        boolean isAccessible = false;
+        accessPermissionCheckResult.setMessage(POST_ERROR_MESSAGES.getString(POST_ACCESS_DENIED));
+
+        if (Objects.equals(accessInfo.getUserType(), USER_TYPE_GUEST)) {
+            if (Objects.equals(accessInfo.getPassword(), password)) {
+                isAccessible = true;
+            }
+        } else {
+            if (Objects.equals(accessInfo.getUserId(), userId)) {
+                isAccessible = true;
+            }
+        }
+
+        if (isAccessible) {
+            accessPermissionCheckResult.setAccessible(true);
+            accessPermissionCheckResult.setMessage(SUCCESS_MESSAGES.getString(POST_ACCESS_PERMITTED));
+        }
+
+        return accessPermissionCheckResult;
+    }
 
     @Override
     public VerificationResult verifyPostUploadRequest(PostUploadRequest postUploadRequest) {
@@ -41,16 +78,16 @@ public class PostServiceImpl implements PostService {
         Map<String, String> messages = new HashMap<>();
 
         if (postUploadRequest.getAuthor() == null) {
-            messages.put(DomainConst.AUTHOR, postErrorMessageSource.getString(POST_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, POST_ERROR_MESSAGES.getString(POST_AUTHOR_INVALID));
         }
         if (postUploadRequest.getPassword() == null) {
-            messages.put(DomainConst.PASSWORD, postErrorMessageSource.getString(POST_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, POST_ERROR_MESSAGES.getString(POST_PASSWORD_INVALID));
         }
         if (postUploadRequest.getSubject() == null) {
-            messages.put(DomainConst.SUBJECT, postErrorMessageSource.getString(POST_SUBJECT_INVALID));
+            messages.put(DomainConst.SUBJECT, POST_ERROR_MESSAGES.getString(POST_SUBJECT_INVALID));
         }
         if (postUploadRequest.getBody() == null) {
-            messages.put(DomainConst.BODY, postErrorMessageSource.getString(POST_BODY_INVALID));
+            messages.put(DomainConst.BODY, POST_ERROR_MESSAGES.getString(POST_BODY_INVALID));
         }
 
         if (!messages.isEmpty()) {
@@ -65,16 +102,16 @@ public class PostServiceImpl implements PostService {
         boolean bodyValidation = isValidated(ValidationPatterns.BODY, postUploadRequest.getBody());
 
         if (!authorValidation) {
-            messages.put(DomainConst.AUTHOR, postErrorMessageSource.getString(POST_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, POST_ERROR_MESSAGES.getString(POST_AUTHOR_INVALID));
         }
         if (!passwordValidation) {
-            messages.put(DomainConst.PASSWORD, postErrorMessageSource.getString(POST_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, POST_ERROR_MESSAGES.getString(POST_PASSWORD_INVALID));
         }
         if (!subjectValidation) {
-            messages.put(DomainConst.SUBJECT, postErrorMessageSource.getString(POST_SUBJECT_INVALID));
+            messages.put(DomainConst.SUBJECT, POST_ERROR_MESSAGES.getString(POST_SUBJECT_INVALID));
         }
         if (!bodyValidation) {
-            messages.put(DomainConst.BODY, postErrorMessageSource.getString(POST_BODY_INVALID));
+            messages.put(DomainConst.BODY, POST_ERROR_MESSAGES.getString(POST_BODY_INVALID));
         }
 
         if (messages.isEmpty()) {
@@ -87,7 +124,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Attachment> extractAttachments(Long boardId, Long postId, String body) {
+    public List<Attachment> extractAttachments(Long boardId, String body) {
         List<Attachment> attachments = new ArrayList<>();
         String date = Utilities.getDate(DATE_FORMAT_YYYY_MM_DD);
 
@@ -105,8 +142,7 @@ public class PostServiceImpl implements PostService {
                     fileName(fileName).
                     extension(extension).
                     directory(directory.toString()).
-                    size(size).
-                    postId(postId).build();
+                    size(size).build();
 
             attachments.add(attachment);
         }
@@ -120,41 +156,58 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void uploadAttachments(List<Attachment> attachments) throws IOException, SQLException {
-        for (Attachment attachment : attachments) {
-            Utilities.isAllowedExtension(attachment.getExtension());
-            Utilities.isFileSizeExceedLimit(attachment.getSize());
+    public boolean uploadAttachments_prj(List<Attachment> attachments, Long postId) {
+        try {
+            for (Attachment attachment : attachments) {
+                attachment.setPostId(postId);
+                Utilities.isAllowedExtension(attachment.getExtension());
+                Utilities.isFileSizeExceedLimit(attachment.getSize());
 
-            Path path = Paths.get(attachment.getDirectory());
+                Path path = Paths.get(attachment.getDirectory());
 
-            File directory = new File(path.getParent().toString());
+                File directory = new File(path.getParent().toString());
 
-            if (!directory.exists()) {
-                if (!directory.mkdirs()) {
-                    throw new IOException();
+                if (!directory.exists()) {
+                    if (!directory.mkdirs()) {
+                        throw new IOException();
+                    }
+                }
+
+                byte[] imageData = Base64.getDecoder().decode(attachment.getImageData());
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+
+                InputStream inputStream = new ByteArrayInputStream(imageData);
+                FileOutputStream fileOutputStream = new FileOutputStream(attachment.getDirectory());
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead);
+                    fileOutputStream.flush();
+                }
+                fileOutputStream.close();
+                inputStream.close();
+            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean uploadAttachments_db(List<Attachment> attachments, Long postId) {
+        try {
+            for (Attachment attachment : attachments) {
+                attachment.setPostId(postId);
+                if (!postMapper.uploadAttachment(attachment)) {
+                    throw new SQLException();
                 }
             }
-
-            byte[] imageData = Base64.getDecoder().decode(attachment.getImageData());
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-
-            InputStream inputStream = new ByteArrayInputStream(imageData);
-            FileOutputStream fileOutputStream = new FileOutputStream(attachment.getDirectory());
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer, 0, bytesRead);
-                fileOutputStream.flush();
-            }
-            fileOutputStream.close();
-            inputStream.close();
-
-
-            if (!postMapper.uploadAttachment(attachment)) {
-                throw new SQLException();
-            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -168,8 +221,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public boolean uploadThumbnail(Attachment attachment) {
-        return postMapper.uploadThumbnail(attachment);
+    public boolean uploadThumbnail(Attachment attachment) throws SQLException {
+        try {
+            if (!postMapper.uploadThumbnail(attachment)) {
+                throw new SQLException();
+            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -187,36 +248,34 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
+
     @Override
     @Transactional
-    public PostUploadResult uploadPost(PostUploadRequest postUploadRequest) {
+    public PostUploadResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments) {
         PostUploadResult postUploadResult = new PostUploadResult();
-        List<Attachment> attachments = extractAttachments(
-                postUploadRequest.getBoardId(),
-                postUploadRequest.getPostId(),
-                postUploadRequest.getBody());
 
         VerificationResult verificationResult = verifyPostUploadRequest(postUploadRequest);
-
         if (!verificationResult.isVerified()) {
             postUploadResult.setErrorMessages(verificationResult.getMessages());
-            postUploadResult.setResultMessage(postErrorMessageSource.getString(POST_UPLOAD_FAILURE));
+            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
             return postUploadResult;
         }
 
         try {
-            if (attachments.size() > 0) {
-                uploadAttachments(attachments);
-                uploadThumbnail(attachments.get(0));
+            if (!postMapper.uploadPost(postUploadRequest) ||
+                    !uploadAttachments_db(attachments, postUploadRequest.getPostId()) ||
+                    !uploadThumbnail(attachments.get(0)) ||
+                    !uploadAttachments_prj(attachments, postUploadRequest.getPostId())) {
+                throw new Exception();
             }
-
-            if (postMapper.uploadPost(postUploadRequest)) {
-                throw new SQLException();
-            }
+            postUploadResult.setUploaded(true);
+            postUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+            postUploadResult.setPostId(postUploadResult.getPostId());
         } catch (Exception e) {
-            log.info("{}", e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
         }
+
         return postUploadResult;
     }
 

@@ -109,16 +109,19 @@ public class Utilities {
         return fileName.substring(fileName.indexOf('/') + 1, fileName.indexOf(';'));
     }
 
-    public static String replaceAttachments(String body, Attachment attachment) {
-        String originalText = BASE_64_PATTERN_OPEN +
-                attachment.getExtension() + ";" +
-                BASE_64 + "," +
-                attachment.getImageData();
+    public static String replaceAttachments(String body, List<Attachment> attachments) {
+        for (Attachment attachment : attachments) {
+            String originalText = BASE_64_PATTERN_OPEN +
+                    attachment.getExtension() + ";" +
+                    BASE_64 + "," +
+                    attachment.getImageData();
 
-        String newText = attachment.getDirectory().substring(
-                attachment.getDirectory().indexOf(CLASS_PATH) + CLASS_PATH.length());
+            String newText = attachment.getDirectory().substring(
+                    attachment.getDirectory().indexOf(CLASS_PATH) + CLASS_PATH.length());
 
-        return body.replace(originalText, "/" + newText);
+            body = body.replace(originalText, "/" + newText);
+        }
+        return body;
     }
 
     public static void isAllowedExtension(String extension) throws NotAllowedExtensionException {

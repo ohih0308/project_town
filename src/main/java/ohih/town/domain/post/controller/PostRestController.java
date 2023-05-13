@@ -3,21 +3,32 @@ package ohih.town.domain.post.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
+import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.domain.post.dto.Attachment;
 import ohih.town.domain.post.dto.PostContentInfo;
+import ohih.town.domain.post.dto.PostUploadRequest;
 import ohih.town.domain.post.dto.PostUploadResult;
+import ohih.town.domain.post.service.PostService;
+import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.session.SessionManager;
 import ohih.town.utilities.Utilities;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class PostRestController {
+
+    private final PostServiceImpl postService;
 //
 //
 //
@@ -101,10 +112,38 @@ public class PostRestController {
     public PostUploadResult uploadPost(HttpServletRequest request,
                                        @Nullable @SessionAttribute UserInfo userInfo,
                                        AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        postContentInfo.setBoardId(1L);
+        authorInfo.setAuthor("USERNAME");
+        authorInfo.setPassword("ValidPassword1");
+
         String ip = Utilities.getIp(request);
         Utilities.setAuthor(authorInfo, userInfo, ip);
 
+        List<Attachment> attachments = postService.extractAttachments(
+                postContentInfo.getBoardId(),
+                postContentInfo.getBody());
 
-        return null;
+        postContentInfo.setBody(Utilities.replaceAttachments(postContentInfo.getBody(), attachments));
+
+        return postService.uploadPost(new PostUploadRequest(authorInfo, postContentInfo), attachments);
+    }
+
+    @PostMapping(URLConst.ACCESS_PERMISSION_POST)
+    public AccessPermissionCheckResult checkAccessPermission(HttpServletRequest request,
+                                                             @Nullable @SessionAttribute UserInfo userInfo,
+                                                             Long postId, String password) {
+        AccessPermissionCheckResult accessPermissionCheckResult;
+
+        if (userInfo == null) {
+            accessPermissionCheckResult = postService.checkAccessPermission(null, postId, password);
+        } else {
+            accessPermissionCheckResult = postService.checkAccessPermission(userInfo.getUserId(), postId, password);
+        }
+
+        if (accessPermissionCheckResult.isAccessible()) {
+            SessionManager.setAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID, postId);
+        }
+
+        return accessPermissionCheckResult;
     }
 }

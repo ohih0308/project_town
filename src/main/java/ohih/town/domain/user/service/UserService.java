@@ -10,11 +10,6 @@ import java.util.ResourceBundle;
 import static ohih.town.constants.ResourceBundleConst.*;
 
 public interface UserService {
-
-    ResourceBundle userErrorMessageSource = USER_ERROR_MESSAGES;
-    ResourceBundle successMessageSource = SUCCESS_MESSAGES;
-
-
     /*
      * class list:
      *   RegisterRequest, RegisterResult,

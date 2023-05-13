@@ -7,6 +7,8 @@
         <typeAlias type="ohih.town.domain.user.dto.UserInfo" alias="UserInfo"/>
         <typeAlias type="ohih.town.domain.user.dto.ProfileImage" alias="ProfileImage"/>
         <typeAlias type="ohih.town.domain.user.dto.GuestbookPermission" alias="GuestbookPermission"/>
+        
+        <typeAlias type="ohih.town.domain.AccessInfo" alias="AccessInfo"/>
 
         <typeAlias type="ohih.town.domain.post.dto.Attachment" alias="Attachment"/>
     </typeAliases>

@@ -5,12 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.*;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
-import ohih.town.domain.comment.dto.CommentAccessInfo;
+import ohih.town.domain.AccessInfo;
 import ohih.town.domain.comment.dto.CommentDeleteResult;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentUploadResult;
 import ohih.town.domain.comment.mapper.CommentMapper;
 import ohih.town.utilities.Utilities;
+import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -21,10 +22,10 @@ import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
 import static ohih.town.constants.ErrorsConst.COMMENT_ACCESS_DENIED;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 import static ohih.town.constants.SuccessConst.COMMENT_ACCESS_PERMITTED;
-import static ohih.town.domain.user.service.UserService.*;
 
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
@@ -36,16 +37,16 @@ public class CommentServiceImpl implements CommentService {
         Map<String, String> messages = new HashMap<>();
 
         if (!commentMapper.isPostIdExists(commentUploadRequest.getPostId())) {
-            messages.put(DomainConst.POST_ID, commentErrorMessageSource.getString(ErrorsConst.COMMENT_POST_ID_INVALID));
+            messages.put(DomainConst.POST_ID, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_POST_ID_INVALID));
         }
         if (commentUploadRequest.getAuthor() == null) {
-            messages.put(DomainConst.AUTHOR, commentErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
         }
         if (commentUploadRequest.getPassword() == null) {
-            messages.put(DomainConst.PASSWORD, commentErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
         }
         if (commentUploadRequest.getComment() == null) {
-            messages.put(UtilityConst.COMMENT, commentErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
         }
 
         if (!messages.isEmpty()) {
@@ -59,13 +60,13 @@ public class CommentServiceImpl implements CommentService {
         boolean commentValidation = Utilities.isValidated(ValidationPatterns.COMMENT, commentUploadRequest.getComment());
 
         if (!authorValidation) {
-            messages.put(DomainConst.AUTHOR, commentErrorMessageSource.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
         }
         if (!passwordValidation) {
-            messages.put(DomainConst.PASSWORD, commentErrorMessageSource.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
         }
         if (!commentValidation) {
-            messages.put(UtilityConst.COMMENT, commentErrorMessageSource.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
         }
 
         if (messages.isEmpty()) {
@@ -84,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!verificationResult.isVerified()) {
             commentUploadResult.setErrorMessages(verificationResult.getMessages());
-            commentUploadResult.setResultMessage(commentErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentUploadResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
             return commentUploadResult;
         }
 
@@ -96,7 +97,7 @@ public class CommentServiceImpl implements CommentService {
             commentUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentUploadResult.setResultMessage(commentErrorMessageSource.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentUploadResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
         }
 
         return commentUploadResult;
@@ -107,17 +108,17 @@ public class CommentServiceImpl implements CommentService {
         AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
         accessPermissionCheckResult.setId(commentId);
 
-        CommentAccessInfo commentAccessInfo = commentMapper.getCommentAccessInfoByCommentId(commentId);
+        AccessInfo accessInfo = commentMapper.getAccessInfo(commentId);
 
         boolean isAccessible = false;
-        accessPermissionCheckResult.setMessage(commentErrorMessageSource.getString(COMMENT_ACCESS_DENIED));
+        accessPermissionCheckResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
 
-        if (Objects.equals(commentAccessInfo.getUserType(), USER_TYPE_GUEST)) {
-            if (Objects.equals(commentAccessInfo.getPassword(), password)) {
+        if (Objects.equals(accessInfo.getUserType(), USER_TYPE_GUEST)) {
+            if (Objects.equals(accessInfo.getPassword(), password)) {
                 isAccessible = true;
             }
         } else {
-            if (Objects.equals(commentAccessInfo.getUserId(), userId)) {
+            if (Objects.equals(accessInfo.getUserId(), userId)) {
                 isAccessible = true;
             }
         }
@@ -136,7 +137,7 @@ public class CommentServiceImpl implements CommentService {
         commentDeleteResult.setCommentId(commentId);
 
         if (accessPermittedCommentId == null || !accessPermittedCommentId.equals(commentId)) {
-            commentDeleteResult.setMessage(commentErrorMessageSource.getString(COMMENT_ACCESS_DENIED));
+            commentDeleteResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
             return commentDeleteResult;
         }
 
@@ -145,10 +146,10 @@ public class CommentServiceImpl implements CommentService {
                 throw new SQLException();
             }
             commentDeleteResult.setDeleted(true);
-            commentDeleteResult.setMessage(successMessageSource.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
+            commentDeleteResult.setMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentDeleteResult.setMessage(commentErrorMessageSource.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
+            commentDeleteResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
         }
 
         return commentDeleteResult;

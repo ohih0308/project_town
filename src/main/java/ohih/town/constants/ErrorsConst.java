@@ -64,8 +64,9 @@ public interface ErrorsConst {
     String POST_SUBJECT_INVALID = "post.subject.invalid";
     String POST_BODY_INVALID = "post.body.invalid";
 
-    String POST_UPLOAD_FAILURE = "post.upload.failure";
+    String POST_ACCESS_DENIED = "post.access.denied";
 
+    String POST_UPLOAD_FAILURE = "post.upload.failure";
 
     // Comment
     String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";
@@ -73,8 +74,9 @@ public interface ErrorsConst {
     String COMMENT_PASSWORD_INVALID = "comment.password.invalid";
     String COMMENT_COMMENT_INVALID = "comment.comment.invalid";
 
-    String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
-
     String COMMENT_ACCESS_DENIED = "comment.access.denied";
+
+    String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
     String COMMENT_DELETE_FAILURE = "comment.delete.failure";
+
 }

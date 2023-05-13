@@ -9,6 +9,7 @@ import ohih.town.constants.UtilityConst;
 import ohih.town.domain.VerificationResult;
 import ohih.town.domain.user.dto.*;
 import ohih.town.domain.user.service.UserService;
+import ohih.town.domain.user.service.UserServiceImpl;
 import ohih.town.session.SessionManager;
 import ohih.town.utilities.Utilities;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 public class UserRestController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
 
     @PostMapping(URLConst.SEND_VERIFICATION_CODE)

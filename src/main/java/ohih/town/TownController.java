@@ -54,5 +54,8 @@ public class TownController {
     }
 
 
-
+    @GetMapping(URLConst.UPLOAD_POST)
+    public String uploadPost() {
+        return ViewConst.UPLOAD_POST_FORM;
+    }
 }

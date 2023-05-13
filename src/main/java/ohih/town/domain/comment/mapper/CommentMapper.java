@@ -1,6 +1,6 @@
 package ohih.town.domain.comment.mapper;
 
-import ohih.town.domain.comment.dto.CommentAccessInfo;
+import ohih.town.domain.AccessInfo;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,7 +12,7 @@ public interface CommentMapper {
 
     boolean uploadComment(CommentUploadRequest commentUploadRequest);
 
-    CommentAccessInfo getCommentAccessInfoByCommentId(Long commentId);
+    AccessInfo getAccessInfo(Long commentId);
 
     boolean deleteComment(Long commentId);
 

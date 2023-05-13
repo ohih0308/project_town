@@ -14,11 +14,6 @@ import static ohih.town.constants.ResourceBundleConst.COMMENT_ERROR_MESSAGES;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 
 public interface CommentService {
-
-    ResourceBundle commentErrorMessageSource = COMMENT_ERROR_MESSAGES;
-    ResourceBundle successMessageSource = SUCCESS_MESSAGES;
-
-
     /*
      * class list:
      *   AuthorInfo, CommentContentInfo
