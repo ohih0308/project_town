@@ -29,8 +29,7 @@ import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.ResourceBundleConst.POST_ERROR_MESSAGES;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
-import static ohih.town.constants.SuccessConst.POST_ACCESS_PERMITTED;
-import static ohih.town.constants.SuccessConst.POST_UPLOAD_SUCCESS;
+import static ohih.town.constants.SuccessConst.*;
 import static ohih.town.constants.UtilityConst.UUID_FULL_INDEX;
 import static ohih.town.utilities.Utilities.isValidated;
 
@@ -187,11 +186,11 @@ public class PostServiceImpl implements PostService {
                 fileOutputStream.close();
                 inputStream.close();
             }
+            return true;
         } catch (Exception e) {
             log.info("{}", e.getMessage());
             return false;
         }
-        return true;
     }
 
     @Override
@@ -211,17 +210,45 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public boolean updateAttachments_db(List<Attachment> attachments, Long postId) {
+        try {
+            for (Attachment attachment : attachments) {
+                attachment.setPostId(postId);
+                if (!postMapper.updateAttachment(attachment)) {
+                    throw new SQLException();
+                }
+            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public List<Attachment> getAttachments(Long postId) {
         return null;
     }
 
     @Override
-    public void deleteAttachments(Long postId) {
+    public boolean deleteAttachments_prj(Long postId) {
+        List<Attachment> attachments = postMapper.getAttachments(postId);
 
+        for (Attachment attachment : attachments) {
+            File file = new File(attachment.getDirectory());
+            try {
+                if (!file.delete()) {
+                    throw new IOException();
+                }
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
-    public boolean uploadThumbnail(Attachment attachment) throws SQLException {
+    public boolean uploadThumbnail(Attachment attachment) {
         try {
             if (!postMapper.uploadThumbnail(attachment)) {
                 throw new SQLException();
@@ -231,6 +258,20 @@ public class PostServiceImpl implements PostService {
             return false;
         }
         return true;
+    }
+
+
+    @Override
+    public boolean updateThumbnail(Attachment attachment) {
+        try {
+            if (!postMapper.updateThumbnail(attachment)) {
+                throw new SQLException();
+            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return false;
     }
 
     @Override
@@ -264,8 +305,8 @@ public class PostServiceImpl implements PostService {
         try {
             if (!postMapper.uploadPost(postUploadRequest) ||
                     !uploadAttachments_db(attachments, postUploadRequest.getPostId()) ||
-                    !uploadThumbnail(attachments.get(0)) ||
-                    !uploadAttachments_prj(attachments, postUploadRequest.getPostId())) {
+                    !uploadAttachments_prj(attachments, postUploadRequest.getPostId()) ||
+                    !uploadThumbnail(attachments.get(0))) {
                 throw new Exception();
             }
             postUploadResult.setUploaded(true);
@@ -280,8 +321,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePost(List<Attachment> attachments, AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+    public PostUploadResult updatePost(PostUploadRequest postUploadRequest, List<Attachment> attachments) {
+        PostUploadResult postUploadResult = new PostUploadResult();
 
+        VerificationResult verificationResult = verifyPostUploadRequest(postUploadRequest);
+        if (!verificationResult.isVerified()) {
+            postUploadResult.setErrorMessages(verificationResult.getMessages());
+            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
+            return postUploadResult;
+        }
+
+        try {
+            if (!postMapper.updatePost(postUploadRequest) ||
+                    !deleteAttachments_prj(postUploadRequest.getPostId()) ||
+                    !updateAttachments_db(attachments, postUploadRequest.getPostId()) ||
+                    !uploadAttachments_prj(attachments, postUploadRequest.getPostId()) ||
+                    !updateThumbnail(attachments.get(0))) {
+                throw new Exception();
+            }
+            postUploadResult.setUploaded(true);
+            postUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
+            postUploadResult.setPostId(postUploadResult.getPostId());
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPDATE_FAILURE));
+        }
+
+        return postUploadResult;
     }
 
     @Override

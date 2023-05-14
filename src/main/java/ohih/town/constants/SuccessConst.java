@@ -29,6 +29,7 @@ public interface SuccessConst {
     String POST_BODY_VALID = "post.body.valid";
 
     String POST_UPLOAD_SUCCESS = "post.upload.success";
+    String POST_UPDATE_SUCCESS = "post.update.success";
     String POST_ACCESS_PERMITTED = "post.access.permitted";
 
     String COMMENT_VALID = "comment.valid";

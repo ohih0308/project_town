@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -112,10 +113,6 @@ public class PostRestController {
     public PostUploadResult uploadPost(HttpServletRequest request,
                                        @Nullable @SessionAttribute UserInfo userInfo,
                                        AuthorInfo authorInfo, PostContentInfo postContentInfo) {
-        postContentInfo.setBoardId(1L);
-        authorInfo.setAuthor("USERNAME");
-        authorInfo.setPassword("ValidPassword1");
-
         String ip = Utilities.getIp(request);
         Utilities.setAuthor(authorInfo, userInfo, ip);
 
@@ -145,5 +142,27 @@ public class PostRestController {
         }
 
         return accessPermissionCheckResult;
+    }
+
+    @PostMapping(URLConst.UPDATE_POST)
+    public PostUploadResult updatePost(HttpServletRequest request,
+                                       @Nullable @SessionAttribute UserInfo userInfo,
+                                       AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+        String ip = Utilities.getIp(request);
+        Utilities.setAuthor(authorInfo, userInfo, ip);
+
+        List<Attachment> attachments = postService.extractAttachments(
+                postContentInfo.getBoardId(),
+                postContentInfo.getBody());
+
+        postContentInfo.setBody(Utilities.replaceAttachments(postContentInfo.getBody(), attachments));
+
+        Long accessPermittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+
+        if (Objects.equals(accessPermittedPostId, postContentInfo.getPostId())) {
+            return null;
+        } else {
+            return null;
+        }
     }
 }

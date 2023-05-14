@@ -16,10 +16,15 @@ public interface PostMapper {
 
     boolean uploadAttachment(Attachment attachment);
 
+    boolean updateAttachment(Attachment attachment);
+
     boolean uploadThumbnail(Attachment attachment);
 
+    boolean updateThumbnail(Attachment attachment);
 
-    List<Attachment> getAttachmentByPostId(Long postId);
+    boolean deleteAttachments(Long postId);
+
+    List<Attachment> getAttachments(Long postId);
 
 
     boolean deleteAttachmentsByFileName(String fileName);
@@ -34,7 +39,7 @@ public interface PostMapper {
     PostDetails getPostDetailsByPostId(Long postId);
 
 
-    Integer updatePost(PostUploadRequest postUploadRequest);
+    boolean updatePost(PostUploadRequest postUploadRequest);
 
     Integer deletePost(Long postId);
 

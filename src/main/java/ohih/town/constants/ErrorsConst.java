@@ -67,6 +67,7 @@ public interface ErrorsConst {
     String POST_ACCESS_DENIED = "post.access.denied";
 
     String POST_UPLOAD_FAILURE = "post.upload.failure";
+    String POST_UPDATE_FAILURE = "post.update.failure";
 
     // Comment
     String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";
