@@ -10,8 +10,7 @@ import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.post.dto.Attachment;
 import ohih.town.domain.post.dto.PostContentInfo;
 import ohih.town.domain.post.dto.PostUploadRequest;
-import ohih.town.domain.post.dto.PostUploadResult;
-import ohih.town.domain.post.service.PostService;
+import ohih.town.domain.post.dto.PostResult;
 import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -110,9 +108,9 @@ public class PostRestController {
 //    }
 
     @PostMapping(URLConst.UPLOAD_POST)
-    public PostUploadResult uploadPost(HttpServletRequest request,
-                                       @Nullable @SessionAttribute UserInfo userInfo,
-                                       AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+    public PostResult uploadPost(HttpServletRequest request,
+                                 @Nullable @SessionAttribute UserInfo userInfo,
+                                 AuthorInfo authorInfo, PostContentInfo postContentInfo) {
         String ip = Utilities.getIp(request);
         Utilities.setAuthor(authorInfo, userInfo, ip);
 
@@ -145,9 +143,9 @@ public class PostRestController {
     }
 
     @PostMapping(URLConst.UPDATE_POST)
-    public PostUploadResult updatePost(HttpServletRequest request,
-                                       @Nullable @SessionAttribute UserInfo userInfo,
-                                       AuthorInfo authorInfo, PostContentInfo postContentInfo) {
+    public PostResult updatePost(HttpServletRequest request,
+                                 @Nullable @SessionAttribute UserInfo userInfo,
+                                 AuthorInfo authorInfo, PostContentInfo postContentInfo) {
         String ip = Utilities.getIp(request);
         Utilities.setAuthor(authorInfo, userInfo, ip);
 
@@ -159,10 +157,26 @@ public class PostRestController {
 
         Long accessPermittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
 
-        if (Objects.equals(accessPermittedPostId, postContentInfo.getPostId())) {
-            return null;
-        } else {
-            return null;
+        PostResult postResult = postService.updatePost(accessPermittedPostId, new PostUploadRequest(authorInfo, postContentInfo), attachments);
+
+        if (postResult.isSuccess()) {
+            SessionManager.removeAttribute(request, SessionConst.ACCESS_PERMITTED_POST_ID);
         }
+
+        return postResult;
+    }
+
+    @PostMapping(URLConst.DELETE_POST)
+    public PostResult deletePost(HttpServletRequest request,
+                                 Long postId) {
+        Long accessPermittedPostId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+
+        PostResult postResult = postService.deletePost(accessPermittedPostId, postId);
+
+        if (postResult.isSuccess()) {
+            SessionManager.removeAttribute(request, SessionConst.ACCESS_PERMITTED_POST_ID);
+        }
+
+        return postResult;
     }
 }

@@ -3,12 +3,10 @@ package ohih.town.domain.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.DomainConst;
-import ohih.town.constants.ResourceBundleConst;
 import ohih.town.constants.ValidationPatterns;
 import ohih.town.domain.AccessInfo;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
-import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.UserInfo;
@@ -69,6 +67,11 @@ public class PostServiceImpl implements PostService {
         }
 
         return accessPermissionCheckResult;
+    }
+
+    @Override
+    public PostContent getPostContent(Long postId) {
+        return postMapper.getPostContent(postId);
     }
 
     @Override
@@ -275,8 +278,29 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deleteThumbnail(Long postId) {
+    public boolean deleteThumbnail(Long postId) {
+        try {
+            if (!postMapper.deleteThumbnail(postId)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public boolean deleteAttachments_db(Long postId) {
+        Integer attachmentCount = postMapper.getAttachmentCount(postId);
+        try {
+            if (!Objects.equals(postMapper.deleteAttachments(postId), attachmentCount)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -292,14 +316,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostUploadResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments) {
-        PostUploadResult postUploadResult = new PostUploadResult();
+    public PostResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments) {
+        PostResult postResult = new PostResult();
 
         VerificationResult verificationResult = verifyPostUploadRequest(postUploadRequest);
         if (!verificationResult.isVerified()) {
-            postUploadResult.setErrorMessages(verificationResult.getMessages());
-            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
-            return postUploadResult;
+            postResult.setErrorMessages(verificationResult.getMessages());
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
+            return postResult;
         }
 
         try {
@@ -309,49 +333,94 @@ public class PostServiceImpl implements PostService {
                     !uploadThumbnail(attachments.get(0))) {
                 throw new Exception();
             }
-            postUploadResult.setUploaded(true);
-            postUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
-            postUploadResult.setPostId(postUploadResult.getPostId());
+            postResult.setSuccess(true);
+            postResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
+            postResult.setPostId(postResult.getPostId());
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
         }
 
-        return postUploadResult;
+        return postResult;
     }
 
     @Override
-    public PostUploadResult updatePost(PostUploadRequest postUploadRequest, List<Attachment> attachments) {
-        PostUploadResult postUploadResult = new PostUploadResult();
+    public PostResult updatePost(Long accessPermittedPostId,
+                                 PostUploadRequest postUploadRequest, List<Attachment> attachments) {
+        PostResult postResult = new PostResult();
+
+        if (!Objects.equals(accessPermittedPostId, postUploadRequest.getPostId())) {
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_ACCESS_DENIED));
+            return postResult;
+        }
 
         VerificationResult verificationResult = verifyPostUploadRequest(postUploadRequest);
         if (!verificationResult.isVerified()) {
-            postUploadResult.setErrorMessages(verificationResult.getMessages());
-            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
-            return postUploadResult;
+            postResult.setErrorMessages(verificationResult.getMessages());
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
+            return postResult;
         }
 
         try {
             if (!postMapper.updatePost(postUploadRequest) ||
                     !deleteAttachments_prj(postUploadRequest.getPostId()) ||
-                    !updateAttachments_db(attachments, postUploadRequest.getPostId()) ||
+                    !deleteAttachments_db(postUploadRequest.getPostId()) ||
+                    !uploadAttachments_db(attachments, postUploadRequest.getPostId()) ||
                     !uploadAttachments_prj(attachments, postUploadRequest.getPostId()) ||
                     !updateThumbnail(attachments.get(0))) {
                 throw new Exception();
             }
-            postUploadResult.setUploaded(true);
-            postUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
-            postUploadResult.setPostId(postUploadResult.getPostId());
+            postResult.setSuccess(true);
+            postResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPDATE_SUCCESS));
+            postResult.setPostId(postUploadRequest.getPostId());
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            postUploadResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPDATE_FAILURE));
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPDATE_FAILURE));
         }
 
-        return postUploadResult;
+        return postResult;
     }
 
     @Override
-    public void deletePost(Long postId) {
+    public boolean deleteComments(Long postId) {
+        Integer commentCount = postMapper.getCommentCount(postId);
+        try {
+            if (!Objects.equals(postMapper.deleteComments(postId), commentCount)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public PostResult deletePost(Long accessPermittedPostId,
+                                 Long postId) {
+        PostResult postResult = new PostResult();
+
+        if (!Objects.equals(accessPermittedPostId, postId)) {
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_ACCESS_DENIED));
+            return postResult;
+        }
+
+        try {
+            if (!deleteComments(postId) ||
+                    !deleteThumbnail(postId) ||
+                    !deleteAttachments_prj(postId) ||
+                    !deleteAttachments_db(postId) ||
+                    !postMapper.deletePost(postId)) {
+                throw new SQLException();
+            }
+            postResult.setSuccess(true);
+            postResult.setPostId(postId);
+            postResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_DELETE_SUCCESS));
+        } catch (SQLException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_DELETE_FAILURE));
+        }
+
+        return postResult;
     }
 }

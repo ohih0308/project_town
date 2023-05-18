@@ -12,36 +12,34 @@ public interface PostMapper {
 
     AccessInfo getAccessInfo(Long postId);
 
+    List<Attachment> getAttachments(Long postId);
+
+    Integer getAttachmentCount(Long postId);
+
+    Integer getCommentCount(Long postId);
+
+    PostContent getPostContent(Long postId);
+
+
     boolean uploadPost(PostUploadRequest postUploadRequest);
 
     boolean uploadAttachment(Attachment attachment);
 
-    boolean updateAttachment(Attachment attachment);
-
     boolean uploadThumbnail(Attachment attachment);
+
+
+    boolean updateAttachment(Attachment attachment);
 
     boolean updateThumbnail(Attachment attachment);
 
-    boolean deleteAttachments(Long postId);
-
-    List<Attachment> getAttachments(Long postId);
-
-
-    boolean deleteAttachmentsByFileName(String fileName);
-
-
-    void deleteThumbnailByPostId(Long postId);
-
-
-    PostUpdateRequest getPostUpdateInfoByPostId(Long postId);
-
-
-    PostDetails getPostDetailsByPostId(Long postId);
-
-
     boolean updatePost(PostUploadRequest postUploadRequest);
 
-    Integer deletePost(Long postId);
 
+    Integer deleteAttachments(Long postId);
 
+    boolean deletePost(Long postId);
+
+    Integer deleteComments(Long postId);
+
+    boolean deleteThumbnail(Long postId);
 }

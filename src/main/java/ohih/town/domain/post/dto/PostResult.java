@@ -8,8 +8,8 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class PostUploadResult {
-    boolean isUploaded;
+public class PostResult {
+    boolean isSuccess;
     private Map<String, String> errorMessages = new HashMap<>();
     private String resultMessage;
 

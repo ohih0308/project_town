@@ -23,6 +23,8 @@ public interface PostService {
 
     boolean updateAttachments_db(List<Attachment> attachments, Long postId);
 
+    PostContent getPostContent(Long postId);
+
     List<Attachment> getAttachments(Long postId);
 
     boolean deleteAttachments_prj(Long postId);
@@ -30,15 +32,21 @@ public interface PostService {
     boolean uploadThumbnail(Attachment attachment);
 
     boolean updateThumbnail(Attachment attachment);
-    void deleteThumbnail(Long postId);
+
+    boolean deleteThumbnail(Long postId);
 
     boolean checkAccessPermission(UserInfo userInfo, String password, Long postId);
 
     PostDetails getPostDetails(Long postId);
 
-    PostUploadResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments);
+    PostResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments);
 
-    PostUploadResult updatePost(PostUploadRequest postUploadRequest, List<Attachment> attachments);
+    PostResult updatePost(Long accessPermittedPostId,
+                          PostUploadRequest postUploadRequest, List<Attachment> attachments);
 
-    void deletePost(Long postId);
+    PostResult deletePost(Long accessPermittedPostId, Long postId);
+
+    boolean deleteAttachments_db(Long postId);
+
+    boolean deleteComments(Long postId);
 }

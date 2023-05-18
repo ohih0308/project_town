@@ -52,9 +52,8 @@ public class Utilities {
     }
 
 
-    // paging revised
     public static Paging getPaging(Long totalCount, Integer presentPage, Integer itemsPerPage) {
-        int pagesPerBlock = PagingConst.pagesPerBlock;
+        int pagesPerBlock = UtilityConst.PAGES_PER_BLOCK;
         int totalPages = (int) Math.ceil(totalCount / (double) itemsPerPage);
 
         // 현재 페이지가 null이면 0으로 설정

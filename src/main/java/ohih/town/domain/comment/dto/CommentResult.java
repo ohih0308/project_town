@@ -8,8 +8,8 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class CommentUploadResult {
-    boolean isUploaded;
+public class CommentResult {
+    boolean isSuccess;
     private Map<String, String> errorMessages = new HashMap<>();
     private String resultMessage;
 

@@ -21,12 +21,40 @@
         where post_id = #{postId};
     </select>
 
-<!--  List<Attachment> getAttachments(Long postId);  -->
+    <!--  List<Attachment> getAttachments(Long postId);  -->
     <select id="getAttachments" parameterType="Long" resultType="Attachment">
         select *
         from attachments
         where post_id = #{postId};
     </select>
+
+    <!--  Integer getCommentCount(Long postId);  -->
+    <select id="getCommentCount" parameterType="Long" resultType="Integer">
+        select count(*)
+        from comments
+        where post_id = #{postId};
+    </select>
+
+    <!--  Integer getAttachmentCount(Long postId);  -->
+    <select id="getAttachmentCount" parameterType="Long" resultType="Integer">
+        select count(*)
+        from attachments
+        where post_id = #{postId};
+    </select>
+
+    <!--  PostContent getPostContent(Long postId);  -->
+    <select id="getPostContent" parameterType="Long" resultType="PostContent">
+        select post_id   as postId,
+               board_id  as boardId,
+               user_id   as userId,
+               user_type as userType,
+               author,
+               subject,
+               body
+        from posts
+        where post_id = #{postId};
+    </select>
+
 
     <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
     <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
@@ -46,7 +74,8 @@
         values (#{postId}, #{fileName}, #{directory});
     </insert>
 
-<!--  boolean updateThumbnail(Attachment attachment);  -->
+
+    <!--  boolean updateThumbnail(Attachment attachment);  -->
     <update id="updateThumbnail" parameterType="Attachment">
         update thumbnails
         set file_name = #{fileNmae},
@@ -60,9 +89,8 @@
         set file_name = #{fileName},
             extension = #{extension},
             directory = #{directory}
-        where post_id = #{postId}
+        where file_name = #{fileName}
     </update>
-
 
     <!--  boolean updatePost(PostUploadRequest postUploadRequest);  -->
     <update id="updatePost" parameterType="PostUploadRequest">
@@ -77,5 +105,26 @@
             body       = #{body},
             updated_at = NOW()
     </update>
+
+    <!--  Integer deleteAttachments(Long postId);  -->
+    <delete id="deleteAttachments" parameterType="Long">
+        delete
+        from attachments
+        where post_id = #{postId};
+    </delete>
+
+    <!--  boolean deleteThumbnail(Long postId);  -->
+    <delete id="deleteThumbnail" parameterType="Long">
+        delete
+        from thumbnails
+        where post_id = #{postId};
+    </delete>
+
+    <!--  boolean deletePost(Long postId);  -->
+    <delete id="deletePost" parameterType="Long">
+        delete
+        from posts
+        where post_id = #{postId};
+    </delete>
 
 </mapper>

@@ -7,13 +7,10 @@ import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.comment.dto.CommentContentInfo;
-import ohih.town.domain.comment.dto.CommentDeleteResult;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
-import ohih.town.domain.comment.dto.CommentUploadResult;
-import ohih.town.domain.comment.service.CommentService;
+import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.comment.service.CommentServiceImpl;
 import ohih.town.domain.common.dto.AuthorInfo;
-import ohih.town.domain.notification.service.NotificationService;
 import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
@@ -32,20 +29,20 @@ public class CommentRestController {
     private final NotificationServiceImpl notificationService;
 
     @PostMapping(URLConst.UPLOAD_COMMENT)
-    public CommentUploadResult uploadComment(HttpServletRequest request,
-                                             @Nullable @SessionAttribute UserInfo userInfo,
-                                             AuthorInfo authorInfo, CommentContentInfo commentContentInfo) {
+    public CommentResult uploadComment(HttpServletRequest request,
+                                       @Nullable @SessionAttribute UserInfo userInfo,
+                                       AuthorInfo authorInfo, CommentContentInfo commentContentInfo) {
         String ip = Utilities.getIp(request);
         Utilities.setAuthor(authorInfo, userInfo, ip);
 
-        CommentUploadResult commentUploadResult =
+        CommentResult commentResult =
                 commentService.uploadComment(new CommentUploadRequest(authorInfo, commentContentInfo));
 
-        if (commentUploadResult.isUploaded()) {
-            notificationService.createNewCommentNotification(commentUploadResult.getPostId());
+        if (commentResult.isSuccess()) {
+            notificationService.createNewCommentNotification(commentResult.getPostId());
         }
 
-        return commentUploadResult;
+        return commentResult;
     }
 
     @PostMapping(URLConst.ACCESS_PERMISSION_COMMENT)
@@ -68,9 +65,16 @@ public class CommentRestController {
     }
 
     @PostMapping(URLConst.DELETE_COMMENT)
-    public CommentDeleteResult deleteComment(HttpServletRequest request, Long commentId) {
+    public CommentResult deleteComment(HttpServletRequest request, Long commentId) {
         Long accessPermittedCommentId = (Long) SessionManager.getAttributes(request, SessionConst.ACCESS_PERMITTED_COMMENT_ID);
 
-        return commentService.deleteComment(accessPermittedCommentId, commentId);
+        CommentResult commentResult = commentService.deleteComment(accessPermittedCommentId, commentId);
+
+        if (commentResult.isSuccess()) {
+            SessionManager.removeAttribute(request, SessionConst.ACCESS_PERMITTED_COMMENT_ID);
+        }
+
+        return commentResult;
     }
+
 }

@@ -68,6 +68,7 @@ public interface ErrorsConst {
 
     String POST_UPLOAD_FAILURE = "post.upload.failure";
     String POST_UPDATE_FAILURE = "post.update.failure";
+    String POST_DELETE_FAILURE = "post.delete.failure";
 
     // Comment
     String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";

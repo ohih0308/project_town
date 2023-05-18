@@ -9,7 +9,7 @@ public interface ViewConst {
 
     String LOGIN = "login";
 
-    String FORUM_SELECTION = "forum-selection";
+    String BOARD_SELECTION = "board-selection";
     String BOARD = "board";
 
     String POST_DETAILS = "post-details";

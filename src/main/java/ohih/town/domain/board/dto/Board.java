@@ -1,4 +1,4 @@
-package ohih.town.domain.forum.dto;
+package ohih.town.domain.board.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Forum {
+public class Board {
     private Long categoryId;
     private String categoryName;
     private Long boardId;

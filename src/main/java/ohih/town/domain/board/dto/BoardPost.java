@@ -1,4 +1,4 @@
-package ohih.town.domain.forum.dto;
+package ohih.town.domain.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;

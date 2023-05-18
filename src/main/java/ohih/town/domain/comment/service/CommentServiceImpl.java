@@ -6,9 +6,8 @@ import ohih.town.constants.*;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
 import ohih.town.domain.AccessInfo;
-import ohih.town.domain.comment.dto.CommentDeleteResult;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
-import ohih.town.domain.comment.dto.CommentUploadResult;
+import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.comment.mapper.CommentMapper;
 import ohih.town.utilities.Utilities;
 import org.springframework.stereotype.Service;
@@ -79,28 +78,28 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentUploadResult uploadComment(CommentUploadRequest commentUploadRequest) {
-        CommentUploadResult commentUploadResult = new CommentUploadResult();
+    public CommentResult uploadComment(CommentUploadRequest commentUploadRequest) {
+        CommentResult commentResult = new CommentResult();
         VerificationResult verificationResult = verifyCommentUploadRequest(commentUploadRequest);
 
         if (!verificationResult.isVerified()) {
-            commentUploadResult.setErrorMessages(verificationResult.getMessages());
-            commentUploadResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
-            return commentUploadResult;
+            commentResult.setErrorMessages(verificationResult.getMessages());
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            return commentResult;
         }
 
         try {
             if (!commentMapper.uploadComment(commentUploadRequest)) {
                 throw new SQLException();
             }
-            commentUploadResult.setUploaded(true);
-            commentUploadResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
+            commentResult.setSuccess(true);
+            commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentUploadResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
         }
 
-        return commentUploadResult;
+        return commentResult;
     }
 
     @Override
@@ -132,37 +131,26 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDeleteResult deleteComment(Long accessPermittedCommentId, Long commentId) {
-        CommentDeleteResult commentDeleteResult = new CommentDeleteResult();
-        commentDeleteResult.setCommentId(commentId);
+    public CommentResult deleteComment(Long accessPermittedCommentId, Long commentId) {
+        CommentResult commentResult = new CommentResult();
+        commentResult.setCommentId(commentId);
 
         if (accessPermittedCommentId == null || !accessPermittedCommentId.equals(commentId)) {
-            commentDeleteResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
-            return commentDeleteResult;
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
+            return commentResult;
         }
 
         try {
             if (!commentMapper.deleteComment(commentId)) {
                 throw new SQLException();
             }
-            commentDeleteResult.setDeleted(true);
-            commentDeleteResult.setMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
+            commentResult.setSuccess(true);
+            commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentDeleteResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
         }
 
-        return commentDeleteResult;
-    }
-
-    @Override
-    public void deleteCommentsByPostId(Long postId) {
-
-    }
-
-
-    @Override
-    public Integer getTotalCountsByPostId(Long postId) {
-        return null;
+        return commentResult;
     }
 }

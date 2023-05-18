@@ -3,7 +3,12 @@ package ohih.town.constants;
 public interface URLConst {
     String RETURN_MESSAGE = "return-message";
 
+
+    // TownController
     String HOME = "/";
+    String BOARD_SELECTION = "/board-selection";
+    String BOARD = "/board/";
+
 
     String SEND_VERIFICATION_CODE = "/send/verification-code";
     String VERIFY_EMAIL = "/verify/email";
@@ -25,14 +30,12 @@ public interface URLConst {
     String UPDATE_GUESTBOOK_PERMISSION = "/update/guestbook-permission";
     String UPDATE_GUESTBOOK_ACTIVATION = "/update/guestbook-activation";
 
-    String FORUM_SELECTION = "/forum-selection";
-    String GET_BOARD_PAGE = "/board/{boardName}";
 
     String UPLOAD_POST = "/upload/post";
     String POST_DETAILS = "/post/{postId}";
-    String UPDATE_POST_FORM = "/update/post-form";
+    String UPDATE_POST_FORM = "/update/post";
     String UPDATE_POST = "/update/post";
-    String DELETE_POST_FORM = "/delete/post-form";
+    String DELETE_POST_FORM = "/delete/post";
     String DELETE_POST = "/delete/post";
     String ACCESS_PERMISSION_POST = "/access-permission/post/";
 

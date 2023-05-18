@@ -5,10 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostUpdateInfo {
+public class PostContent {
     private Long postId;
+    private Long boardId;
+
     private Long userId;
+    private Integer userType;
     private String author;
+
     private String subject;
     private String body;
 }
