@@ -9,9 +9,10 @@ public interface DomainConst {
     String BOARD_POSTS = "board_posts";
 
 
-    Integer USER_TYPE_ADMIN = 0;
-    Integer USER_TYPE_GUEST = 1;
-    Integer USER_TYPE_MEMBER = 2;
+    Integer USER_TYPE_ADMIN = 10;
+    Integer USER_TYPE_GUEST = 20;
+    Integer DEACTIVATED_USER_ID = 30;
+    Integer USER_TYPE_MEMBER = 31;
 
     Integer VERIFICATION_CODE_LENGTH = 5;
 
@@ -47,4 +48,6 @@ public interface DomainConst {
     String BODY = "body";
 
     String POST_UPDATE_INFO = "post_update_info";
+
+    String NOTIFICATION_ID = "notification_id";
 }

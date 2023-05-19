@@ -70,4 +70,11 @@ public interface ErrorsConst {
     String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
     String COMMENT_DELETE_FAILURE = "comment.delete.failure";
 
+    // Notification
+    String NOTIFICATION_ACCESS_DENIED = "notification.access.denied";
+    String NOTIFICATION_DELETE_FAILURE = "notification.delete.failure";
+    String NOTIFICATION_DELETE_PARTIAL_FAILURE = "notification.delete.partial_failure";
+    String NOTIFICATION_MARK_AS_READ_FAILURE = "notification.markAsRead.failure";
+    String NOTIFICATION_EXISTENCE_ERROR = "notification.existence.error";
+
 }

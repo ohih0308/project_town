@@ -37,4 +37,7 @@ public interface SuccessConst {
     String COMMENT_UPLOAD_SUCCESS = "comment.upload.success";
     String COMMENT_ACCESS_PERMITTED = "comment.access.permitted";
     String COMMENT_DELETE_SUCCESS = "comment.delete.success";
+
+    String NOTIFICATION_DELETE_SUCCESS = "notification.delete.success";
+    String NOTIFICATION_MARK_AS_READ_SUCCESS = "notification.markAsRead.success";
 }

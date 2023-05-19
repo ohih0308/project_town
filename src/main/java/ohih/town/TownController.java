@@ -9,16 +9,17 @@ import ohih.town.constants.UtilityConst;
 import ohih.town.constants.ViewConst;
 import ohih.town.domain.board.dto.BoardPost;
 import ohih.town.domain.board.service.BoardServiceImpl;
+import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.post.service.PostServiceImpl;
+import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class TownController {
 
     private final BoardServiceImpl boardService;
     private final PostServiceImpl postService;
+    private final NotificationServiceImpl notificationService;
 
 
     @GetMapping(URLConst.HOME)
@@ -68,7 +70,7 @@ public class TownController {
 
 
     @GetMapping(URLConst.POST_DETAILS)
-    public String getPostDetails(Model model, Long postId) {
+    public String getPostDetails(Model model, @PathVariable Long postId) {
         model.addAttribute(POST_DETAILS, postService.getPostDetails(postId));
         return ViewConst.POST_DETAILS;
     }
@@ -88,5 +90,12 @@ public class TownController {
         model.addAttribute(POST_CONTENT, postService.getPostContent(postId));
 
         return ViewConst.UPDATE_POST_FORM;
+    }
+
+    @GetMapping(URLConst.READ_NOTIFICATIONS)
+    public String readNotifications(@SessionAttribute UserInfo userInfo,
+                                    Long notificationId, String redirectUrl) {
+        notificationService.markAsRead(userInfo.getUserId(), notificationId);
+        return "redirect:" + redirectUrl;
     }
 }

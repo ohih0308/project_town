@@ -64,4 +64,6 @@ public interface UserService {
 
     UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean activation);
 
+    UserInfoUpdateResult deactivateUser(Long userId);
+
 }

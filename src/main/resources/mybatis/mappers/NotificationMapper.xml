@@ -4,9 +4,50 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="ohih.town.domain.notification.mapper.NotificationMapper">
+    <!--  Notification getNotification(Long notificationId);  -->
+    <select id="getNotification" parameterType="Long" resultType="Notification">
+        select *
+        from notifications
+        where notification_id = #{notificationId};
+    </select>
+
+    <!--  Integer countNotification(Long userId);  -->
+    <select id="countNotification" parameterType="Long" resultType="Integer">
+        select count(*)
+        from notifications
+        where user_id = #{userId};
+    </select>
+
+
     <!--  boolean createNotification(Notification notification);  -->
     <insert id="createNotification" parameterType="Notification" useGeneratedKeys="true" keyProperty="notificationId">
-        insert into notifications (user_id, type, message, redirect_url, created_at, updated_at)
-        values (#{userId}, #{type}, #{message}, #{redirectUrl}, now(), now());
+        insert into notifications (user_id,
+                                   type,
+                                   message,
+                                   redirect_url,
+                                   created_at,
+                                   updated_at,
+                                   is_read)
+        values (#{userId}, #{type}, #{message}, #{redirectUrl}, now(), now(), 0);
     </insert>
+
+    <!--  boolean markAsRead(Map<String, Long> map);  -->
+    <update id="markAsRead" parameterType="Map">
+        update notifications
+        set is_read = 1
+        where user_id = #{user_id}
+          and notification_id = #{notification_id};
+    </update>
+
+    <!--  boolean deleteNotification(Long notificationId);  -->
+    <delete id="deleteNotification" parameterType="Long">
+        delete
+        from notifications
+        where notification_id = #{notificationId};
+    </delete>
+
+    <!--  boolean deleteNotifications(Long userId);  -->
+    <delete id="deleteNotifications" parameterType="Long">
+
+    </delete>
 </mapper>

@@ -9,9 +9,11 @@ public interface URLConst {
     String REGISTER = "/register";
     String BOARD_SELECTION = "/board-selection";
     String BOARD = "/board/";
-    String POST_DETAILS = "/post-details";
+    String POST_DETAILS = "/post-details/{postId}";
     String UPLOAD_POST_FORM = "/upload/post";
     String UPDATE_POST_FORM = "/update/post";
+
+    String READ_NOTIFICATIONS = "/read-notifications";
 
 
     String UPLOAD_POST = "/upload/post";
@@ -45,4 +47,8 @@ public interface URLConst {
     String UPLOAD_COMMENT = "/upload/comment";
     String DELETE_COMMENT = "/delete/comment";
     String ACCESS_PERMISSION_COMMENT = "/access-permission/comment/";
+
+
+    String DELETE_NOTIFICATION = "/delete-notification";
+    String DELETE_NOTIFICATIONS = "/delete-notifications";
 }

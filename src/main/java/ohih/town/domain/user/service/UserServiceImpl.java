@@ -544,11 +544,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean activation) {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put(GUESTBOOK_ACTIVATION, activation);
-//        map.put(USER_ID, userId);
-//
-//        if ()
+        return null;
+    }
+
+    @Override
+    public UserInfoUpdateResult deactivateUser(Long userId) {
         return null;
     }
 }
