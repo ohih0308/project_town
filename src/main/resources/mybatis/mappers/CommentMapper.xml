@@ -5,6 +5,82 @@
 
 <mapper namespace="ohih.town.domain.comment.mapper.CommentMapper">
 
+    <!--  AccessInfo getAccessInfo(Long commentId);  -->
+    <select id="getAccessInfo" parameterType="Long" resultType="AccessInfo">
+        select comment_id as commentId,
+               user_id    as userId,
+               user_type  as userType,
+               password
+        from comments
+        where comment_id = #{commentId};
+    </select>
+
+    <!--  Long countComments(Long postId);  -->
+    <select id="countComments" parameterType="Long" resultType="Long">
+        select count(*)
+        from comments
+        where post_id = #{postId};
+    </select>
+
+    <!--  List<Comment> getComments(Map<String, Object> map);  -->
+    <select id="getComments" parameterType="Map" resultType="Comment">
+        select c.post_id          as postId,
+               c.comment_id       as commentId,
+               c.user_type        as userType,
+               c.user_id          as userId,
+               c.user_ip          as userIp,
+               c.author,
+               pi.saved_file_name as savedFileName,
+               pi.extension
+        from comments as c
+                 left join profile_images as pi on c.user_id = pi.user_id
+        where c.post_id = #{post_id}
+        order by c.coment_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+    <!--  Long countMyComments(Map<String, Object> map);  -->
+    <select id="countMyComments" parameterType="Map" resultType="Long">
+        select count(*)
+        from comments
+        where user_id = #{user_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>;
+    </select>
+
+    <!--  List<Comment> getMyComments(Map<String, Object> map);  -->
+    <select id="getMyComments" parameterType="Map" resultType="Comment">
+        select c.post_id as postId,
+        c.comment_id as commentId,
+        c.user_type as userType,
+        c.user_id as userId,
+        c.user_ip as userIp,
+        c.author,
+        pi.saved_file_name as savedFileName,
+        pi.extension
+        from comments as c
+        left join profile_images as pi on c.user_id = pi.user_id
+        where c.user_id = #{user_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>
+        order by c.coment_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
     <!--  boolean isPostIdExists(Long postId);  -->
     <select id="isPostIdExists" parameterType="Long" resultType="boolean">
         select count(*)
@@ -18,15 +94,6 @@
         values (#{postId}, #{userType}, #{userId}, #{ip}, #{author}, #{password}, #{comment}, now());
     </insert>
 
-    <!--  AccessInfo getAccessInfo(Long commentId);  -->
-    <select id="getAccessInfo" parameterType="Long" resultType="AccessInfo">
-        select comment_id as commentId,
-               user_id    as userId,
-               user_type  as userType,
-               password
-        from comments
-        where comment_id = #{commentId};
-    </select>
 
     <!--  boolean deleteComment(Long commentId);  -->
     <delete id="deleteComment" parameterType="Long">
@@ -35,17 +102,17 @@
         where comment_id = #{commentId};
     </delete>
 
-    <!--  Integer getTotalCommentCountByPostId(Long postId);  -->
-    <select id="getTotalCommentCountByPostId" parameterType="Long">
-        select count(*)
-        from comments
-        where post_id = #{postId};
-    </select>
+    <!--      Integer getTotalCommentCountByPostId(Long postId);  -->
+    <!--    <select id="getTotalCommentCountByPostId" parameterType="Long">-->
+    <!--        select count(*)-->
+    <!--        from comments-->
+    <!--        where post_id = #{postId};-->
+    <!--    </select>-->
 
-    <!--  List<Long> getCommentIdsByPostId(Long postId);  -->
-    <select id="getCommentIdsByPostId" parameterType="Long">
-        select comment_id
-        from comments
-        where post_id = #{post_id};
-    </select>
+    <!--      List<Long> getCommentIdsByPostId(Long postId);  -->
+    <!--    <select id="getCommentIdsByPostId" parameterType="Long">-->
+    <!--        select comment_id-->
+    <!--        from comments-->
+    <!--        where post_id = #{post_id};-->
+    <!--    </select>-->
 </mapper>

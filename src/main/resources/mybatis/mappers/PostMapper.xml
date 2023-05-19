@@ -77,6 +77,97 @@
         where p.post_id = #{post_id};
     </select>
 
+    <!--  Long countPosts(Map<String, Object> map);  -->
+    <select id="countPosts" parameterType="Map" resultType="Long">
+        select count(*)
+        from posts as p
+        left join boards as b on p.board_id = b.board_id
+        where b.id = #{board_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>;
+    </select>
+
+    <!--  List<SimplePost> getPosts(Map<String, Object> map);  -->
+    <select id="getPosts" parameterType="Map" resultType="SimplePost">
+        select p.post_id as postId,
+        p.board_id as postId,
+        p.user_id as userId,
+        p.user_type as userType,
+        p.author,
+        p.subject,
+        p.views,
+        p.created_at,
+        pi.saved_file_name as savedFileName,
+        pi.extension
+        from posts as p
+        left join profile_images as pi on p.user_id = pi.user_id
+        where p.board_id = #{board_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>
+        order by p.post_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+    <!--  Long countMyPosts(Map<String, Object> map);  -->
+    <select id="countMyPosts" parameterType="Map" resultType="Long">
+        select count(*)
+        from posts as p
+        left join users as u on p.user_id = u.user_id
+        where u.user_id = #{user_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>;
+    </select>
+
+    <!--  List<SimplePost> getMyPosts(Map<String, Object> map);  -->
+    <select id="getMyPosts" parameterType="Map" resultType="SimplePost">
+        select p.post_id as postId,
+        p.board_id as postId,
+        p.user_id as userId,
+        p.user_type as userType,
+        p.author,
+        p.subject,
+        p.views,
+        p.created_at,
+        pi.saved_file_name as savedFileName,
+        pi.extension
+        from posts as p
+        left join users on p.user_id = pi.user_id
+        where p.user_id = #{user_id}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>
+        order by p.post_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+
     <!--  boolean uploadAttachment(Attachment attachment);  -->
     <insert id="uploadAttachment" parameterType="Attachment">
         insert into attachments (file_name, extension, post_id, directory)

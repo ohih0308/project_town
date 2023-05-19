@@ -7,9 +7,11 @@ import ohih.town.constants.ValidationPatterns;
 import ohih.town.domain.AccessInfo;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
+import ohih.town.domain.post.dto.SimplePost;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
-import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.utilities.Paging;
+import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,12 +25,12 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static ohih.town.constants.DateFormat.DATE_FORMAT_YYYY_MM_DD;
-import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
+import static ohih.town.constants.DomainConst.*;
 import static ohih.town.constants.ErrorsConst.*;
 import static ohih.town.constants.ResourceBundleConst.POST_ERROR_MESSAGES;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 import static ohih.town.constants.SuccessConst.*;
-import static ohih.town.constants.UtilityConst.UUID_FULL_INDEX;
+import static ohih.town.constants.UtilityConst.*;
 import static ohih.town.utilities.Utilities.isValidated;
 
 @RequiredArgsConstructor
@@ -158,6 +160,39 @@ public class PostServiceImpl implements PostService {
         return postMapper.getPostDetails(postId);
     }
 
+    @Override
+    public Long countPosts(Long boardId, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(BOARD_ID, boardId);
+        map.put(SEARCH, search);
+        return postMapper.countPosts(map);
+    }
+
+    @Override
+    public List<SimplePost> getPosts(Long boardId, Paging paging, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(BOARD_ID, boardId);
+        map.put(PAGING, paging);
+        map.put(SEARCH, search);
+        return postMapper.getPosts(map);
+    }
+
+    @Override
+    public Long countMyPosts(Long userId, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(SEARCH, search);
+        return postMapper.countMyPosts(map);
+    }
+
+    @Override
+    public List<SimplePost> getMyPosts(Long userId, Paging paging, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(PAGING, paging);
+        map.put(SEARCH, search);
+        return postMapper.getMyPosts(map);
+    }
 
     @Override
     public boolean uploadAttachments_prj(List<Attachment> attachments, Long postId) {

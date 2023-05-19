@@ -3,9 +3,12 @@ package ohih.town.domain.comment.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ohih.town.constants.DomainConst;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
+import ohih.town.constants.UtilityConst;
 import ohih.town.domain.AccessPermissionCheckResult;
+import ohih.town.domain.comment.dto.Comment;
 import ohih.town.domain.comment.dto.CommentContentInfo;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentResult;
@@ -14,11 +17,17 @@ import ohih.town.domain.common.dto.AuthorInfo;
 import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
+import ohih.town.utilities.Paging;
 import ohih.town.utilities.Utilities;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +36,7 @@ public class CommentRestController {
 
     private final CommentServiceImpl commentService;
     private final NotificationServiceImpl notificationService;
+
 
     @PostMapping(URLConst.UPLOAD_COMMENT)
     public CommentResult uploadComment(HttpServletRequest request,
@@ -77,4 +87,17 @@ public class CommentRestController {
         return commentResult;
     }
 
+    @PostMapping(URLConst.GET_COMMENTS)
+    public Map<String, Object> getComments(@PathVariable Long postId,
+                           Integer presentPage) {
+        Map<String, Object> map = new HashMap<>();
+
+        Long totalCount = commentService.countComments(postId);
+        Paging paging = Utilities.getPaging(totalCount, presentPage, UtilityConst.COMMENTS_PER_PAGE);
+
+        map.put(UtilityConst.PAGING, paging);
+        map.put(DomainConst.COMMENTS, commentService.getComments(postId, paging));
+
+        return map;
+    }
 }

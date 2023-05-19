@@ -6,14 +6,19 @@ import ohih.town.constants.*;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
 import ohih.town.domain.AccessInfo;
+import ohih.town.domain.comment.dto.Comment;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.comment.mapper.CommentMapper;
+import ohih.town.domain.post.dto.SimplePost;
+import ohih.town.utilities.Paging;
+import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -76,6 +81,37 @@ public class CommentServiceImpl implements CommentService {
 
         return verificationResult;
     }
+
+    @Override
+    public Long countComments(Long postId) {
+        return commentMapper.countComments(postId);
+    }
+
+    @Override
+    public List<Comment> getComments(Long postId, Paging paging) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.POST_ID, postId);
+        map.put(UtilityConst.PAGING, paging);
+        return commentMapper.getComments(map);
+    }
+
+    @Override
+    public Long countMyComments(Long userId, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.USER_ID, userId);
+        map.put(UtilityConst.SEARCH, search);
+        return commentMapper.countMyComments(map);
+    }
+
+    @Override
+    public List<Comment> getMyComments(Long userId, Paging paging, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.USER_ID, userId);
+        map.put(UtilityConst.PAGING, paging);
+        map.put(UtilityConst.SEARCH, search);
+        return commentMapper.getMyComments(map);
+    }
+
 
     @Override
     public CommentResult uploadComment(CommentUploadRequest commentUploadRequest) {

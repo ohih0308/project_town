@@ -15,6 +15,9 @@
         <typeAlias type="ohih.town.domain.post.dto.Attachment" alias="Attachment"/>
         <typeAlias type="ohih.town.domain.post.dto.PostContent" alias="PostContent"/>
         <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
+        <typeAlias type="ohih.town.domain.post.dto.SimplePost" alias="SimplePost"/>
+
+        <typeAlias type="ohih.town.domain.comment.dto.Comment" alias="Comment"/>
 
         <typeAlias type="ohih.town.domain.notification.dto.Notification" alias="Notification"/>
     </typeAliases>

@@ -7,9 +7,10 @@ import ohih.town.constants.DomainConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UtilityConst;
 import ohih.town.constants.ViewConst;
-import ohih.town.domain.board.dto.BoardPost;
+import ohih.town.domain.comment.dto.Comment;
+import ohih.town.domain.comment.service.CommentServiceImpl;
+import ohih.town.domain.post.dto.SimplePost;
 import ohih.town.domain.board.service.BoardServiceImpl;
-import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.utilities.Paging;
@@ -32,7 +33,7 @@ public class TownController {
 
     private final BoardServiceImpl boardService;
     private final PostServiceImpl postService;
-    private final NotificationServiceImpl notificationService;
+    private final CommentServiceImpl commentService;
 
 
     @GetMapping(URLConst.HOME)
@@ -45,6 +46,10 @@ public class TownController {
         return ViewConst.REGISTER;
     }
 
+    @GetMapping(URLConst.LOGIN)
+    public String login() {
+        return ViewConst.LOGIN;
+    }
 
     @GetMapping(URLConst.BOARD_SELECTION)
     public String selectBoard(Model model) {
@@ -55,15 +60,15 @@ public class TownController {
     @GetMapping(URLConst.BOARD)
     public String getBoard(Model model,
                            Long boardId, Integer presentPage, Search search) {
-        Long totalCount = boardService.countPosts(boardId, search);
+        Long totalCount = postService.countPosts(boardId, search);
 
         Paging paging = Utilities.getPaging(totalCount, presentPage, UtilityConst.POSTS_PER_PAGE);
-        List<BoardPost> boardPosts = boardService.getPosts(boardId, paging, search);
+        List<SimplePost> simplePosts = postService.getPosts(boardId, paging, search);
 
         model.addAttribute(BOARD_NAME, boardService.getBoardName(boardId));
         model.addAttribute(UtilityConst.PAGING, paging);
         model.addAttribute(UtilityConst.SEARCH, search);
-        model.addAttribute(DomainConst.BOARD_POSTS, boardPosts);
+        model.addAttribute(DomainConst.SIMPLE_POSTS, simplePosts);
 
         return ViewConst.BOARD;
     }
@@ -92,10 +97,39 @@ public class TownController {
         return ViewConst.UPDATE_POST_FORM;
     }
 
-    @GetMapping(URLConst.READ_NOTIFICATIONS)
-    public String readNotifications(@SessionAttribute UserInfo userInfo,
-                                    Long notificationId, String redirectUrl) {
-        notificationService.markAsRead(userInfo.getUserId(), notificationId);
-        return "redirect:" + redirectUrl;
+
+    @GetMapping(URLConst.MY_PAGE)
+    public String getMyPage() {
+        return ViewConst.MY_PAGE;
+    }
+
+    @GetMapping(URLConst.MY_POSTS)
+    public String getMyPosts(Model model,
+                             @SessionAttribute UserInfo userInfo,
+                             Integer presentPage, Search search) {
+        Long totalCount = postService.countMyPosts(userInfo.getUserId(), search);
+        Paging paging = Utilities.getPaging(totalCount, presentPage, UtilityConst.POSTS_PER_PAGE);
+        List<SimplePost> simplePosts = postService.getMyPosts(userInfo.getUserId(), paging, search);
+
+        model.addAttribute(UtilityConst.PAGING, paging);
+        model.addAttribute(UtilityConst.SEARCH, search);
+        model.addAttribute(DomainConst.SIMPLE_POSTS, simplePosts);
+
+        return ViewConst.MY_POSTS;
+    }
+
+    @GetMapping(URLConst.MY_COMMENTS)
+    public String getMyComments(Model model,
+                                @SessionAttribute UserInfo userInfo,
+                                Integer presentPage, Search search) {
+        Long totalCount = commentService.countMyComments(userInfo.getUserId(), search);
+        Paging paging = Utilities.getPaging(totalCount, presentPage, UtilityConst.POSTS_PER_PAGE);
+        List<Comment> comments = commentService.getMyComments(userInfo.getUserId(), paging, search);
+
+        model.addAttribute(UtilityConst.PAGING, paging);
+        model.addAttribute(UtilityConst.SEARCH, search);
+        model.addAttribute(COMMENTS, comments);
+
+        return ViewConst.MY_COMMENTS;
     }
 }

@@ -1,4 +1,4 @@
-package ohih.town.domain.board.dto;
+package ohih.town.domain.post.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class BoardPost {
+public class SimplePost {
 
     private Long postId;
     private Long userId;

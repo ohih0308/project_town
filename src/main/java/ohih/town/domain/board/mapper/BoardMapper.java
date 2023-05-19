@@ -1,7 +1,7 @@
 package ohih.town.domain.board.mapper;
 
 import ohih.town.domain.board.dto.Board;
-import ohih.town.domain.board.dto.BoardPost;
+import ohih.town.domain.post.dto.SimplePost;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -16,5 +16,5 @@ public interface BoardMapper {
 
     Long countPosts(Map<String, Object> map);
 
-    List<BoardPost> getPosts(Map<String, Object> map);
+    List<SimplePost> getPosts(Map<String, Object> map);
 }

@@ -13,14 +13,12 @@ public interface URLConst {
     String UPLOAD_POST_FORM = "/upload/post";
     String UPDATE_POST_FORM = "/update/post";
 
-    String READ_NOTIFICATIONS = "/read-notifications";
+    String MY_PAGE = "/my-page";
+    String MY_POSTS = "/my-page/posts";
+    String MY_COMMENTS = "/my-page/comments";
 
 
-    String UPLOAD_POST = "/upload/post";
-    String UPDATE_POST = "/update/post";
-    String DELETE_POST = "/delete/post";
-
-
+    // UserRestController
     String SEND_VERIFICATION_CODE = "/send/verification-code";
     String VERIFY_EMAIL = "/verify/email";
     String VERIFY_USERNAME = "/verify/username";
@@ -41,14 +39,23 @@ public interface URLConst {
     String UPDATE_GUESTBOOK_ACTIVATION = "/update/guestbook-activation";
 
 
+    // PostRestController
+    String UPLOAD_POST = "/upload/post";
     String ACCESS_PERMISSION_POST = "/access-permission/post/";
+    String UPDATE_POST = "/update/post";
+    String DELETE_POST = "/delete/post";
 
 
+
+    // CommentRestController
     String UPLOAD_COMMENT = "/upload/comment";
-    String DELETE_COMMENT = "/delete/comment";
     String ACCESS_PERMISSION_COMMENT = "/access-permission/comment/";
+    String DELETE_COMMENT = "/delete/comment";
+    String GET_COMMENTS = "/{postId}/comments";
 
 
+    // NotificationRestController
+    String READ_NOTIFICATIONS = "/read-notifications";
     String DELETE_NOTIFICATION = "/delete-notification";
     String DELETE_NOTIFICATIONS = "/delete-notifications";
 }

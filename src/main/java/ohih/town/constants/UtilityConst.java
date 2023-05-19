@@ -6,6 +6,7 @@ public interface UtilityConst {
 
     int PAGES_PER_BLOCK = 10;
     int POSTS_PER_PAGE = 20;
+    int COMMENTS_PER_PAGE = 20;
 
     String SEARCH = "search";
     String PAGING = "paging";

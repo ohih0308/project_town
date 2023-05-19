@@ -7,9 +7,8 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class CommentsList {
+public class Comment {
 
-    private Long rowNum;
     private Long postId;
     private Long commentId;
 
@@ -19,7 +18,7 @@ public class CommentsList {
     private String author;
 
     private String savedFileName;
-    private String ext;
+    private String extension;
 
     private String comment;
     private Date createdAt;
