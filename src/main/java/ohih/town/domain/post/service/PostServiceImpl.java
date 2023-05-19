@@ -70,11 +70,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostContent getPostContent(Long postId) {
-        return postMapper.getPostContent(postId);
-    }
-
-    @Override
     public VerificationResult verifyPostUploadRequest(PostUploadRequest postUploadRequest) {
         VerificationResult verificationResult = new VerificationResult();
         Map<String, String> messages = new HashMap<>();
@@ -152,10 +147,17 @@ public class PostServiceImpl implements PostService {
         return attachments;
     }
 
-    @Override
-    public void setPostContent(PostContentInfo postContentInfo, List<Attachment> attachments) {
 
+    @Override
+    public PostContent getPostContent(Long postId) {
+        return postMapper.getPostContent(postId);
     }
+
+    @Override
+    public PostDetails getPostDetails(Long postId) {
+        return postMapper.getPostDetails(postId);
+    }
+
 
     @Override
     public boolean uploadAttachments_prj(List<Attachment> attachments, Long postId) {
@@ -213,44 +215,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public boolean updateAttachments_db(List<Attachment> attachments, Long postId) {
-        try {
-            for (Attachment attachment : attachments) {
-                attachment.setPostId(postId);
-                if (!postMapper.updateAttachment(attachment)) {
-                    throw new SQLException();
-                }
-            }
-        } catch (Exception e) {
-            log.info("{}", e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public List<Attachment> getAttachments(Long postId) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteAttachments_prj(Long postId) {
-        List<Attachment> attachments = postMapper.getAttachments(postId);
-
-        for (Attachment attachment : attachments) {
-            File file = new File(attachment.getDirectory());
-            try {
-                if (!file.delete()) {
-                    throw new IOException();
-                }
-            } catch (IOException e) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
     public boolean uploadThumbnail(Attachment attachment) {
         try {
             if (!postMapper.uploadThumbnail(attachment)) {
@@ -262,57 +226,6 @@ public class PostServiceImpl implements PostService {
         }
         return true;
     }
-
-
-    @Override
-    public boolean updateThumbnail(Attachment attachment) {
-        try {
-            if (!postMapper.updateThumbnail(attachment)) {
-                throw new SQLException();
-            }
-        } catch (Exception e) {
-            log.info("{}", e.getMessage());
-            return false;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean deleteThumbnail(Long postId) {
-        try {
-            if (!postMapper.deleteThumbnail(postId)) {
-                throw new SQLException();
-            }
-        } catch (SQLException e) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean deleteAttachments_db(Long postId) {
-        Integer attachmentCount = postMapper.getAttachmentCount(postId);
-        try {
-            if (!Objects.equals(postMapper.deleteAttachments(postId), attachmentCount)) {
-                throw new SQLException();
-            }
-        } catch (SQLException e) {
-            log.info("{}", e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean checkAccessPermission(UserInfo userInfo, String password, Long postId) {
-        return false;
-    }
-
-    @Override
-    public PostDetails getPostDetails(Long postId) {
-        return null;
-    }
-
 
     @Override
     @Transactional
@@ -342,6 +255,20 @@ public class PostServiceImpl implements PostService {
         }
 
         return postResult;
+    }
+
+
+    @Override
+    public boolean updateThumbnail(Attachment attachment) {
+        try {
+            if (!postMapper.updateThumbnail(attachment)) {
+                throw new SQLException();
+            }
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return false;
     }
 
     @Override
@@ -381,15 +308,45 @@ public class PostServiceImpl implements PostService {
         return postResult;
     }
 
+
     @Override
-    public boolean deleteComments(Long postId) {
-        Integer commentCount = postMapper.getCommentCount(postId);
+    public boolean deleteAttachments_prj(Long postId) {
+        List<Attachment> attachments = postMapper.getAttachments(postId);
+
+        for (Attachment attachment : attachments) {
+            File file = new File(attachment.getDirectory());
+            try {
+                if (!file.delete()) {
+                    throw new IOException();
+                }
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteAttachments_db(Long postId) {
+        Integer attachmentCount = postMapper.getAttachmentCount(postId);
         try {
-            if (!Objects.equals(postMapper.deleteComments(postId), commentCount)) {
+            if (!Objects.equals(postMapper.deleteAttachments(postId), attachmentCount)) {
                 throw new SQLException();
             }
         } catch (SQLException e) {
             log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteThumbnail(Long postId) {
+        try {
+            if (!postMapper.deleteThumbnail(postId)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
             return false;
         }
         return true;
@@ -422,5 +379,20 @@ public class PostServiceImpl implements PostService {
         }
 
         return postResult;
+    }
+
+
+    @Override
+    public boolean deleteComments(Long postId) {
+        Integer commentCount = postMapper.getCommentCount(postId);
+        try {
+            if (!Objects.equals(postMapper.deleteComments(postId), commentCount)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 }

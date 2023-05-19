@@ -9,44 +9,48 @@ import java.util.List;
 
 public interface PostService {
 
+    //    void setPostContent(PostContentInfo postContentInfo, List<Attachment> attachments);
+    //    boolean updateAttachments_db(List<Attachment> attachments, Long postId);
+    //    List<Attachment> getAttachments(Long postId);
+    //    boolean checkAccessPermission(UserInfo userInfo, String password, Long postId);
+
     AccessPermissionCheckResult checkAccessPermission(Long userId, Long postId, String password);
 
     VerificationResult verifyPostUploadRequest(PostUploadRequest postUploadRequest);
 
     List<Attachment> extractAttachments(Long boardId, String body);
 
-    void setPostContent(PostContentInfo postContentInfo, List<Attachment> attachments);
+
+    PostContent getPostContent(Long postId);
+
+    PostDetails getPostDetails(Long postId);
+
 
     boolean uploadAttachments_prj(List<Attachment> attachments, Long postId);
 
     boolean uploadAttachments_db(List<Attachment> attachments, Long postId);
 
-    boolean updateAttachments_db(List<Attachment> attachments, Long postId);
-
-    PostContent getPostContent(Long postId);
-
-    List<Attachment> getAttachments(Long postId);
-
-    boolean deleteAttachments_prj(Long postId);
-
     boolean uploadThumbnail(Attachment attachment);
 
-    boolean updateThumbnail(Attachment attachment);
-
-    boolean deleteThumbnail(Long postId);
-
-    boolean checkAccessPermission(UserInfo userInfo, String password, Long postId);
-
-    PostDetails getPostDetails(Long postId);
-
     PostResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments);
+
+
+    boolean updateThumbnail(Attachment attachment);
 
     PostResult updatePost(Long accessPermittedPostId,
                           PostUploadRequest postUploadRequest, List<Attachment> attachments);
 
-    PostResult deletePost(Long accessPermittedPostId, Long postId);
+
+    boolean deleteAttachments_prj(Long postId);
 
     boolean deleteAttachments_db(Long postId);
 
+    boolean deleteThumbnail(Long postId);
+
+    PostResult deletePost(Long accessPermittedPostId, Long postId);
+
+
     boolean deleteComments(Long postId);
+
+
 }

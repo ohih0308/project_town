@@ -43,6 +43,7 @@ public class TownController {
         return ViewConst.REGISTER;
     }
 
+
     @GetMapping(URLConst.BOARD_SELECTION)
     public String selectBoard(Model model) {
         model.addAttribute(BOARD_LIST, boardService.getBoards());
@@ -65,7 +66,14 @@ public class TownController {
         return ViewConst.BOARD;
     }
 
-    @GetMapping(URLConst.UPLOAD_POST)
+
+    @GetMapping(URLConst.POST_DETAILS)
+    public String getPostDetails(Model model, Long postId) {
+        model.addAttribute(POST_DETAILS, postService.getPostDetails(postId));
+        return ViewConst.POST_DETAILS;
+    }
+
+    @GetMapping(URLConst.UPLOAD_POST_FORM)
     public String uploadPost(Model model,
                              Long boardId) {
         model.addAttribute(BOARD_ID, boardId);
@@ -74,13 +82,11 @@ public class TownController {
         return ViewConst.UPLOAD_POST_FORM;
     }
 
-    @GetMapping(URLConst.UPDATE_POST)
+    @GetMapping(URLConst.UPDATE_POST_FORM)
     public String updatePost(Model model,
                              Long postId) {
         model.addAttribute(POST_CONTENT, postService.getPostContent(postId));
 
         return ViewConst.UPDATE_POST_FORM;
     }
-
-
 }

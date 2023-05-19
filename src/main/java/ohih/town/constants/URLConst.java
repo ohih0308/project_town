@@ -6,8 +6,17 @@ public interface URLConst {
 
     // TownController
     String HOME = "/";
+    String REGISTER = "/register";
     String BOARD_SELECTION = "/board-selection";
     String BOARD = "/board/";
+    String POST_DETAILS = "/post-details";
+    String UPLOAD_POST_FORM = "/upload/post";
+    String UPDATE_POST_FORM = "/update/post";
+
+
+    String UPLOAD_POST = "/upload/post";
+    String UPDATE_POST = "/update/post";
+    String DELETE_POST = "/delete/post";
 
 
     String SEND_VERIFICATION_CODE = "/send/verification-code";
@@ -15,7 +24,6 @@ public interface URLConst {
     String VERIFY_USERNAME = "/verify/username";
     String VERIFY_PASSWORD = "/verify/password";
     String VERIFY_PASSWORD_CONFIRMATION = "/verify/password-confirmation";
-    String REGISTER = "/register";
 
     String LOGIN = "/login";
     String LOGOUT = "/logout";
@@ -31,12 +39,6 @@ public interface URLConst {
     String UPDATE_GUESTBOOK_ACTIVATION = "/update/guestbook-activation";
 
 
-    String UPLOAD_POST = "/upload/post";
-    String POST_DETAILS = "/post/{postId}";
-    String UPDATE_POST_FORM = "/update/post";
-    String UPDATE_POST = "/update/post";
-    String DELETE_POST_FORM = "/delete/post";
-    String DELETE_POST = "/delete/post";
     String ACCESS_PERMISSION_POST = "/access-permission/post/";
 
 

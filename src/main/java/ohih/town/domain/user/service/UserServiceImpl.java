@@ -207,10 +207,14 @@ public class UserServiceImpl implements UserService {
         Map<String, String> messages = new HashMap<>();
         verificationResult.setVerified(Utilities.isValidated(ValidationPatterns.PASSWORD, password));
 
-        if (verificationResult.isVerified()) {
-            messages.put(DomainConst.PASSWORD, SUCCESS_MESSAGES.getString(USER_PASSWORD_VALID));
+        if (password == null) {
+            messages.put(DomainConst.PASSWORD, USER_ERROR_MESSAGES.getString(USER_PASSWORD_NULL));
         } else {
-            messages.put(DomainConst.PASSWORD, USER_ERROR_MESSAGES.getString(USER_PASSWORD_INVALID));
+            if (verificationResult.isVerified()) {
+                messages.put(DomainConst.PASSWORD, SUCCESS_MESSAGES.getString(USER_PASSWORD_VALID));
+            } else {
+                messages.put(DomainConst.PASSWORD, USER_ERROR_MESSAGES.getString(USER_PASSWORD_INVALID));
+            }
         }
 
         verificationResult.setMessages(messages);
@@ -246,14 +250,6 @@ public class UserServiceImpl implements UserService {
         verificationResult.setMessages(messages);
 
         return verificationResult;
-    }
-
-    @Override
-    public boolean hasNull(RegisterRequest registerRequest) {
-        return registerRequest.getEmail() == null ||
-                registerRequest.getUsername() == null ||
-                registerRequest.getPassword() == null ||
-                registerRequest.getPasswordConfirmation() == null;
     }
 
     @Override
@@ -308,6 +304,15 @@ public class UserServiceImpl implements UserService {
 
         return verificationResult;
     }
+
+    @Override
+    public boolean hasNull(RegisterRequest registerRequest) {
+        return registerRequest.getEmail() == null ||
+                registerRequest.getUsername() == null ||
+                registerRequest.getPassword() == null ||
+                registerRequest.getPasswordConfirmation() == null;
+    }
+
 
     @Override
     @Transactional
@@ -380,6 +385,7 @@ public class UserServiceImpl implements UserService {
 
         return loginResult;
     }
+
 
     @Override
     public ProfileImage extractProfileImageFromRequest(MultipartFile multipartFile, Long userId) {
@@ -521,10 +527,6 @@ public class UserServiceImpl implements UserService {
 
         return userInfoUpdateResult;
     }
-
-    /*
-     * deactivate user account
-     * */
 
     @Override
     public UserInfoUpdateResult updateGuestbookPermission(GuestbookPermission guestbookPermission) {

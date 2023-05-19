@@ -14,6 +14,7 @@
 
         <typeAlias type="ohih.town.domain.post.dto.Attachment" alias="Attachment"/>
         <typeAlias type="ohih.town.domain.post.dto.PostContent" alias="PostContent"/>
+        <typeAlias type="ohih.town.domain.post.dto.PostDetails" alias="PostDetails"/>
     </typeAliases>
 
     <mappers>

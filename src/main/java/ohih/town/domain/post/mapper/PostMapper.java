@@ -20,6 +20,8 @@ public interface PostMapper {
 
     PostContent getPostContent(Long postId);
 
+    PostDetails getPostDetails(Long postId);
+
 
     boolean uploadPost(PostUploadRequest postUploadRequest);
 
@@ -27,9 +29,7 @@ public interface PostMapper {
 
     boolean uploadThumbnail(Attachment attachment);
 
-
-    boolean updateAttachment(Attachment attachment);
-
+    
     boolean updateThumbnail(Attachment attachment);
 
     boolean updatePost(PostUploadRequest postUploadRequest);

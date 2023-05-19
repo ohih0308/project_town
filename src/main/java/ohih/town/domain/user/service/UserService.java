@@ -37,10 +37,10 @@ public interface UserService {
 
     VerificationResult verifyPasswordConfirmation(String password, String confirmPassword);
 
+    VerificationResult verifyRegisterRequest(RegisterRequest registerRequest, String verifiedEmail);
+
     boolean hasNull(RegisterRequest registerRequest);
 
-    // null, duplication, validation, confirm password check
-    VerificationResult verifyRegisterRequest(RegisterRequest registerRequest, String verifiedEmail);
 
     // register and initialize guestbook configs
     RegisterResult registerUser(RegisterRequest registerRequest, String verifiedEmail);

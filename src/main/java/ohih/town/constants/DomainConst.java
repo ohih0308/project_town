@@ -38,6 +38,7 @@ public interface DomainConst {
 
     //
     String POST_CONTENT = "post_content";
+    String POST_DETAILS = "post_details";
     String POST_UPLOAD_USER = "post_upload_user";
     String POST_UPLOAD_CONTENT = "post_upload_content";
 
@@ -45,6 +46,5 @@ public interface DomainConst {
     String SUBJECT = "subject";
     String BODY = "body";
 
-    String POST_DETAILS = "post_details";
     String POST_UPDATE_INFO = "post_update_info";
 }

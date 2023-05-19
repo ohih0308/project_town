@@ -21,4 +21,5 @@ public class PostDetails {
     private Date updatedAt;
     private String savedFileName;
     private String extension;
+    private String boardName;
 }
