@@ -7,7 +7,6 @@ import ohih.town.constants.ValidationPatterns;
 import ohih.town.domain.AccessInfo;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
-import ohih.town.domain.post.dto.SimplePost;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.utilities.Paging;

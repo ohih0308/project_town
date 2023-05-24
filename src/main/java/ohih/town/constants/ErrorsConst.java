@@ -59,6 +59,7 @@ public interface ErrorsConst {
     String POST_UPDATE_FAILURE = "post.update.failure";
     String POST_DELETE_FAILURE = "post.delete.failure";
 
+
     // Comment
     String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";
     String COMMENT_AUTHOR_INVALID = "comment.author.invalid";
@@ -70,6 +71,7 @@ public interface ErrorsConst {
     String COMMENT_UPLOAD_FAILURE = "comment.upload.failure";
     String COMMENT_DELETE_FAILURE = "comment.delete.failure";
 
+
     // Notification
     String NOTIFICATION_ACCESS_DENIED = "notification.access.denied";
     String NOTIFICATION_DELETE_FAILURE = "notification.delete.failure";
@@ -77,4 +79,9 @@ public interface ErrorsConst {
     String NOTIFICATION_MARK_AS_READ_FAILURE = "notification.markAsRead.failure";
     String NOTIFICATION_EXISTENCE_ERROR = "notification.existence.error";
 
+
+    // Guestbook
+    String GUESTBOOK_ACCESS_DISABLED = "guestbook.access.disabled";
+    String GUESTBOOK_ACCESS_GUEST_NOT_ALLOWED = "guestbook.access.guestNotAllowed";
+    String GUESTBOOK_ACCESS_MEMBER_NOT_ALLOWED = "guestbook.access.memberNotAllowed";
 }

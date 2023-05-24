@@ -20,6 +20,9 @@
         <typeAlias type="ohih.town.domain.comment.dto.Comment" alias="Comment"/>
 
         <typeAlias type="ohih.town.domain.notification.dto.Notification" alias="Notification"/>
+
+        <typeAlias type="ohih.town.domain.guestbook.dto.GuestbookWriteConfig" alias="GuestbookWriteConfig"/>
+        <typeAlias type="ohih.town.domain.guestbook.dto.PostUploadRequest" alias="PostUploadRequest"/>
     </typeAliases>
 
     <mappers>
@@ -28,5 +31,6 @@
         <mapper resource="mybatis.mappers.PostMapper.xml"/>
         <mapper resource="mybatis.mappers.CommentMapper.xml"/>
         <mapper resource="mybatis.mappers.NotificationMapper.xml"/>
+        <mapper resource="mybatis.mappers.GuestbookMapper.xml"/>
     </mappers>
 </configuration>

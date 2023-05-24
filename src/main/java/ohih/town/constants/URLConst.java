@@ -45,6 +45,9 @@ public interface URLConst {
     String UPDATE_POST = "/update/post";
     String DELETE_POST = "/delete/post";
 
+    String GUESTBOOK_UPLOAD_POST = "/guestbook/upload/post";
+    String GUESTBOOK_ACCESS_PERMISSION_POST = "/guestbook/access-permission/post/";
+    String GUESTBOOK_DELETE_POST = "/guestbook/delete/post";
 
 
     // CommentRestController

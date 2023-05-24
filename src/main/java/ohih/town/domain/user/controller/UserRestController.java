@@ -164,11 +164,5 @@ public class UserRestController {
         return userService.updatePassword(userInfo.getUserId(), password);
     }
 
-    @PostMapping(URLConst.UPDATE_GUESTBOOK_PERMISSION)
-    public UserInfoUpdateResult updateGuestbookPermission(@NotNull @SessionAttribute UserInfo userInfo,
-                                                          GuestbookPermission guestbookPermission) {
-        guestbookPermission.setUserId(userInfo.getUserId());
 
-        return userService.updateGuestbookPermission(guestbookPermission);
-    }
 }

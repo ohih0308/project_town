@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ohih.town.domain.guestbook.mapper.GuestbookMapper">
+
+    <!--  AccessInfo getAccessInfo(Long postId);  -->
+    <select id="getAccessInfo" parameterType="Long" resultType="AccessInfo">
+        select post_id   as postId,
+               user_id   as userId,
+               user_type as userType,
+               password
+        from guestbook_posts
+        where post_id = #{postId};
+    </select>
+
+    <!--  GuestbookWriteConfig getGuestbookWriteConfig(Long ownerId);  -->
+    <select id="getGuestbookWriteConfig" parameterType="Long" resultType="GuestbookWriteConfig">
+        select activation, member_write as memberWrite, guest_write as guestWrite
+        from guestbookConfigs
+        where user_id = #{ownerId};
+    </select>
+
+    <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
+    <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
+        insert into guestbook_posts (to_user_id, from_user_id, user_type, ip, author, password, private_read, content,
+                                     created_at)
+        values (#{owner}, #{userId}, #{userType}, #{ip}, #{author}, #{password}, #{privateRead}, #{content}, now());
+    </insert>
+
+    <!--  boolean deletePost(Long postId);  -->
+    <delete id="deletePost" parameterType="Long">
+        delete
+        from guestbook_posts
+        where guestbook_post_id = #{postId};
+    </delete>
+</mapper>
