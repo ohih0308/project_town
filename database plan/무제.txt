@@ -82,12 +82,12 @@
                  left join profile_images as pi on posts.user_id = pi.user_id
         where p.post_id = #{post_id};
     </select>
-    <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
+    <!--  boolean uploadPost(PostUploadRequest guestbookUploadRequest);  -->
     <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
         insert into posts (board_id, user_type, ip, author, password, subject, body, views, created_at, updated_at)
         values (#{boardId}, #{userType}, #{ip}, #{author}, #{password}, #{subject}, #{body}, 0, now(), now());
     </insert>
-    <!--  boolean updatePost(PostUploadRequest postUploadRequest);  -->
+    <!--  boolean updatePost(PostUploadRequest guestbookUploadRequest);  -->
     <update id="updatePost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
         update posts
         set board_id   = #{boardId},

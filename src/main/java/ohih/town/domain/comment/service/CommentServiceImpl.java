@@ -130,6 +130,7 @@ public class CommentServiceImpl implements CommentService {
             }
             commentResult.setSuccess(true);
             commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
+            commentResult.setCommentId(commentUploadRequest.getCommentId());
         } catch (Exception e) {
             log.info("{}", e.getMessage());
             commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));

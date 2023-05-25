@@ -7,10 +7,12 @@ import ohih.town.constants.DomainConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UtilityConst;
 import ohih.town.constants.ViewConst;
+import ohih.town.domain.board.service.BoardServiceImpl;
 import ohih.town.domain.comment.dto.Comment;
 import ohih.town.domain.comment.service.CommentServiceImpl;
+import ohih.town.domain.guestbook.dto.Guestbook;
+import ohih.town.domain.guestbook.service.GuestbookServiceImpl;
 import ohih.town.domain.post.dto.SimplePost;
-import ohih.town.domain.board.service.BoardServiceImpl;
 import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.utilities.Paging;
@@ -34,6 +36,7 @@ public class TownController {
     private final BoardServiceImpl boardService;
     private final PostServiceImpl postService;
     private final CommentServiceImpl commentService;
+    private final GuestbookServiceImpl guestbookService;
 
 
     @GetMapping(URLConst.HOME)
@@ -131,5 +134,22 @@ public class TownController {
         model.addAttribute(COMMENTS, comments);
 
         return ViewConst.MY_COMMENTS;
+    }
+
+    @GetMapping(URLConst.GUESTBOOK_POSTS)
+    public String getGuestbookPosts(Long ownerId, Model model,
+                                    @SessionAttribute UserInfo userInfo,
+                                    Integer presentPage, Search search) {
+        Long totalCount = guestbookService.countPosts(ownerId, search);
+        Paging paging = Utilities.getPaging(totalCount, presentPage, UtilityConst.POSTS_PER_PAGE);
+        List<Guestbook> posts = guestbookService.getPosts(ownerId,
+                userInfo != null ? userInfo.getUserId() : null,
+                paging);
+
+        model.addAttribute(UtilityConst.PAGING, paging);
+        model.addAttribute(UtilityConst.SEARCH, search);
+        model.addAttribute(GUESTBOOK_POSTS, posts);
+
+        return ViewConst.GUESTBOOK;
     }
 }

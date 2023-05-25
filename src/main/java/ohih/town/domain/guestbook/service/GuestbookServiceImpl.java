@@ -2,27 +2,21 @@ package ohih.town.domain.guestbook.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ohih.town.constants.DomainConst;
-import ohih.town.constants.ErrorsConst;
-import ohih.town.constants.ResourceBundleConst;
-import ohih.town.constants.ValidationPatterns;
+import ohih.town.constants.*;
 import ohih.town.domain.AccessInfo;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
+import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.common.dto.AuthorInfo;
-import ohih.town.domain.guestbook.dto.ContentInfo;
-import ohih.town.domain.guestbook.dto.PostUploadRequest;
-import ohih.town.domain.guestbook.dto.GuestbookResult;
-import ohih.town.domain.guestbook.dto.GuestbookWriteConfig;
+import ohih.town.domain.guestbook.dto.*;
 import ohih.town.domain.guestbook.mapper.GuestbookMapper;
 import ohih.town.domain.post.dto.PostResult;
+import ohih.town.utilities.Paging;
+import ohih.town.utilities.Search;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
 import static ohih.town.constants.ErrorsConst.*;
@@ -41,11 +35,11 @@ public class GuestbookServiceImpl implements GuestbookService {
     ResourceBundle guestbookErrorMessages = ResourceBundleConst.GUESTBOOK_ERROR_MESSAGES;
 
     @Override
-    public AccessPermissionCheckResult checkAccessPermission(Long userId, Long postId, String password) {
+    public AccessPermissionCheckResult checkPostAccessPermission(Long userId, Long postId, String password) {
         AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
         accessPermissionCheckResult.setId(postId);
 
-        AccessInfo accessInfo = guestbookMapper.getAccessInfo(postId);
+        AccessInfo accessInfo = guestbookMapper.getPostAccessInfo(postId);
 
         boolean isAccessible = false;
         accessPermissionCheckResult.setMessage(POST_ERROR_MESSAGES.getString(POST_ACCESS_DENIED));
@@ -63,6 +57,34 @@ public class GuestbookServiceImpl implements GuestbookService {
         if (isAccessible) {
             accessPermissionCheckResult.setAccessible(true);
             accessPermissionCheckResult.setMessage(SUCCESS_MESSAGES.getString(POST_ACCESS_PERMITTED));
+        }
+
+        return accessPermissionCheckResult;
+    }
+
+    @Override
+    public AccessPermissionCheckResult checkCommentAccessPermission(Long userId, Long commentId, String password) {
+        AccessPermissionCheckResult accessPermissionCheckResult = new AccessPermissionCheckResult();
+        accessPermissionCheckResult.setId(commentId);
+
+        AccessInfo accessInfo = guestbookMapper.getCommentAccessInfo(commentId);
+
+        boolean isAccessible = false;
+        accessPermissionCheckResult.setMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
+
+        if (Objects.equals(accessInfo.getUserType(), USER_TYPE_GUEST)) {
+            if (Objects.equals(accessInfo.getPassword(), password)) {
+                isAccessible = true;
+            }
+        } else {
+            if (Objects.equals(accessInfo.getUserId(), userId)) {
+                isAccessible = true;
+            }
+        }
+
+        if (isAccessible) {
+            accessPermissionCheckResult.setAccessible(true);
+            accessPermissionCheckResult.setMessage(SUCCESS_MESSAGES.getString(COMMENT_ACCESS_PERMITTED));
         }
 
         return accessPermissionCheckResult;
@@ -134,6 +156,55 @@ public class GuestbookServiceImpl implements GuestbookService {
     }
 
     @Override
+    public Long countPosts(Long userId, Search search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.USER_ID, userId);
+        map.put(UtilityConst.SEARCH, search);
+
+        return guestbookMapper.countPosts(map);
+    }
+
+    @Override
+    public List<Guestbook> getPosts(Long ownerId, Long userId, Paging paging) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.USER_ID, ownerId);
+        map.put(UtilityConst.PAGING, paging);
+
+        if (Objects.equals(ownerId, userId)) {
+            return guestbookMapper.getAllPosts(map);
+        } else {
+            return guestbookMapper.getPublicPosts(map);
+        }
+    }
+
+    @Override
+    public Long countComments(Long postId) {
+        return guestbookMapper.countComments(postId);
+    }
+
+    @Override
+    public boolean isGuestbookOwner(Long postId, Long userId) {
+        return Objects.equals(guestbookMapper.getGuestbookOwner(postId), userId);
+    }
+
+    @Override
+    public List<Guestbook> getComments(Long postId, Long userId, Paging paging) {
+        boolean isPrivatePost = guestbookMapper.isPrivatePost(postId);
+        boolean isOwner = isGuestbookOwner(postId, userId);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(DomainConst.POST_ID, postId);
+        map.put(UtilityConst.PAGING, paging);
+
+        if (!isPrivatePost || isOwner) {
+            return guestbookMapper.getComments(map);
+        } else {
+            return null;
+        }
+    }
+
+
+    @Override
     public PostResult uploadPost(AuthorInfo authorInfo, ContentInfo contentInfo) {
         PostResult postResult = new PostResult();
 
@@ -152,19 +223,46 @@ public class GuestbookServiceImpl implements GuestbookService {
         }
 
         try {
-            PostUploadRequest postUploadRequest = new PostUploadRequest(authorInfo, contentInfo);
-            if (!guestbookMapper.uploadPost(postUploadRequest)) {
+            GuestbookUploadRequest guestbookUploadRequest = new GuestbookUploadRequest(authorInfo, contentInfo);
+            if (!guestbookMapper.uploadPost(guestbookUploadRequest)) {
                 throw new SQLException();
             }
             postResult.setSuccess(true);
             postResult.setResultMessage(SUCCESS_MESSAGES.getString(POST_UPLOAD_SUCCESS));
-            postResult.setPostId(postUploadRequest.getPostId());
+            postResult.setPostId(guestbookUploadRequest.getContentId());
         } catch (SQLException e) {
             log.info("{}", e.getMessage());
             postResult.setResultMessage(POST_ERROR_MESSAGES.getString(POST_UPLOAD_FAILURE));
         }
 
         return postResult;
+    }
+
+    @Override
+    public CommentResult uploadComment(AuthorInfo authorInfo, ContentInfo contentInfo) {
+        CommentResult commentResult = new CommentResult();
+        VerificationResult verificationResult = verifyPostUploadRequest(authorInfo, contentInfo);
+
+        if (!verificationResult.isVerified()) {
+            commentResult.setErrorMessages(verificationResult.getMessages());
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            return commentResult;
+        }
+
+        try {
+            GuestbookUploadRequest guestbookUploadRequest = new GuestbookUploadRequest(authorInfo, contentInfo);
+            if (!guestbookMapper.uploadComment(guestbookUploadRequest)) {
+                throw new SQLException();
+            }
+            commentResult.setSuccess(true);
+            commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_UPLOAD_SUCCESS));
+            commentResult.setCommentId(guestbookUploadRequest.getContentId());
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+        }
+
+        return commentResult;
     }
 
     @Override
@@ -190,5 +288,27 @@ public class GuestbookServiceImpl implements GuestbookService {
         return postResult;
     }
 
+    @Override
+    public CommentResult deleteComment(Long accessPermittedCommentId, Long commentId) {
+        CommentResult commentResult = new CommentResult();
+        commentResult.setCommentId(commentId);
 
+        if (accessPermittedCommentId == null || !accessPermittedCommentId.equals(commentId)) {
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(COMMENT_ACCESS_DENIED));
+            return commentResult;
+        }
+
+        try {
+            if (!guestbookMapper.deleteComment(commentId)) {
+                throw new SQLException();
+            }
+            commentResult.setSuccess(true);
+            commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
+        }
+
+        return commentResult;
+    }
 }

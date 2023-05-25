@@ -7,6 +7,7 @@ public interface DomainConst {
     String BOARD_NAME = "board_name";
     String BOARD_LIST = "board_list";
     String SIMPLE_POSTS = "simple_posts";
+    String GUESTBOOK_POSTS = "guestbook_posts";
 
 
     Integer USER_TYPE_ADMIN = 10;

@@ -4,7 +4,7 @@ import ohih.town.domain.notification.dto.NotificationResult;
 
 public interface NotificationService {
 
-    void createNewCommentNotification(Long postId);
+    void createNotification(boolean isGuestbook, Long postId);
 
     NotificationResult markAsRead(Long userId, Long notificationId);
 

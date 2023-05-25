@@ -10,4 +10,7 @@ public interface SessionConst {
 
     String ACCESS_PERMITTED_POST_ID = "access_permitted_post_id";
     String ACCESS_PERMITTED_COMMENT_ID = "access_permitted_comment_id";
+
+    String ACCESS_PERMITTED_GUESTBOOK_POST_ID = "access_permitted_guestbook_post_id";
+    String ACCESS_PERMITTED_GUESTBOOK_COMMENT_ID = "access_permitted_guestbook_comment_id";
 }

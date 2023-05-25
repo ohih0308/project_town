@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.DomainConst;
 import ohih.town.constants.NotificationConst;
 import ohih.town.constants.URLConst;
+import ohih.town.domain.guestbook.mapper.GuestbookMapper;
 import ohih.town.domain.notification.dto.Notification;
 import ohih.town.domain.notification.dto.NotificationResult;
 import ohih.town.domain.notification.mapper.NotificationMapper;
@@ -30,17 +31,27 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final PostMapper postMapper;
+    private final GuestbookMapper guestbookMapper;
 
 
     @Override
-    public void createNewCommentNotification(Long postId) {
-        Long userId = postMapper.getUserIdByPostId(postId);
+    public void createNotification(boolean isGuestbook, Long postId) {
+        Long userId;
+        String redirectUrl;
+
+        if (isGuestbook) {
+            userId = guestbookMapper.getUserId(postId);
+            redirectUrl = "";
+        } else {
+            userId = postMapper.getUserId(postId);
+            redirectUrl = URLConst.POST_DETAILS.replace("{postId}", postId.toString());
+        }
 
         Notification notification = Notification.builder().
                 userId(userId).
                 type(NotificationConst.NEW_COMMENT).
                 message(NOTIFICATION_MESSAGES.getString(NOTIFICATION_COMMENT_UPLOADED)).
-                redirectUrl(URLConst.POST_DETAILS.replace("{postId}", postId.toString())).
+                redirectUrl(redirectUrl).
                 build();
 
         try {

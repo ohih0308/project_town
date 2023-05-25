@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Mapper
 public interface PostMapper {
-    Long getUserIdByPostId(Long postId);
+    Long getUserId(Long postId);
 
     AccessInfo getAccessInfo(Long postId);
 

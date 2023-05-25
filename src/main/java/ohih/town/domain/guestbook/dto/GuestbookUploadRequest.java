@@ -7,7 +7,7 @@ import ohih.town.domain.common.dto.AuthorInfo;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostUploadRequest {
+public class GuestbookUploadRequest {
 
     private Long userId;
     private String ip;
@@ -17,11 +17,11 @@ public class PostUploadRequest {
 
     private Long ownerId;
     private boolean privateRead;
-    private Long postId;
+    private Long contentId;
     private String content;
 
 
-    public PostUploadRequest(AuthorInfo authorInfo, ContentInfo contentInfo) {
+    public GuestbookUploadRequest(AuthorInfo authorInfo, ContentInfo contentInfo) {
         this.userId = authorInfo.getUserId();
         this.ip = authorInfo.getIp();
         this.userType = authorInfo.getUserType();

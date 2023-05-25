@@ -19,4 +19,6 @@ public interface ViewConst {
     String MY_PAGE = "my-page";
     String MY_POSTS = "my-posts";
     String MY_COMMENTS = "my-comments";
+
+    String GUESTBOOK = "guestbook";
 }

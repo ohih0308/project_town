@@ -5,14 +5,31 @@
 
 <mapper namespace="ohih.town.domain.guestbook.mapper.GuestbookMapper">
 
-    <!--  AccessInfo getAccessInfo(Long postId);  -->
-    <select id="getAccessInfo" parameterType="Long" resultType="AccessInfo">
+    <!--  Long getUserId(Long postId);  -->
+    <select id="getUserId" parameterType="Long" resultType="Long">
+        select user_id
+        from guestbook_posts
+        where guestbook_post_id = #{postId};
+    </select>
+
+    <!--  AccessInfo getPostAccessInfo(Long postId);  -->
+    <select id="getPostAccessInfo" parameterType="Long" resultType="AccessInfo">
         select post_id   as postId,
                user_id   as userId,
                user_type as userType,
                password
         from guestbook_posts
         where post_id = #{postId};
+    </select>
+
+    <!--  AccessInfo getCommentAccessInfo(Long commentId);  -->
+    <select id="getCommentAccessInfo" parameterType="Long" resultType="AccessInfo">
+        select comment_id as commentId,
+               user_id    as userId,
+               user_type  as userType,
+               password
+        from guestbook_comments
+        where guestbook_comment_id = #{commentId};
     </select>
 
     <!--  GuestbookWriteConfig getGuestbookWriteConfig(Long ownerId);  -->
@@ -22,11 +39,123 @@
         where user_id = #{ownerId};
     </select>
 
-    <!--  boolean uploadPost(PostUploadRequest postUploadRequest);  -->
-    <insert id="uploadPost" parameterType="PostUploadRequest" useGeneratedKeys="true" keyProperty="postId">
+    <!--  Long countPosts(Map<String, Object> map);  -->
+    <select id="countPosts" parameterType="Map" resultType="Long">
+        select count(*)
+        from guestbook_posts as p
+        where to_user_id = #{userId}
+        <if test="search.searchFilter == 'author'">
+            and author like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'subject'">
+            and subject like concat('%', #{search.searchValue}, '%')
+        </if>
+        <if test="search.searchFilter == 'body'">
+            and text like concat('%', #{search.searchValue}, '%')
+        </if>;
+    </select>
+
+    <!--  List<Guestbook> getAllPosts(Map<String, Object> map);  -->
+    <select id="getAllPosts" parameterType="Map" resultType="Guestbook">
+        select gp.guestbook_post_id           as contentId,
+               gp.from_user_id                as userId,
+               gp.user_type                   as userType,
+               gp.ip,
+               gp.author,
+               gp.private_read                as privateRead,
+               gp.content,
+               pi.saved_file_name             as savedFileName,
+               pi.extension,
+               count(gc.guestbook_comment_id) as commentCount
+        from guestbook_posts as gp
+                 left join profile_images as pi on gp.from_user_id = pi.user_id
+                 left join guestbook_comments as gc on gp.guestbook_post_id = gc.guestbook_post_id
+        where gp.to_user_id = #{userId}
+        group by gp.guestbook_post_id
+        order by gp.guestbook_post_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+    <!--  List<Guestbook> getPublicPosts(Map<String, Object> map);  -->
+    <select id="getPublicPosts" parameterType="Map" resultType="Guestbook">
+        select gp.guestbook_post_id           as postId,
+               gp.from_user_id                as userId,
+               gp.user_type                   as userType,
+               gp.ip,
+               gp.author,
+               gp.private_read                as privateRead,
+               gp.content,
+               pi.saved_file_name             as savedFileName,
+               pi.extension,
+               count(gc.guestbook_comment_id) as commentCount
+        from guestbook_posts as gp
+                 left join profile_images as pi on gp.from_user_id = pi.user_id
+                 left join guestbook_comments as gc on gp.guestbook_post_id = gc.guestbook_post_id
+        where gp.to_user_id = #{userId}
+          and gp.private_read = 0
+        group by gp.guestbook_post_id
+        order by gp.guestbook_post_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+    <!--  Long countComments(Long postId);  -->
+    <select id="countComments" parameterType="Long" resultType="Long">
+        select count(*)
+        from guestbook_comments
+        where guestbook_post_id = #{postId};
+    </select>
+
+    <!--  boolean isPrivatePost(Long postId);  -->
+    <select id="isPrivatePost" parameterType="Long" resultType="Integer">
+        select private_read
+        from guestbook_posts
+        where guestbook_post_id = #{postId};
+    </select>
+
+<!--  Long getGuestbookOwner(Long postId);  -->
+    <select id="getGuestbookOwner" parameterType="Long" resultType="Long">
+        select to_user_id
+        from guestbook_posts
+        where guestbook_post_id = #{post_id};
+    </select>
+
+    <!--  List<Guestbook> getComments(Map<String, Object> map);  -->
+    <select id="getComments" parameterType="Map" resultType="Guestbook">
+        select gc.guestbook_comment_id as contentId,
+               gc.user_type            as userType,
+               gc.from_user_id         as userId,
+               gc.ip,
+               gc.author,
+               gc.comment              as content,
+               gc.created_at           as createdAt,
+               pi.saved_file_name      as savedFileName,
+               pi.extension
+        from guestbook_comments as gc
+                 left join profile_images as pi on gc.from_user_id = pi.user_id
+        where gc.guestbook_post_id = #{postId}
+        order by gc.guestbook_comment_id desc
+        limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
+    </select>
+
+
+    <!--  boolean uploadPost(GuestbookUploadRequest guestbookUploadRequest);  -->
+    <insert id="uploadPost" parameterType="GuestbookUploadRequest" useGeneratedKeys="true" keyProperty="contentId">
         insert into guestbook_posts (to_user_id, from_user_id, user_type, ip, author, password, private_read, content,
                                      created_at)
         values (#{owner}, #{userId}, #{userType}, #{ip}, #{author}, #{password}, #{privateRead}, #{content}, now());
+    </insert>
+
+    <!--  boolean uploadComment(GuestbookUploadRequest guestbookUploadRequest);  -->
+    <insert id="uploadComment" parameterType="GuestbookUploadRequest" useGeneratedKeys="true" keyProperty="contentId">
+        insert into guestbook_comments (guestbook_post_id,
+                                        user_type,
+                                        from_user_id,
+                                        ip,
+                                        author,
+                                        password,
+                                        comment,
+                                        created_at)
+        values (#{postId}, #{userType}, #{userId}, #{ip}, #{author}, #{password}, #{content}, now());
     </insert>
 
     <!--  boolean deletePost(Long postId);  -->
@@ -34,5 +163,12 @@
         delete
         from guestbook_posts
         where guestbook_post_id = #{postId};
+    </delete>
+
+    <!--  boolean deleteComment(Long commentId);  -->
+    <delete id="deleteComment" parameterType="Long">
+        delete
+        from guestbook_comments
+        where guestbook_comment_id = #{commentId};
     </delete>
 </mapper>

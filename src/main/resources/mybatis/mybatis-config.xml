@@ -22,7 +22,8 @@
         <typeAlias type="ohih.town.domain.notification.dto.Notification" alias="Notification"/>
 
         <typeAlias type="ohih.town.domain.guestbook.dto.GuestbookWriteConfig" alias="GuestbookWriteConfig"/>
-        <typeAlias type="ohih.town.domain.guestbook.dto.PostUploadRequest" alias="PostUploadRequest"/>
+        <typeAlias type="ohih.town.domain.guestbook.dto.GuestbookUploadRequest" alias="GuestbookUploadRequest"/>
+        <typeAlias type="ohih.town.domain.guestbook.dto.Guestbook" alias="Guestbook"/>
     </typeAliases>
 
     <mappers>

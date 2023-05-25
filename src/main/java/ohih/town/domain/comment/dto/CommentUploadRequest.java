@@ -13,6 +13,7 @@ public class CommentUploadRequest {
     private String author;
     private String password;
 
+    private Long commentId;
     private Long postId;
     private String comment;
 

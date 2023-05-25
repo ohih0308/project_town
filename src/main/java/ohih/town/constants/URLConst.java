@@ -45,10 +45,6 @@ public interface URLConst {
     String UPDATE_POST = "/update/post";
     String DELETE_POST = "/delete/post";
 
-    String GUESTBOOK_UPLOAD_POST = "/guestbook/upload/post";
-    String GUESTBOOK_ACCESS_PERMISSION_POST = "/guestbook/access-permission/post/";
-    String GUESTBOOK_DELETE_POST = "/guestbook/delete/post";
-
 
     // CommentRestController
     String UPLOAD_COMMENT = "/upload/comment";
@@ -61,4 +57,17 @@ public interface URLConst {
     String READ_NOTIFICATIONS = "/read-notifications";
     String DELETE_NOTIFICATION = "/delete-notification";
     String DELETE_NOTIFICATIONS = "/delete-notifications";
+
+
+    // GuestbookRestController
+    String GUESTBOOK_POSTS = "/guestbook/posts";
+    String GUESTBOOK_COMMENTS = "/guestbook/comments";
+    String GUESTBOOK_UPLOAD_POST = "/guestbook/upload/post";
+    String GUESTBOOK_ACCESS_PERMISSION_POST = "/guestbook/access-permission/post/";
+    String GUESTBOOK_ACCESS_PERMISSION_COMMENT = "/guestbook/access-permission/comment/";
+    String GUESTBOOK_DELETE_POST = "/guestbook/delete/post";
+
+    String GUESTBOOK_UPLOAD_COMMENT = "/guestbook/upload/comment";
+    String GUESTBOOK_DELETE_COMMENT = "/guestbook/delete/comment";
+
 }

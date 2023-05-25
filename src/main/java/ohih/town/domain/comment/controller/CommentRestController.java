@@ -8,7 +8,6 @@ import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.constants.UtilityConst;
 import ohih.town.domain.AccessPermissionCheckResult;
-import ohih.town.domain.comment.dto.Comment;
 import ohih.town.domain.comment.dto.CommentContentInfo;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentResult;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -49,7 +47,7 @@ public class CommentRestController {
                 commentService.uploadComment(new CommentUploadRequest(authorInfo, commentContentInfo));
 
         if (commentResult.isSuccess()) {
-            notificationService.createNewCommentNotification(commentResult.getPostId());
+            notificationService.createNotification(false, commentResult.getPostId());
         }
 
         return commentResult;
@@ -89,7 +87,7 @@ public class CommentRestController {
 
     @PostMapping(URLConst.GET_COMMENTS)
     public Map<String, Object> getComments(@PathVariable Long postId,
-                           Integer presentPage) {
+                                           Integer presentPage) {
         Map<String, Object> map = new HashMap<>();
 
         Long totalCount = commentService.countComments(postId);
