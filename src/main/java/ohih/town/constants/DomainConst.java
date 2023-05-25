@@ -17,6 +17,8 @@ public interface DomainConst {
 
     Integer VERIFICATION_CODE_LENGTH = 5;
 
+    String USER_COUNT = "user_count";
+    String USER_LIST = "user_list";
 
     String EMAIL = "email";
     String USERNAME = "username";
