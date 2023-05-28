@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
-import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.ErrorConst.*;
 import static ohih.town.constants.ResourceBundleConst.POST_ERROR_MESSAGES;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 import static ohih.town.constants.SuccessConst.*;
@@ -99,11 +99,11 @@ public class GuestbookServiceImpl implements GuestbookService {
         boolean isGuest = Objects.equals(authorInfo.getUserType(), DomainConst.USER_TYPE_GUEST);
 
         if (!writeConfig.isActivation()) {
-            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorsConst.GUESTBOOK_ACCESS_DISABLED));
+            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorConst.GUESTBOOK_ACCESS_DISABLED));
         } else if (isGuest && !writeConfig.isGuestWrite()) {
-            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorsConst.GUESTBOOK_ACCESS_GUEST_NOT_ALLOWED));
+            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorConst.GUESTBOOK_ACCESS_GUEST_NOT_ALLOWED));
         } else if (!isGuest && !writeConfig.isMemberWrite()) {
-            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorsConst.GUESTBOOK_ACCESS_MEMBER_NOT_ALLOWED));
+            guestbookResult.setMessage(guestbookErrorMessages.getString(ErrorConst.GUESTBOOK_ACCESS_MEMBER_NOT_ALLOWED));
         } else {
             guestbookResult.setSuccess(true);
         }
@@ -241,11 +241,19 @@ public class GuestbookServiceImpl implements GuestbookService {
     @Override
     public CommentResult uploadComment(AuthorInfo authorInfo, ContentInfo contentInfo) {
         CommentResult commentResult = new CommentResult();
+
+        GuestbookResult guestbookResult = checkGuestbookConfigs(contentInfo.getOwnerId(), authorInfo);
+
+        if (!guestbookResult.isSuccess()) {
+            commentResult.setResultMessage(guestbookResult.getMessage());
+            return commentResult;
+        }
+
         VerificationResult verificationResult = verifyPostUploadRequest(authorInfo, contentInfo);
 
         if (!verificationResult.isVerified()) {
             commentResult.setErrorMessages(verificationResult.getMessages());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_UPLOAD_FAILURE));
             return commentResult;
         }
 
@@ -259,7 +267,7 @@ public class GuestbookServiceImpl implements GuestbookService {
             commentResult.setCommentId(guestbookUploadRequest.getContentId());
         } catch (SQLException e) {
             log.info("{}", e.getMessage());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_UPLOAD_FAILURE));
         }
 
         return commentResult;
@@ -306,7 +314,7 @@ public class GuestbookServiceImpl implements GuestbookService {
             commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_DELETE_FAILURE));
         }
 
         return commentResult;

@@ -8,6 +8,7 @@ public interface ResourceBundleConst {
     ResourceBundle SUCCESS_MESSAGES = ResourceBundle.getBundle("messages.success-messages.success-messages", Locale.getDefault());
 
     // Error
+    ResourceBundle BOARD_ERROR_MESSAGES = ResourceBundle.getBundle("messages.error-messages.board-error-messages", Locale.getDefault());
     ResourceBundle USER_ERROR_MESSAGES = ResourceBundle.getBundle("messages.error-messages.user-error-messages", Locale.getDefault());
     ResourceBundle COMMON_ERROR_MESSAGES = ResourceBundle.getBundle("messages.error-messages.common-error-messages", Locale.getDefault());
     ResourceBundle POST_ERROR_MESSAGES = ResourceBundle.getBundle("messages.error-messages.post-error-messages", Locale.getDefault());

@@ -1,6 +1,14 @@
 package ohih.town.constants;
 
 public interface SuccessConst {
+    String CATEGORY_NAME_VALID = "category.name.valid";
+    String BOARD_NAME_VALID = "board.name.valid";
+    String CATEGORY_CREATE_SUCCESS = "category.create.success";
+    String BOARD_CREATE_SUCCESS = "board.create.success";
+    String CATEGORY_RENAME_SUCCESS = "category.rename.success";
+    String BOARD_RENAME_SUCCESS = "board.rename.success";
+
+
     String VERIFICATION_EMAIL_SENT = "verification.email.sent";
     String EMAIL_VERIFICATION_SUCCESS = "email.verification.success";
 
@@ -33,6 +41,9 @@ public interface SuccessConst {
     String POST_ACCESS_PERMITTED = "post.access.permitted";
     String POST_DELETE_SUCCESS = "post.delete.success";
 
+    String APPRAISAL_UPLOAD_SUCCESS = "appraisal.upload.success";
+
+
     String COMMENT_VALID = "comment.valid";
     String COMMENT_UPLOAD_SUCCESS = "comment.upload.success";
     String COMMENT_ACCESS_PERMITTED = "comment.access.permitted";
@@ -40,4 +51,6 @@ public interface SuccessConst {
 
     String NOTIFICATION_DELETE_SUCCESS = "notification.delete.success";
     String NOTIFICATION_MARK_AS_READ_SUCCESS = "notification.markAsRead.success";
+
+
 }

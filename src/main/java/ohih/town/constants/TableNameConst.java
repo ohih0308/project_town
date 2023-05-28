@@ -1,0 +1,19 @@
+package ohih.town.constants;
+
+public interface TableNameConst {
+    String TABLE_NAME = "table_name";
+    String ATTACHMENTS = "ATTACHMENTS";
+    String BOARDS = "BOARDS";
+    String CATEGORIES = "CATEGORIES";
+    String COMMENT_APPRAISALS = "COMMENT_APPRAISALS";
+    String COMMENTS = "COMMENTS";
+    String GUESTBOOK_COMMENTS = "GUESTBOOK_COMMENTS";
+    String GUESTBOOK_CONFIGS = "GUESTBOOK_CONFIGS";
+    String GUESTBOOK_POSTS = "GUESTBOOK_POSTS";
+    String NOTIFICATIONS = "NOTIFICATIONS";
+    String POST_APPRAISALS = "POST_APPRAISALS";
+    String POSTS = "POSTS";
+    String PROFILE_IMAGES = "PROFILE_IMAGES";
+    String THUMBNAILS = "THUMBNAILS";
+    String USERS = "USERS";
+}

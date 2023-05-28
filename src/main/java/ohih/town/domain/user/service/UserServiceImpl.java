@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.*;
 import ohih.town.domain.VerificationResult;
+import ohih.town.domain.comment.mapper.CommentMapper;
+import ohih.town.domain.guestbook.mapper.GuestbookMapper;
+import ohih.town.domain.post.mapper.PostMapper;
 import ohih.town.domain.user.dto.*;
 import ohih.town.domain.user.mapper.UserMapper;
+import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -21,11 +25,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 import static ohih.town.constants.DomainConst.*;
-import static ohih.town.constants.ErrorsConst.*;
-import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
-import static ohih.town.constants.ResourceBundleConst.USER_ERROR_MESSAGES;
+import static ohih.town.constants.ErrorConst.*;
+import static ohih.town.constants.ResourceBundleConst.*;
 import static ohih.town.constants.SuccessConst.*;
 
 @Service
@@ -46,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
 
     private final UserMapper userMapper;
+    private final PostMapper postMapper;
+    private final CommentMapper commentMapper;
+    private final GuestbookMapper guestbookMapper;
 
 
     @Override
@@ -61,10 +68,10 @@ public class UserServiceImpl implements UserService {
         boolean isDuplicated = isDuplicated(DomainConst.EMAIL, email);
 
         if (!isValidated) {
-            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorsConst.USER_EMAIL_INVALID));
+            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorConst.USER_EMAIL_INVALID));
         }
         if (isDuplicated) {
-            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorsConst.USER_EMAIL_DUPLICATED));
+            errorMessages.put(DomainConst.EMAIL, USER_ERROR_MESSAGES.getString(ErrorConst.USER_EMAIL_DUPLICATED));
         }
 
         if (!isValidated || isDuplicated) {
@@ -543,12 +550,140 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean activation) {
-        return null;
+    public UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean isActivated) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
+
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(IS_ACTIVATED, isActivated);
+
+        if (userMapper.updateGuestbookActivation(map)) {
+            userInfoUpdateResult.setSuccess(true);
+            userInfoUpdateResult.setResultMessage(SUCCESS_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_SUCCESS));
+        } else {
+            userInfoUpdateResult.setResultMessage(GUESTBOOK_ERROR_MESSAGES.getString(GUESTBOOK_ACTIVATION_UPDATE_FAILURE));
+        }
+        return userInfoUpdateResult;
+    }
+
+
+    @Override
+    @Transactional
+    public UserInfoUpdateResult deactivateAccount(Long userId, String directory) {
+        UserInfoUpdateResult userInfoUpdateResult = new UserInfoUpdateResult();
+
+        try {
+            if (!deactivatePosts(userId) ||
+                    !deactivateComments(userId) ||
+                    !deactivateGuestbookPosts(userId) ||
+                    !deactivateGuestbookComments(userId)) {
+                throw new Exception();
+            }
+
+            UserInfoUpdateResult updateGuestbookActivation = updateGuestbookActivation(userId, false);
+            ProfileImageResult profileImageResult = deleteProfileImage(directory);
+
+            if (!updateGuestbookActivation.isSuccess() ||
+                    !profileImageResult.isSuccess()) {
+                throw new Exception();
+            }
+
+            userInfoUpdateResult.setSuccess(true);
+            userInfoUpdateResult.setResultMessage(SUCCESS_MESSAGES.getString(USER_DEACTIVATE_SUCCESS));
+
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            userInfoUpdateResult.setResultMessage(USER_ERROR_MESSAGES.getString(USER_DEACTIVATE_ACCOUNT_FAILURE));
+        }
+
+        return userInfoUpdateResult;
     }
 
     @Override
-    public UserInfoUpdateResult deactivateUser(Long userId) {
-        return null;
+    public boolean deactivatePosts(Long userId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(UtilityConst.SEARCH, new Search());
+
+        Integer totalCount = postMapper.countMyPosts(map).intValue();
+        map.clear();
+        try {
+            map.put(TableNameConst.TABLE_NAME, TableNameConst.POSTS);
+            map.put(USER_ID, userId);
+            map.put(USER_TYPE, DEACTIVATED_USER);
+
+            if (!Objects.equals(userMapper.updateUserTypeDeactivated(map), totalCount)) {
+                throw new Exception();
+            }
+            return true;
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deactivateComments(Long userId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(UtilityConst.SEARCH, new Search());
+
+        Integer totalCount = commentMapper.countMyComments(map).intValue();
+        map.clear();
+        try {
+            map.put(TableNameConst.TABLE_NAME, TableNameConst.COMMENTS);
+            map.put(USER_ID, userId);
+            map.put(USER_TYPE, DEACTIVATED_USER);
+
+            if (!Objects.equals(userMapper.updateUserTypeDeactivated(map), totalCount)) {
+                throw new Exception();
+            }
+            return true;
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deactivateGuestbookPosts(Long userId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(USER_ID, userId);
+        map.put(UtilityConst.SEARCH, new Search());
+
+        Integer totalCount = guestbookMapper.countPosts(map).intValue();
+        map.clear();
+        try {
+            map.put(TableNameConst.TABLE_NAME, TableNameConst.GUESTBOOK_POSTS);
+            map.put(USER_ID, userId);
+            map.put(USER_TYPE, DEACTIVATED_USER);
+
+            if (!Objects.equals(userMapper.updateUserTypeDeactivated(map), totalCount)) {
+                throw new Exception();
+            }
+            return true;
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deactivateGuestbookComments(Long userId) {
+        Integer totalCount = userMapper.countGuestbookComment(userId);
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put(TableNameConst.TABLE_NAME, TableNameConst.GUESTBOOK_COMMENTS);
+            map.put(USER_ID, userId);
+            map.put(USER_TYPE, DEACTIVATED_USER);
+
+            if (!Objects.equals(userMapper.updateUserTypeDeactivated(map), totalCount)) {
+                throw new Exception();
+            }
+            return true;
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+        }
+        return false;
     }
 }

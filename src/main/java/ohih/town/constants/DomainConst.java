@@ -3,6 +3,11 @@ package ohih.town.constants;
 public interface DomainConst {
     String VALID_GUEST_PASSWORD = "valid_guest_password";
 
+
+    String NAME = "name";
+    String CATEGORY = "category";
+    String CATEGORY_ID = "category_id";
+    String BOARD = "board";
     String BOARD_ID = "board_id";
     String BOARD_NAME = "board_name";
     String BOARD_LIST = "board_list";
@@ -12,10 +17,14 @@ public interface DomainConst {
 
     Integer USER_TYPE_ADMIN = 10;
     Integer USER_TYPE_GUEST = 20;
-    Integer DEACTIVATED_USER_ID = 30;
+    Integer DEACTIVATED_USER = 30;
     Integer USER_TYPE_MEMBER = 31;
 
+    String IS_ACTIVATED = "is_activated";
+
     Integer VERIFICATION_CODE_LENGTH = 5;
+
+    String USER_TYPE = "user_type";
 
     String USER_COUNT = "user_count";
     String USER_LIST = "user_list";
@@ -26,6 +35,7 @@ public interface DomainConst {
     String PASSWORD_CONFIRMATION = "password_confirmation";
     String AGREEMENT = "agreement";
     String USER_ID = "user_id";
+    String IP = "ip";
 
 
     String REGISTER_REQUEST = "register_request";

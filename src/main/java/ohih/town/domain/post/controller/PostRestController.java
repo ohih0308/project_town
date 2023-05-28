@@ -7,10 +7,7 @@ import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.common.dto.AuthorInfo;
-import ohih.town.domain.post.dto.Attachment;
-import ohih.town.domain.post.dto.PostContentInfo;
-import ohih.town.domain.post.dto.PostResult;
-import ohih.town.domain.post.dto.PostUploadRequest;
+import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;
@@ -101,5 +98,19 @@ public class PostRestController {
         }
 
         return postResult;
+    }
+
+
+    @PostMapping(URLConst.APPRAISE_POST)
+    public PostResult appraisePost(HttpServletRequest request,
+                                   @Nullable @SessionAttribute UserInfo userInfo,
+                                   Appraisal appraisal) {
+        String ip = Utilities.getIp(request);
+
+        if (postService.hasUserAppraised(userInfo == null ? null : userInfo.getUserId(), ip, appraisal.getPostId())) {
+            return postService.uploadAppraisal(appraisal);
+        } else {
+            return postService.updateAppraisal(appraisal);
+        }
     }
 }

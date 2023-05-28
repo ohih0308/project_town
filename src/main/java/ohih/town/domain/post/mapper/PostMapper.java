@@ -32,6 +32,11 @@ public interface PostMapper {
 
     List<SimplePost> getMyPosts(Map<String, Object> map);
 
+    boolean getAppraisal(Map<String, Object> map);
+
+    Integer countAppraisals(Long postId);
+
+
 
     boolean uploadPost(PostUploadRequest postUploadRequest);
 
@@ -39,10 +44,14 @@ public interface PostMapper {
 
     boolean uploadThumbnail(Attachment attachment);
 
+    boolean uploadAppraisal(Appraisal appraisal);
+
 
     boolean updateThumbnail(Attachment attachment);
 
     boolean updatePost(PostUploadRequest postUploadRequest);
+
+    boolean updateAppraisal(Appraisal appraisal);
 
 
     Integer deleteAttachments(Long postId);
@@ -52,4 +61,6 @@ public interface PostMapper {
     Integer deleteComments(Long postId);
 
     boolean deleteThumbnail(Long postId);
+
+    Integer deleteAppraisals(Long postId);
 }

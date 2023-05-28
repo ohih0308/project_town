@@ -10,7 +10,6 @@ import ohih.town.domain.comment.dto.Comment;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.comment.mapper.CommentMapper;
-import ohih.town.domain.post.dto.SimplePost;
 import ohih.town.utilities.Paging;
 import ohih.town.utilities.Search;
 import ohih.town.utilities.Utilities;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static ohih.town.constants.DomainConst.USER_TYPE_GUEST;
-import static ohih.town.constants.ErrorsConst.COMMENT_ACCESS_DENIED;
+import static ohih.town.constants.ErrorConst.COMMENT_ACCESS_DENIED;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 import static ohih.town.constants.SuccessConst.COMMENT_ACCESS_PERMITTED;
 
@@ -41,16 +40,16 @@ public class CommentServiceImpl implements CommentService {
         Map<String, String> messages = new HashMap<>();
 
         if (!commentMapper.isPostIdExists(commentUploadRequest.getPostId())) {
-            messages.put(DomainConst.POST_ID, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_POST_ID_INVALID));
+            messages.put(DomainConst.POST_ID, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_POST_ID_INVALID));
         }
         if (commentUploadRequest.getAuthor() == null) {
-            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_AUTHOR_INVALID));
         }
         if (commentUploadRequest.getPassword() == null) {
-            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_PASSWORD_INVALID));
         }
         if (commentUploadRequest.getComment() == null) {
-            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_COMMENT_INVALID));
         }
 
         if (!messages.isEmpty()) {
@@ -64,13 +63,13 @@ public class CommentServiceImpl implements CommentService {
         boolean commentValidation = Utilities.isValidated(ValidationPatterns.COMMENT, commentUploadRequest.getComment());
 
         if (!authorValidation) {
-            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_AUTHOR_INVALID));
+            messages.put(DomainConst.AUTHOR, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_AUTHOR_INVALID));
         }
         if (!passwordValidation) {
-            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_PASSWORD_INVALID));
+            messages.put(DomainConst.PASSWORD, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_PASSWORD_INVALID));
         }
         if (!commentValidation) {
-            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_COMMENT_INVALID));
+            messages.put(UtilityConst.COMMENT, ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_COMMENT_INVALID));
         }
 
         if (messages.isEmpty()) {
@@ -120,7 +119,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!verificationResult.isVerified()) {
             commentResult.setErrorMessages(verificationResult.getMessages());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_UPLOAD_FAILURE));
             return commentResult;
         }
 
@@ -133,7 +132,7 @@ public class CommentServiceImpl implements CommentService {
             commentResult.setCommentId(commentUploadRequest.getCommentId());
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_UPLOAD_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_UPLOAD_FAILURE));
         }
 
         return commentResult;
@@ -185,7 +184,7 @@ public class CommentServiceImpl implements CommentService {
             commentResult.setResultMessage(SUCCESS_MESSAGES.getString(SuccessConst.COMMENT_DELETE_SUCCESS));
         } catch (Exception e) {
             log.info("{}", e.getMessage());
-            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorsConst.COMMENT_DELETE_FAILURE));
+            commentResult.setResultMessage(ResourceBundleConst.COMMENT_ERROR_MESSAGES.getString(ErrorConst.COMMENT_DELETE_FAILURE));
         }
 
         return commentResult;

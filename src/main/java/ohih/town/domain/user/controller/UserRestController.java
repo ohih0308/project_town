@@ -164,5 +164,15 @@ public class UserRestController {
         return userService.updatePassword(userInfo.getUserId(), password);
     }
 
+    @PostMapping(URLConst.UPDATE_GUESTBOOK_ACTIVATION)
+    public UserInfoUpdateResult deactivateGuestbook(@NotNull @SessionAttribute UserInfo userInfo,
+                                                    boolean isActivated) {
+        return userService.updateGuestbookActivation(userInfo.getUserId(), isActivated);
+    }
 
+
+    @PostMapping(URLConst.DEACTIVATE_ACCOUNT)
+    public UserInfoUpdateResult deactivateAccount(@NotNull @SessionAttribute UserInfo userInfo) {
+        return userService.deactivateAccount(userInfo.getUserId(), userInfo.getDirectory());
+    }
 }

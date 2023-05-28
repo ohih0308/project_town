@@ -112,7 +112,7 @@
         where guestbook_post_id = #{postId};
     </select>
 
-<!--  Long getGuestbookOwner(Long postId);  -->
+    <!--  Long getGuestbookOwner(Long postId);  -->
     <select id="getGuestbookOwner" parameterType="Long" resultType="Long">
         select to_user_id
         from guestbook_posts

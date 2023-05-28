@@ -10,11 +10,23 @@ import java.util.Map;
 @Mapper
 public interface BoardMapper {
 
+    boolean ifCategoryExists(Long categoryId);
+
+    boolean isBoardActivated(Long boardId);
+
     String getBoardName(Long boardId);
 
     List<Board> getBoards();
 
     Long countPosts(Map<String, Object> map);
 
-    List<SimplePost> getPosts(Map<String, Object> map);
+    boolean isDuplicated(Map<String, String> map);
+
+    boolean createCategory(String name);
+
+    boolean renameCategory(Map<String, Object> map);
+
+    boolean createBoard(Map<String, Object> map);
+
+    boolean renameBoard(Map<String, Object> map);
 }

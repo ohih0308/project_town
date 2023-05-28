@@ -5,10 +5,6 @@ import ohih.town.domain.VerificationResult;
 import ohih.town.domain.user.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ResourceBundle;
-
-import static ohih.town.constants.ResourceBundleConst.*;
-
 public interface UserService {
     /*
      * class list:
@@ -64,6 +60,15 @@ public interface UserService {
 
     UserInfoUpdateResult updateGuestbookActivation(Long userId, boolean activation);
 
-    UserInfoUpdateResult deactivateUser(Long userId);
+    UserInfoUpdateResult deactivateAccount(Long userId, String directory);
+
+
+    boolean deactivatePosts(Long userId);
+
+    boolean deactivateComments(Long userId);
+
+    boolean deactivateGuestbookPosts(Long userId);
+
+    boolean deactivateGuestbookComments(Long userId);
 
 }

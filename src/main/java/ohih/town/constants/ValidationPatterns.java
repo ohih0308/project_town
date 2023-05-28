@@ -14,4 +14,6 @@ public interface ValidationPatterns {
     Pattern BODY = Pattern.compile("^\\S.{5,20000}\\S$");
 
     Pattern COMMENT = Pattern.compile("^\\S.{0,9998}\\S$");
+
+    Pattern BOARD = Pattern.compile("^[a-zA-Z0-9]{4,20}$");
 }

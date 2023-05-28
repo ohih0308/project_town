@@ -35,6 +35,8 @@ public interface PostService {
 
     List<SimplePost> getMyPosts(Long userId, Paging paging, Search search);
 
+    boolean hasUserAppraised(Long userId, String ip, Long postId);
+
 
     boolean uploadAttachments_prj(List<Attachment> attachments, Long postId);
 
@@ -44,11 +46,15 @@ public interface PostService {
 
     PostResult uploadPost(PostUploadRequest postUploadRequest, List<Attachment> attachments);
 
+    PostResult uploadAppraisal(Appraisal appraisal);
+
 
     boolean updateThumbnail(Attachment attachment);
 
     PostResult updatePost(Long accessPermittedPostId,
                           PostUploadRequest postUploadRequest, List<Attachment> attachments);
+
+    PostResult updateAppraisal(Appraisal appraisal);
 
 
     boolean deleteAttachments_prj(Long postId);
@@ -61,6 +67,8 @@ public interface PostService {
 
 
     boolean deleteComments(Long postId);
+
+    boolean deleteAppraisals(Long postId);
 
 
 }

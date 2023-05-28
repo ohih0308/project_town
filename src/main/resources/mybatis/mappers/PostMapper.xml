@@ -167,6 +167,21 @@
         limit #{paging.firstItemIndex}, #{paging.itemsPerPage};
     </select>
 
+    <!--  boolean getAppraisal(Map<String, Object> map);  -->
+    <select id="getAppraisal" parameterType="Map" resultType="Integer">
+        select count(*)
+        from post_appraisals
+        where post_id = #{postId}
+          and #{field} = #{value};
+    </select>
+
+    <!--  Integer countAppraisals(Long postId);  -->
+    <select id="countAppraisals" parameterType="Long" resultType="Integer">
+        select count(*)
+        from post_appraisals
+        where post_id = #{postId};
+    </select>
+
 
     <!--  boolean uploadAttachment(Attachment attachment);  -->
     <insert id="uploadAttachment" parameterType="Attachment">
@@ -186,6 +201,11 @@
         values (#{boardId}, #{userType}, #{ip}, #{author}, #{password}, #{subject}, #{body}, 0, now(), now());
     </insert>
 
+    <!--  boolean uploadAppraisal(Appraisal appraisal);  -->
+    <insert id="uploadAppraisal" parameterType="Appraisal">
+        insert into post_appraisals (user_id, post_id, is_like, ip)
+        values (#{userId}, #{postId}, #{isLike}, #{ip});
+    </insert>
 
     <!--  boolean updateThumbnail(Attachment attachment);  -->
     <update id="updateThumbnail" parameterType="Attachment">
@@ -209,6 +229,20 @@
             updated_at = NOW()
     </update>
 
+    <!--  boolean updateAppraisal(Appraisal appraisal);  -->
+    <update id="updateAppraisal" parameterType="Appraisal">
+        update post_appraisal
+        set is_like = #{isLike}
+        where post_id = #{postId}
+        and
+        <if test="userId == null">
+            ip = #{ip};
+        </if>
+        <if test="userId != null">
+            user_id = #{userId};
+        </if>
+    </update>
+
 
     <!--  Integer deleteAttachments(Long postId);  -->
     <delete id="deleteAttachments" parameterType="Long">
@@ -228,6 +262,13 @@
     <delete id="deletePost" parameterType="Long">
         delete
         from posts
+        where post_id = #{postId};
+    </delete>
+
+    <!--  Integer deleteAppraisals(Long postId);  -->
+    <delete id="deleteAppraisals" parameterType="Long">
+        delete
+        from post_appraisals
         where post_id = #{postId};
     </delete>
 

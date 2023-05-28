@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static ohih.town.constants.ErrorsConst.INVALID_ACCESS_ERROR;
+import static ohih.town.constants.ErrorConst.INVALID_ACCESS_ERROR;
 
 @RestControllerAdvice(assignableTypes = {CommentRestController.class})
 public class CommentExceptionHandler {

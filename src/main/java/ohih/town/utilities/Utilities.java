@@ -51,7 +51,6 @@ public class Utilities {
         return today.format(formatter);
     }
 
-
     public static Paging getPaging(Long totalCount, Integer presentPage, Integer itemsPerPage) {
         int pagesPerBlock = UtilityConst.PAGES_PER_BLOCK;
         int totalPages = (int) Math.ceil(totalCount / (double) itemsPerPage);
@@ -143,7 +142,6 @@ public class Utilities {
             throw new FileSizeExceedLimitException();
         }
     }
-
 
     public static void setAuthor(AuthorInfo authorInfo, UserInfo userInfo, String ip) {
         authorInfo.setIp(ip);

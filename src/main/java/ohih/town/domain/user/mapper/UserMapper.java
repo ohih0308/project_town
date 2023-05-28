@@ -29,6 +29,11 @@ public interface UserMapper {
 
     boolean updateGuestbookPermission(GuestbookPermission guestbookPermission);
 
-//    boolean updateGuestbookActivation(Map<String, Object> map);
 
+    boolean updateGuestbookActivation(Map<String, Object> map);
+
+
+    Integer countGuestbookComment(Long userId);
+
+    Integer updateUserTypeDeactivated(Map<String, Object> map);
 }

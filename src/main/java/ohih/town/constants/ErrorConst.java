@@ -1,8 +1,20 @@
 package ohih.town.constants;
 
-public interface ErrorsConst {
+public interface ErrorConst {
     String INVALID_ACCESS_ERROR = "invalid.access.error";
 
+
+    // Board
+    String CATEGORY_NAME_DUPLICATED = "category.name.duplicated";
+    String CATEGORY_NAME_INVALID = "category.name.invalid";
+    String BOARD_NAME_DUPLICATED = "board.name.duplicated";
+    String BOARD_NAME_INVALID = "board.name.invalid";
+    String CATEGORY_CREATE_FAILURE = "category.create.failure";
+    String CATEGORY_RENAME_FAILURE = "category.rename.failure";
+    String CATEGORY_NOT_EXIST_ERROR = "category.not_exist.error";
+    String BOARD_CREATE_FAILURE = "board.create.failure";
+    String BOARD_RENAME_FAILURE = "board.rename.failure";
+    String BOARD_NAME_NULL = "board.name.null";
 
     // Mail
     String MAIL_VERIFICATION_SENT_FAILURE = "mail.verification.sent.failure";
@@ -59,6 +71,8 @@ public interface ErrorsConst {
     String POST_UPDATE_FAILURE = "post.update.failure";
     String POST_DELETE_FAILURE = "post.delete.failure";
 
+    String APPRAISAL_UPLOAD_FAILURE = "appraisal.upload.failure";
+
 
     // Comment
     String COMMENT_POST_ID_INVALID = "comment.post_id.invalid";
@@ -84,4 +98,5 @@ public interface ErrorsConst {
     String GUESTBOOK_ACCESS_DISABLED = "guestbook.access.disabled";
     String GUESTBOOK_ACCESS_GUEST_NOT_ALLOWED = "guestbook.access.guestNotAllowed";
     String GUESTBOOK_ACCESS_MEMBER_NOT_ALLOWED = "guestbook.access.memberNotAllowed";
+    String GUESTBOOK_ACTIVATION_UPDATE_FAILURE = "guestbook.activation_update.failure";
 }

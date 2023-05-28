@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.ErrorConst.*;
 import static ohih.town.constants.NotificationConst.NOTIFICATION_COMMENT_UPLOADED;
 import static ohih.town.constants.ResourceBundleConst.*;
 import static ohih.town.constants.SuccessConst.NOTIFICATION_DELETE_SUCCESS;

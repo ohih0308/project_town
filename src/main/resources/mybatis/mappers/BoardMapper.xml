@@ -5,6 +5,20 @@
 
 <mapper namespace="ohih.town.domain.board.mapper.BoardMapper">
 
+    <!--  boolean ifCategoryExists(Long categoryId);  -->
+    <select id="ifCategoryExists" parameterType="Long" resultType="Integer">
+        select count(*)
+        from categories
+        where category_id = #{category_id};
+    </select>
+
+    <!--  boolean isBoardActivated(Long boardId);  -->
+    <select id="isBoardActivated" parameterType="Long" resultType="Integer">
+        select is_activated
+        from boards
+        where board_id = #{board_id};
+    </select>
+
     <!--  String getBoardName(Long boardId);  -->
     <select id="getBoardName" parameterType="Long" resultType="String">
         select name
@@ -31,4 +45,37 @@
         where p.post_id = #{post_id};
 
     </select>
+
+    <!--  boolean isDuplicated(Map<String, String> map);  -->
+    <select id="isDuplicated" parameterType="Map" resultType="Integer">
+        select count(*)
+        from #{table_name}
+        where #{field} = #{value};
+    </select>
+
+    <!--  boolean createCategory(String name);  -->
+    <insert id="createCategory" parameterType="String">
+        insert into categories (name) value (#{name});
+    </insert>
+
+    <!--  boolean renameCategory(Map<String, Object> map);  -->
+    <update id="renameCategory" parameterType="Map">
+        update categories
+        set name = #{name}
+        where category_id = #{category_id};
+
+    </update>
+
+    <!--  boolean createBoard(Map<String, Object> map);  -->
+    <insert id="createBoard" parameterType="Map">
+        insert into boards (category_id, name, is_activated)
+        values (#{category_id}, #{name}, 1);
+    </insert>
+
+    <!--  boolean renameBoard(Map<String, Object> map);  -->
+    <update id="renameBoard" parameterType="Map">
+        update boards
+        set name = #{name}
+        where board_id = #{board_id};
+    </update>
 </mapper>

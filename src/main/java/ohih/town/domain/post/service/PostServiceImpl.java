@@ -25,7 +25,7 @@ import java.util.*;
 
 import static ohih.town.constants.DateFormat.DATE_FORMAT_YYYY_MM_DD;
 import static ohih.town.constants.DomainConst.*;
-import static ohih.town.constants.ErrorsConst.*;
+import static ohih.town.constants.ErrorConst.*;
 import static ohih.town.constants.ResourceBundleConst.POST_ERROR_MESSAGES;
 import static ohih.town.constants.ResourceBundleConst.SUCCESS_MESSAGES;
 import static ohih.town.constants.SuccessConst.*;
@@ -194,6 +194,22 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public boolean hasUserAppraised(Long userId, String ip, Long postId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(POST_ID, postId);
+
+        if (userId == null) {
+            map.put(FIELD, DomainConst.IP);
+            map.put(VALUE, ip);
+        } else {
+            map.put(FIELD, USER_ID);
+            map.put(VALUE, userId);
+        }
+        return postMapper.getAppraisal(map);
+    }
+
+
+    @Override
     public boolean uploadAttachments_prj(List<Attachment> attachments, Long postId) {
         try {
             for (Attachment attachment : attachments) {
@@ -293,6 +309,25 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
+    public PostResult uploadAppraisal(Appraisal appraisal) {
+        PostResult postResult = new PostResult();
+        postResult.setPostId(appraisal.getPostId());
+
+        try {
+            if (!postMapper.uploadAppraisal(appraisal)) {
+                throw new SQLException();
+            }
+            postResult.setSuccess(true);
+            postResult.setResultMessage(SUCCESS_MESSAGES.getString(APPRAISAL_UPLOAD_SUCCESS));
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(APPRAISAL_UPLOAD_FAILURE));
+        }
+        return postResult;
+    }
+
+
+    @Override
     public boolean updateThumbnail(Attachment attachment) {
         try {
             if (!postMapper.updateThumbnail(attachment)) {
@@ -342,6 +377,23 @@ public class PostServiceImpl implements PostService {
         return postResult;
     }
 
+    @Override
+    public PostResult updateAppraisal(Appraisal appraisal) {
+        PostResult postResult = new PostResult();
+        postResult.setPostId(appraisal.getPostId());
+
+        try {
+            if (!postMapper.updateAppraisal(appraisal)) {
+                throw new SQLException();
+            }
+            postResult.setSuccess(true);
+            postResult.setResultMessage(SUCCESS_MESSAGES.getString(APPRAISAL_UPLOAD_SUCCESS));
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            postResult.setResultMessage(POST_ERROR_MESSAGES.getString(APPRAISAL_UPLOAD_FAILURE));
+        }
+        return postResult;
+    }
 
     @Override
     public boolean deleteAttachments_prj(Long postId) {
@@ -401,6 +453,7 @@ public class PostServiceImpl implements PostService {
                     !deleteThumbnail(postId) ||
                     !deleteAttachments_prj(postId) ||
                     !deleteAttachments_db(postId) ||
+                    !deleteAppraisals(postId) ||
                     !postMapper.deletePost(postId)) {
                 throw new SQLException();
             }
@@ -421,6 +474,21 @@ public class PostServiceImpl implements PostService {
         Integer commentCount = postMapper.getCommentCount(postId);
         try {
             if (!Objects.equals(postMapper.deleteComments(postId), commentCount)) {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            log.info("{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteAppraisals(Long postId) {
+        Integer appraisalCount = postMapper.countAppraisals(postId);
+
+        try {
+            if (!Objects.equals(postMapper.deleteAppraisals(postId), appraisalCount)) {
                 throw new SQLException();
             }
         } catch (SQLException e) {

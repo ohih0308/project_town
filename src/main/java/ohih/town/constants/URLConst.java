@@ -4,6 +4,15 @@ public interface URLConst {
     String RETURN_MESSAGE = "return-message";
 
 
+    // BoardController
+    String VERIFY_CATEGORY = "/verify-category";
+    String VERIFY_BOARD = "/verify-board";
+    String CREATE_CATEGORY = "/create-category";
+    String CREATE_BOARD = "/create-board";
+    String RENAME_CATEGORY = "/rename-category";
+    String RENAME_BOARD = "/rename-board";
+
+
     // TownController
     String HOME = "/";
     String REGISTER = "/register";
@@ -33,7 +42,8 @@ public interface URLConst {
     String DELETE_PROFILE_IMAGE = "/delete/profile-image";
     String UPDATE_USERNAME = "/update/username";
     String UPDATE_PASSWORD = "/update/password";
-    String DEACTIVATE = "/deactivate";
+
+    String DEACTIVATE_ACCOUNT = "/deactivate-account";
 
     String UPDATE_GUESTBOOK_PERMISSION = "/update/guestbook-permission";
     String UPDATE_GUESTBOOK_ACTIVATION = "/update/guestbook-activation";
@@ -44,6 +54,7 @@ public interface URLConst {
     String ACCESS_PERMISSION_POST = "/access-permission/post/";
     String UPDATE_POST = "/update/post";
     String DELETE_POST = "/delete/post";
+    String APPRAISE_POST = "/appraise/post";
 
 
     // CommentRestController
