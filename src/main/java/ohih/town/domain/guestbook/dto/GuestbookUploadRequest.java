@@ -1,7 +1,7 @@
 package ohih.town.domain.guestbook.dto;
 
 import lombok.*;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 
 @Getter
 @Setter

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import ohih.town.domain.board.service.BoardServiceImpl;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import static ohih.town.constants.DomainConst.BOARD_ID;
+
 @RequiredArgsConstructor
 public class IsBoardActivatedInterceptor implements HandlerInterceptor {
 
@@ -14,7 +16,7 @@ public class IsBoardActivatedInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-        return HandlerInterceptor.super.preHandle(request, response, handler);
+        Long boardId = (Long) request.getAttribute(BOARD_ID);
+        return boardService.isBoardActivated(boardId);
     }
 }

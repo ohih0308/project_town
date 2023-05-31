@@ -2,7 +2,7 @@ package ohih.town.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
 import ohih.town.constants.*;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 import ohih.town.domain.post.dto.Attachment;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.exception.FileSizeExceedLimitException;

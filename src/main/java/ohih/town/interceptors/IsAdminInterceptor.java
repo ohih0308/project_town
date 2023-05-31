@@ -2,22 +2,23 @@ package ohih.town.interceptors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ohih.town.constants.DomainConst;
+import ohih.town.constants.SessionConst;
+import ohih.town.domain.user.dto.UserInfo;
+import ohih.town.session.SessionManager;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Objects;
 
 public class IsAdminInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        return HandlerInterceptor.super.preHandle(request, response, handler);
-    }
+        UserInfo userInfo = (UserInfo) SessionManager.getAttributes(request, SessionConst.USER_INFO);
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
-    }
+        if (userInfo == null) {
+            return false;
+        }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+        return Objects.equals(userInfo.getUserType(), DomainConst.USER_TYPE_ADMIN);
     }
 }

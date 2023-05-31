@@ -12,7 +12,7 @@ import ohih.town.domain.comment.dto.CommentContentInfo;
 import ohih.town.domain.comment.dto.CommentUploadRequest;
 import ohih.town.domain.comment.dto.CommentResult;
 import ohih.town.domain.comment.service.CommentServiceImpl;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 import ohih.town.domain.notification.service.NotificationServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;
 import ohih.town.session.SessionManager;

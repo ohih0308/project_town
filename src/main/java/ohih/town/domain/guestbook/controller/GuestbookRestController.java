@@ -9,7 +9,7 @@ import ohih.town.constants.URLConst;
 import ohih.town.constants.UtilityConst;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.comment.dto.CommentResult;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 import ohih.town.domain.guestbook.dto.ContentInfo;
 import ohih.town.domain.guestbook.dto.Guestbook;
 import ohih.town.domain.guestbook.service.GuestbookServiceImpl;

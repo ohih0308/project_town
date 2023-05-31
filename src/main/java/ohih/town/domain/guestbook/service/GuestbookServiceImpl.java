@@ -7,7 +7,7 @@ import ohih.town.domain.AccessInfo;
 import ohih.town.domain.AccessPermissionCheckResult;
 import ohih.town.domain.VerificationResult;
 import ohih.town.domain.comment.dto.CommentResult;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 import ohih.town.domain.guestbook.dto.*;
 import ohih.town.domain.guestbook.mapper.GuestbookMapper;
 import ohih.town.domain.post.dto.PostResult;

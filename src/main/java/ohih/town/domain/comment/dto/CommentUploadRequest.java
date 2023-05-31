@@ -2,7 +2,7 @@ package ohih.town.domain.comment.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 
 @Getter
 @Setter

@@ -10,8 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_ACTIVATION;
-import static ohih.town.constants.URLConst.UPDATE_GUESTBOOK_PERMISSION;
+import static ohih.town.constants.URLConst.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,22 +22,31 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new IsLoginInterceptor())
                 .addPathPatterns(URLConst.LOGOUT,
-                        URLConst.UPLOAD_PROFILE_IMAGE,
-                        URLConst.DELETE_PROFILE_IMAGE,
-                        URLConst.UPDATE_USERNAME,
-                        URLConst.UPDATE_PASSWORD,
-                        URLConst.DEACTIVATE_ACCOUNT,
+                        UPLOAD_PROFILE_IMAGE,
+                        DELETE_PROFILE_IMAGE,
+                        UPDATE_USERNAME,
+                        UPDATE_PASSWORD,
+                        DEACTIVATE_ACCOUNT,
                         UPDATE_GUESTBOOK_PERMISSION,
                         UPDATE_GUESTBOOK_ACTIVATION);
 
         registry.addInterceptor(new IsAdminInterceptor()).addPathPatterns(
-                URLConst.VERIFY_CATEGORY,
-                URLConst.VERIFY_BOARD,
-                URLConst.CREATE_CATEGORY,
-                URLConst.CREATE_BOARD,
-                URLConst.RENAME_CATEGORY,
-                URLConst.RENAME_BOARD);
+                VERIFY_CATEGORY,
+                VERIFY_BOARD,
+                CREATE_CATEGORY,
+                CREATE_BOARD,
+                RENAME_CATEGORY,
+                RENAME_BOARD);
 
-        registry.addInterceptor(new IsBoardActivatedInterceptor(boardService));
+        registry.addInterceptor(new IsBoardActivatedInterceptor(boardService)).addPathPatterns(
+                UPLOAD_COMMENT,
+                ACCESS_PERMISSION_COMMENT,
+                DELETE_COMMENT,
+                UPLOAD_POST,
+                ACCESS_PERMISSION_POST,
+                UPDATE_POST,
+                DELETE_POST,
+                APPRAISE_POST
+        );
     }
 }

@@ -8,7 +8,7 @@
 //import ohih.town.domain.comment.dto.CommentUploadRequest;
 //import ohih.town.domain.comment.mapper.CommentMapper;
 //import ohih.town.domain.common.dto.ActionResult;
-//import ohih.town.domain.common.dto.AuthorInfo;
+//import ohih.town.AuthorInfo;
 //import ohih.town.domain.user.dto.UserInfo;
 //import ohih.town.exception.PartialDeleteException;
 //import ohih.town.utilities.Utilities;

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import ohih.town.constants.SessionConst;
 import ohih.town.constants.URLConst;
 import ohih.town.domain.AccessPermissionCheckResult;
-import ohih.town.domain.common.dto.AuthorInfo;
+import ohih.town.AuthorInfo;
 import ohih.town.domain.post.dto.*;
 import ohih.town.domain.post.service.PostServiceImpl;
 import ohih.town.domain.user.dto.UserInfo;

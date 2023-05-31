@@ -1,4 +1,4 @@
-package ohih.town.domain.common.dto;
+package ohih.town;
 
 import lombok.Getter;
 import lombok.Setter;
