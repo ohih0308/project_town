@@ -79,6 +79,8 @@ public class TownController {
 
     @GetMapping(URLConst.POST_DETAILS)
     public String getPostDetails(Model model, @PathVariable Long postId) {
+        postService.updateViewsCount(postId);
+
         model.addAttribute(POST_DETAILS, postService.getPostDetails(postId));
         return ViewConst.POST_DETAILS;
     }

@@ -497,4 +497,12 @@ public class PostServiceImpl implements PostService {
         }
         return true;
     }
+
+
+    @Override
+    public void updateViewsCount(Long postId) {
+        if (!postMapper.updateViewsCount(postId)) {
+            log.info("updateViewsConst error");
+        }
+    }
 }

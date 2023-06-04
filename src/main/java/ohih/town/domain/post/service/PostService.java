@@ -71,4 +71,5 @@ public interface PostService {
     boolean deleteAppraisals(Long postId);
 
 
+    void updateViewsCount(Long postId);
 }

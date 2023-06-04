@@ -7,6 +7,7 @@ boards
 PK 	- board_id bigint unsigned auto_increment
 FK 	- category_id bigint unsigned not null
 	- name varchar(200) not null
+	- is_activated tinyint(1) not null
 
 
 users
@@ -16,7 +17,7 @@ PK 	- user_id bigint unsigned auto_increment
 	- username varchar(100) not null unique
 	- password varchar(255) not null
 	- created_at datetime not null
-
+    - activated tinyint(1) not null
 
 profile_images
 PK 	- saved_file_name varchar (100)
@@ -74,17 +75,9 @@ FK 	- post_id bigint unsigned not null
 	- created_at datetime not null
 
 
-comment_appraisals
-PK  - comment_appraisal_id bigint unsigned auto_increment
-FK  - user_id bigint unsigned null
-FK 	- comment_id bigint unsigned not null
-	- is_like bit not null
-	- ip varchar (45) not null
-
-
 guestbook_configs
 FK 	- user_id bigint unsigned not null unique
-	- activation bit not null
+	- is_activated bit not null
 	- private_read bit not null
 	- member_write bit not null
 	- guest_write bit not null
@@ -98,9 +91,8 @@ FK 	- from_user_id bigint unsigned null
 	- ip varchar (45) not null
 	- author varchar (100) not null default ""
 	- password varchar (100) not null default ""
-	- seal bit not null
-	- subject varchar (2000) not null
-	- body mediumtext not null
+	- private_read bit(1) not null
+	- content mediumtext not null
 	- created_at datetime not null
 
 
@@ -108,7 +100,7 @@ guestbook_comments
 PK 	- guestbook_comment_id bigint unsigned auto_increment
 FK 	- guestbook_post_id bigint unsigned not null
 	- user_type tinyint unsigned not null
-	- user_id varchar (100) null
+	- from_user_id varchar (100) null
 	- ip varchar (45) not null
 	- author varchar (100) not null
 	- password varchar (100) null
@@ -124,3 +116,4 @@ FK  - user_id bigint unsigned not null
     - redirect_url varchar(100) not null
     - created_at datetime not null
     - updated_at datetime not null
+    - is_read tinyint(1) not null

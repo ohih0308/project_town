@@ -37,7 +37,6 @@ public interface PostMapper {
     Integer countAppraisals(Long postId);
 
 
-
     boolean uploadPost(PostUploadRequest postUploadRequest);
 
     boolean uploadAttachment(Attachment attachment);
@@ -63,4 +62,6 @@ public interface PostMapper {
     boolean deleteThumbnail(Long postId);
 
     Integer deleteAppraisals(Long postId);
+
+    boolean updateViewsCount(Long postId);
 }

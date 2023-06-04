@@ -272,4 +272,11 @@
         where post_id = #{postId};
     </delete>
 
+
+    <!--  boolean updateViewsCount(Long postId);  -->
+    <update id="updateViewsCount" parameterType="Long">
+        update posts
+        set views = views + 1
+        where postId = #{postId};
+    </update>
 </mapper>

@@ -27,7 +27,7 @@
     </select>
 
     <!--  List<Board> getBoards();  -->
-    <select id="getAllForums" resultType="Board">
+    <select id="getBoards" resultType="Board">
         select c.category_id as categoryId,
                c.name        as categoryName,
                b.board_id    as boardId,
@@ -35,7 +35,6 @@
         from boards as b
                  left join categories as c on b.category_id = c.category_id;
     </select>
-
 
     <!--  String getBoardNameByPostId(Long postId);  -->
     <select id="getBoardNameByPostId" parameterType="Long" resultType="String">
@@ -52,6 +51,7 @@
         from #{table_name}
         where #{field} = #{value};
     </select>
+
 
     <!--  boolean createCategory(String name);  -->
     <insert id="createCategory" parameterType="String">

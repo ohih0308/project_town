@@ -1,5 +1,0 @@
-post, comment 여러개 지우기
-
-admin 기능
-	* category, board 추가 제거 변경
-	* 글, 댓글 삭제
